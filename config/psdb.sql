@@ -1,5 +1,4 @@
 /** Processing System DB **/
--- Requires MySQL 8.0+
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS audit_logs, approvals, forms, employees, roles;
@@ -11,8 +10,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(20) UNIQUE NOT NULL,
-    description TEXT,
-    CONSTRAINT chk_role_name CHECK (name IN ('admin', 'approver', 'staff'))
+    description TEXT
 );
 
 INSERT INTO roles (name, description) VALUES
@@ -45,32 +43,17 @@ CREATE INDEX idx_employees_role  ON employees(role_id);
 -- ============================================================
 CREATE TABLE forms (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    form_type VARCHAR(50)  NOT NULL,
-    status VARCHAR(20)  NOT NULL DEFAULT 'draft',
+    form_type VARCHAR(50) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'draft',
     submitted_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     data JSON NOT NULL,
-    FOREIGN KEY (submitted_by) REFERENCES employees(id) ON DELETE CASCADE,
-    CONSTRAINT chk_form_type CHECK (form_type IN (
-        'advance_payment',
-        'overtime_authorization',
-        'request_for_payment',
-        'work_permit',
-        'leave_application',
-        'reimbursement',
-        'liquidation',
-        'vehicle_request'
-    )),
-    CONSTRAINT chk_form_status CHECK (status IN (
-        'draft', 'submitted', 'in_approval', 'approved', 'rejected', 'cancelled'
-    ))
+    amount_val DECIMAL(15,2) AS (CAST(JSON_UNQUOTE(JSON_EXTRACT(data, '$.amount')) AS DECIMAL(15,2))) VIRTUAL,
+    FOREIGN KEY (submitted_by) REFERENCES employees(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_forms_submitted_by ON forms(submitted_by);
-CREATE INDEX idx_forms_type_status  ON forms(form_type, status);
--- Functional index on JSON amount field (MySQL 8.0+)
-CREATE INDEX idx_forms_amount ON forms ((CAST(JSON_UNQUOTE(JSON_EXTRACT(data, '$.amount')) AS DECIMAL(15,2))));
+CREATE INDEX idx_forms_amount ON forms (amount_val);
 
 -- ============================================================
 -- APPROVALS
@@ -84,10 +67,8 @@ CREATE TABLE approvals (
     remarks TEXT,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approved_at TIMESTAMP NULL DEFAULT NULL,
-    FOREIGN KEY (form_id) REFERENCES forms(id)     ON DELETE CASCADE,
+    FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
     FOREIGN KEY (approver_id) REFERENCES employees(id) ON DELETE RESTRICT,
-    CONSTRAINT chk_approval_sequence CHECK (sequence > 0),
-    CONSTRAINT chk_approval_status CHECK (status IN ('pending', 'approved', 'rejected')),
     CONSTRAINT uk_approval_form_seq UNIQUE (form_id, sequence)
 );
 
@@ -112,22 +93,22 @@ CREATE TABLE audit_logs (
 );
 
 CREATE INDEX idx_audit_performed_by ON audit_logs(performed_by);
-CREATE INDEX idx_audit_entity       ON audit_logs(entity_type, entity_id);
-CREATE INDEX idx_audit_performed_at ON audit_logs(performed_at DESC);
+CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX idx_audit_performed_at ON audit_logs(performed_at);
 
 -- ============================================================
 -- VIEW: form approval progress
 -- ============================================================
 CREATE VIEW form_approval_status AS
 SELECT
-    f.id                                                              AS form_id,
+    f.id AS form_id,
     f.form_type,
-    f.status                                                          AS form_status,
+    f.status AS form_status,
     f.submitted_by,
-    COUNT(a.id)                                                       AS total_steps,
-    COUNT(CASE WHEN a.status = 'approved' THEN 1 END)                AS approved_steps,
-    MIN(CASE WHEN a.status = 'pending' THEN a.sequence END)          AS next_pending_sequence,
-    JSON_ARRAYAGG(a.approver_id ORDER BY a.sequence)                 AS approver_chain
+    COUNT(a.id) AS total_steps,
+    COUNT(CASE WHEN a.status = 'approved' THEN 1 END) AS approved_steps,
+    MIN(CASE WHEN a.status = 'pending' THEN a.sequence END) AS next_pending_sequence,
+    GROUP_CONCAT(a.approver_id ORDER BY a.sequence) AS approver_chain
 FROM forms f
 LEFT JOIN approvals a ON a.form_id = f.id
 GROUP BY f.id, f.form_type, f.status, f.submitted_by;
