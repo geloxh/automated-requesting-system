@@ -1,5 +1,6 @@
 <?php
 define('BASE_LOADED', true);
+use App\Middleware\AuthMiddleware;
 AuthMiddleware::require();
 
 $roleId = $_SESSION['role_id'];
