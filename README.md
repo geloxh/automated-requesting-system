@@ -49,3 +49,18 @@ system for SMEs for paperless and make the indicated features below automated, g
     ├── migrations/             # DB schema versioning
     └── .env                    # Environment config (never commit)
 ```
+
+### SDLC - AGILE MODEL
+This project uses Agile Model to adapt to sudden and quick client project request.
+Steps in the Agile Model
+
+### The Agile Model
+is a type of approach iterative and incremental process models. 
+### The phases involve in Agile (SDLC) Model are: 
+- **Requirement Gathering**
+- **Design the Requirements**
+- **Construction / Iteration**
+- **Testing / Quality Assurance**
+- **Deployment**
+- **Feedback**
+![SDLC](images/Agile.drawio.png)
