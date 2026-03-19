@@ -47,7 +47,7 @@ if (preg_match('#^/forms/(\d+)/reject$#', $uri, $m) && $method === 'POST') {
 }
 
 // GET /forms/view/{id}
-if (preg_match('#^/forms/view/(\d+)$#'. $uri, $m)) {
+if (preg_match('#^/forms/view/(\d+)$#', $uri, $m)) {
     (new FormController)->show((int)$m[1]);
     exit;
 }
@@ -60,7 +60,7 @@ if (preg_match('#^/forms/([\w-]+)/create$#', $uri, $m)) {
 
 // GET /forms/{slug}
 if (preg_match('#^/forms/([\w-]+)$#', $uri, $m)) {
-    (new ForumController)->index($m[1]);
+    (new FormController)->index($m[1]);
     exit;
 }
 

@@ -1,4 +1,6 @@
-<?php if (!defined('BASE_LOADED')) die('Direct access not allowed'); ?>
+<?php 
+    if (!defined('BASE_LOADED')) die('Direct access not allowed'); 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

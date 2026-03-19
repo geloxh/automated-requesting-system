@@ -83,4 +83,4 @@
 <?php
 $content = ob_get_clean();
 $pageTitle = $title;
-require __DIR__ . '/../layouts.php';
+require __DIR__ . '/../layouts/base.php';
