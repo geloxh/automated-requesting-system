@@ -16,6 +16,7 @@
     <div class="card shadow p-4" style="width:360px">
         <h5 class="mb-3 text-center">Processing System</h5>
         <form method="POST" action="/processing-system/public/login">
+            \App\Helpers\Csrf::field();
             <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input type="email" name="email" class="form-control" required autofocus>

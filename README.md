@@ -52,7 +52,6 @@ system for SMEs for paperless and make the indicated features below automated, g
 
 ### SDLC - AGILE MODEL
 This project uses Agile Model to adapt to sudden and quick client project request.
-Steps in the Agile Model
 
 ### The Agile Model
 is a type of approach iterative and incremental process models. 

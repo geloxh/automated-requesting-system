@@ -115,8 +115,10 @@ class FormController
     // PRIVATE
     // ================================================================
 
-    private function store(string $type, string $slug): void
-    {
+    private function store(string $type, string $slug): void {
+
+        \App\Helpers\Csrf::verify();
+
         $required = $this->fields[$type];
         $data     = [];
 
@@ -174,8 +176,10 @@ class FormController
         }
     }
 
-    private function processApproval(int $id, string $action): void
-    {
+    private function processApproval(int $id, string $action): void {
+
+        \App\Helpers\Csrf::verify();
+        
         $form      = $this->findForm($id);
         $approverId = $_SESSION['user_id'];
         $remarks   = trim($_POST['remarks'] ?? '');

@@ -3,6 +3,8 @@ class AuthController {
     public function login(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
 
+        \App\Helpers\Csrf::verify();
+
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 

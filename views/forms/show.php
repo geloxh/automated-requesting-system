@@ -110,6 +110,7 @@
             <div class="card-header bg-dark text-white">Your Action</div>
             <div class="card-body">
                 <form method="POST" id="approvalForm">
+                    \App\Helpers\Csrf::field();
                     <div class="mb-3">
                         <label class="form-label">Remarks <span class="text-muted small">(optional)</span></label>
                         <textarea name="remarks" class="form-control" rows="2"></textarea>
