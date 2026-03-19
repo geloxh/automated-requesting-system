@@ -63,4 +63,5 @@ is a type of approach iterative and incremental process models.
 - **Testing / Quality Assurance**
 - **Deployment**
 - **Feedback**
+
 ![SDLC](images/Agile.drawio.png)
