@@ -1,6 +1,5 @@
 <?php
-class FormController
-{
+class FormController {
     // slug → db form_type
     private array $typeMap = [
         'advance-payment' => 'advance_payment',
@@ -312,8 +311,22 @@ class FormController
         return $this->typeMap[$slug];
     }
 
-    private function render(string $view, array $vars = []): void
-    {
+    private function render(string $view, array $vars = []): void {
+        // Whitelist allowed views
+        $allowed = [
+            'forms/list', 'forms/show',
+            'forms/advance_payment', 'forms/overtime_authorization',
+            'forms/request_for_payment','forms/work_permit',
+            'forms/leave_application', 'forms/reimbursement',
+            'forms/liquidation', 'forms/vehicle_request',
+        ];
+
+        if (!in_array($view, $allowed, true)) {
+            http_response_code(404);
+            echo '<h3>View not found.</h3>';
+            exit;
+        }
+
         define('BASE_LOADED', true);
         extract($vars);
         ob_start();
