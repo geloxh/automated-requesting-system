@@ -1,39 +1,25 @@
 <?php
-    // Variables: $form (array), $approvalSteps (array), $canAct (bool), $data (array)
-    $formLabel = [
-        'advance_payment'        => 'Advance Payment',
-        'overtime_authorization' => 'Overtime Authorization',
-        'request_for_payment'    => 'Request for Payment',
-        'work_permit'            => 'Work Permit',
-        'leave_application'      => 'Leave Application',
-        'reimbursement'          => 'Reimbursement',
-        'liquidation'            => 'Liquidation',
-        'vehicle_request'        => 'Vehicle Request',
-    ];
+$formLabel = [
+    'advance_payment'        => 'Advance Payment',
+    'overtime_authorization' => 'Overtime Authorization',
+    'request_for_payment'    => 'Request for Payment',
+    'work_permit'            => 'Work Permit',
+    'leave_application'      => 'Leave Application',
+    'reimbursement'          => 'Reimbursement',
+    'liquidation'            => 'Liquidation',
+    'vehicle_request'        => 'Vehicle Request',
+];
 
-    $statusBadge = [
-        'draft'       => 'secondary',
-        'submitted'   => 'primary',
-        'in_approval' => 'warning',
-        'approved'    => 'success',
-        'rejected'    => 'danger',
-        'cancelled'   => 'dark',
-    ];
+$statusBadge = ['draft' => 'secondary', 'submitted' => 'primary', 'in_approval' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'dark'];
+$stepBadge   = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
 
-    $stepBadge = [
-        'pending'  => 'warning',
-        'approved' => 'success',
-        'rejected' => 'danger',
-    ];
+$title  = $formLabel[$form['form_type']] ?? $form['form_type'];
+$roleId = $_SESSION['role_id'];
+$formId = $form['id'];
 
-    $title = $formLabel[$form['form_type']] ?? $form['form_type'];
-    $roleId = $_SESSION['role_id'];
-    $formId = $form['id'];
-
-    ob_start();
+ob_start();
 ?>
 
-<!-- Flash Messages -->
 <?php if (!empty($_SESSION['success'])): ?>
     <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']) ?></div>
     <?php unset($_SESSION['success']); ?>
@@ -43,87 +29,84 @@
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 
-<!-- Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header">
     <div>
-        <h5 class="mb-1"><?= htmlspecialchars($title) ?> <span class="text-muted fs-6">#<?= $formId ?></span></h5>
-        <span class="badge bg-<?= $statusBadge[$form['status']] ?? 'secondary' ?> fs-6">
+        <h5 style="margin-bottom:.35rem">
+            <?= htmlspecialchars($title) ?>
+            <span class="muted" style="font-weight:400">#<?= $formId ?></span>
+        </h5>
+        <span class="badge badge-<?= $statusBadge[$form['status']] ?? 'secondary' ?>">
             <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
         </span>
     </div>
-    <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">← Back</a>
+    <a href="javascript:history.back()" class="btn btn-ghost btn-sm">← Back</a>
 </div>
 
-<div class="row g-4">
+<div class="two-col">
 
-    <!-- Form Data -->
-    <div class="col-md-7">
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white">Form Details</div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <?php foreach ($data as $key => $value): ?>
-                        <dt class="col-sm-4 text-capitalize"><?= htmlspecialchars(str_replace('_', ' ', $key)) ?></dt>
-                        <dd class="col-sm-8"><?= htmlspecialchars($value) ?></dd>
-                    <?php endforeach; ?>
-                    <dt class="col-sm-4">Submitted</dt>
-                    <dd class="col-sm-8"><?= date('M d, Y h:i A', strtotime($form['created_at'])) ?></dd>
-                </dl>
+    <div class="card">
+        <div class="card-header">Form Details</div>
+        <div class="card-body">
+            <div class="dl-grid">
+                <?php foreach ($data as $key => $value): ?>
+                    <span class="dl-label"><?= htmlspecialchars(str_replace('_', ' ', $key)) ?></span>
+                    <span class="dl-value"><?= htmlspecialchars($value) ?></span>
+                <?php endforeach; ?>
+                <span class="dl-label">Submitted</span>
+                <span class="dl-value"><?= date('M d, Y h:i A', strtotime($form['created_at'])) ?></span>
             </div>
         </div>
     </div>
 
-    <!-- Approval Chain -->
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white">Approval Chain</div>
-            <div class="card-body p-0">
-                <?php if (empty($approvalSteps)): ?>
-                    <p class="text-muted p-3 mb-0">No approval steps assigned.</p>
-                <?php else: ?>
-                <ul class="list-group list-group-flush">
+    <div>
+        <div class="card">
+            <div class="card-header">Approval Chain</div>
+            <?php if (empty($approvalSteps)): ?>
+                <div class="card-body">
+                    <p class="muted" style="margin:0">No approval steps assigned.</p>
+                </div>
+            <?php else: ?>
+                <ul class="step-list">
                     <?php foreach ($approvalSteps as $step): ?>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <li class="step-item">
                         <div>
-                            <div class="fw-semibold"><?= htmlspecialchars($step['full_name']) ?></div>
-                            <small class="text-muted">Step <?= $step['sequence'] ?></small>
+                            <div class="step-name"><?= htmlspecialchars($step['full_name']) ?></div>
+                            <div class="step-meta">Step <?= $step['sequence'] ?></div>
                             <?php if ($step['remarks']): ?>
-                                <div class="text-muted small mt-1">"<?= htmlspecialchars($step['remarks']) ?>"</div>
+                                <div class="step-meta">"<?= htmlspecialchars($step['remarks']) ?>"</div>
                             <?php endif; ?>
                             <?php if ($step['approved_at']): ?>
-                                <div class="text-muted small"><?= date('M d, Y h:i A', strtotime($step['approved_at'])) ?></div>
+                                <div class="step-meta"><?= date('M d, Y h:i A', strtotime($step['approved_at'])) ?></div>
                             <?php endif; ?>
                         </div>
-                        <span class="badge bg-<?= $stepBadge[$step['status']] ?? 'secondary' ?>">
+                        <span class="badge badge-<?= $stepBadge[$step['status']] ?? 'secondary' ?>">
                             <?= ucfirst($step['status']) ?>
                         </span>
                     </li>
                     <?php endforeach; ?>
                 </ul>
-                <?php endif; ?>
-            </div>
+            <?php endif; ?>
         </div>
 
-        <!-- Approve / Reject — only for the current pending approver -->
         <?php if ($canAct): ?>
-        <div class="card shadow-sm mt-3">
-            <div class="card-header bg-dark text-white">Your Action</div>
+        <div class="card" style="margin-top:1rem">
+            <div class="card-header">Your Action</div>
             <div class="card-body">
                 <form method="POST" id="approvalForm">
                     <?= \App\Helpers\Csrf::field(); ?>
-                    <div class="mb-3">
-                        <label class="form-label">Remarks <span class="text-muted small">(optional)</span></label>
-                        <textarea name="remarks" class="form-control" rows="2"></textarea>
+                    <div class="form-group" style="margin-bottom:1rem">
+                        <label>Remarks <span class="muted">(optional)</span></label>
+                        <textarea name="remarks" rows="2"></textarea>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div style="display:flex;gap:.5rem">
                         <button type="submit"
                             formaction="/processing-system/public/forms/<?= $formId ?>/approve"
-                            class="btn btn-success w-50">
+                            class="btn btn-success" style="flex:1;justify-content:center">
                             Approve
                         </button>
                         <button type="submit"
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
-                            class="btn btn-danger w-50"
+                            class="btn btn-danger" style="flex:1;justify-content:center"
                             onclick="return confirm('Reject this form?')">
                             Reject
                         </button>
@@ -132,8 +115,8 @@
             </div>
         </div>
         <?php endif; ?>
-
     </div>
+
 </div>
 
 <?php

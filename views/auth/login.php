@@ -1,38 +1,35 @@
-<?php if (!empty($_SESSION['error'])): ?>
-    <div class="alert alert-danger"><?=htmlspecialchars($_SESSION['error']) ?></div>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
-
+<?php
+$loginError = $_SESSION['error'] ?? null;
+unset($_SESSION['error']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" 
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-        crossorigin="anonymous"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login — Processing System</title>
+    <link rel="stylesheet" href="/processing-system/public/css/app.css">
 </head>
-<body class="bg-light d-flex align-items-center justify-content-center vh-100">
-    <div class="card shadow p-4" style="width:360px">
-        <h5 class="mb-3 text-center">Processing System</h5>
+<body>
+<div class="login-wrap">
+    <div class="login-card">
+        <div class="login-title">⚙ Processing System</div>
+        <?php if ($loginError): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($loginError) ?></div>
+        <?php endif; ?>
         <form method="POST" action="/processing-system/public/login">
             <?= \App\Helpers\Csrf::field(); ?>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" required autofocus>
+            <div class="form-group" style="margin-bottom:1rem">
+                <label>Email</label>
+                <input type="email" name="email" required autofocus>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
+            <div class="form-group" style="margin-bottom:1.25rem">
+                <label>Password</label>
+                <input type="password" name="password" required>
             </div>
-            <button class="btn btn-primary w-100">Login</button>
+            <button class="btn btn-primary" style="width:100%;justify-content:center">Login</button>
         </form>
     </div>
-    
+</div>
 </body>
 </html>

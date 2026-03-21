@@ -27,8 +27,7 @@ class FormController {
     // ----------------------------------------------------------------
     // GET /forms/{slug}  — list forms of this type for current user
     // ----------------------------------------------------------------
-    public function index(string $slug): void
-    {
+    public function index(string $slug): void {
         $type = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
@@ -59,8 +58,7 @@ class FormController {
     // GET  /forms/{slug}/create — show blank form
     // POST /forms/{slug}/create — save form
     // ----------------------------------------------------------------
-    public function create(string $slug): void
-    {
+    public function create(string $slug): void {
         $type = $this->resolveType($slug);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -70,7 +68,11 @@ class FormController {
 
         $fields   = $this->fields[$type];
         $formType = $type;
-        $this->render("forms/{$type}", compact('fields', 'formType', 'slug'));
+
+        $noSuffix = ['list', 'show', 'request_for_payment'];
+        $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
+
+        $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug'));
     }
 
     // ----------------------------------------------------------------
@@ -312,13 +314,17 @@ class FormController {
     }
 
     private function render(string $view, array $vars = []): void {
-        // Whitelist allowed views
         $allowed = [
-            'forms/list', 'forms/show',
-            'forms/advance_payment', 'forms/overtime_authorization',
-            'forms/request_for_payment','forms/work_permit',
-            'forms/leave_application', 'forms/reimbursement',
-            'forms/liquidation', 'forms/vehicle_request',
+            'forms/list',
+            'forms/show',
+            'forms/advance_payment_form',
+            'forms/overtime_authorization_form',
+            'forms/request_for_payment_form',
+            'forms/work_permit_form',
+            'forms/leave_application_form',
+            'forms/reimbursement_form',
+            'forms/liquidation_form',
+            'forms/vehicle_request_form',
         ];
 
         if (!in_array($view, $allowed, true)) {
@@ -329,9 +335,7 @@ class FormController {
 
         define('BASE_LOADED', true);
         extract($vars);
-        ob_start();
         require __DIR__ . '/../../views/' . $view . '.php';
-        $content = ob_get_clean();
-        require __DIR__ . '/../../views/layouts/base.php';
     }
+
 }
