@@ -12,4 +12,22 @@ Vehicle Request Form
 composer init --name="sme/processing-system" --type=project --no-interaction
 composer require vlucas/phpdotenv phpmailer/phpmailer
 
--- 
+-- Account Security
+echo password_hash('yourpassword', PASSWORD_BCRYPT, ['cost' => 12]);
+
+password_hash - This is a built-in PHP function that:
+Takes a plain-text password
+Returns a secure hashed version of it
+
+BCRYPT is a strong, industry-standard hashing algorithm
+
+cost controls how computationally expensive the hashing is
+Higher cost = more secure but slower
+
+Typical values:
+
+10 = default (balanced)
+12 = more secure (slower, but still practical)
+14+ = very slow (usually unnecessary)
+
+"C:\xampp\php\php.exe" -r "echo password_hash('yourpassword', PASSWORD_BCRYPT, ['cost' => 12]);"
