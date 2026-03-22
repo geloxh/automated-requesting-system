@@ -1,10 +1,3 @@
-<?php
-define('BASE_LOADED', true);
-use App\Middleware\AuthMiddleware;
-AuthMiddleware::require();
-ob_start();
-?>
-
 <h5 style="margin-bottom:1.25rem">Request for Liquidation</h5>
 
 <form method="POST" action="/processing-system/public/forms/liquidation">
@@ -72,8 +65,3 @@ ob_start();
 <script>
 initTable({ tableId: 'liquidation-table', addBtnId: 'add-row', recalc: 'amount-only', totalId: 'total_amount', balanceId: 'balance', advanceId: 'advance_amount' });
 </script>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = 'Liquidation';
-require __DIR__ . '/../layouts/base.php';

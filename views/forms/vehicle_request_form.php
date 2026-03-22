@@ -1,10 +1,3 @@
-<?php
-define('BASE_LOADED', true);
-use App\Middleware\AuthMiddleware;
-AuthMiddleware::require();
-
-ob_start(); ?>
-
 <h5 class="mb-4">Vehicle Request Form</h5>
 
 <form method="POST" action="/processing-system/public/forms/vehicle-request" class="card p-4 bg-white shadow-sm">
@@ -86,8 +79,3 @@ ob_start(); ?>
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = 'Vehicle Request';
-require __DIR__ . '/../layouts/base.php';

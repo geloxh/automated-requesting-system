@@ -1,10 +1,3 @@
-<?php
-    define('BASE_LOADED', true);
-    use App\Middleware\AuthMiddleware;
-    AuthMiddleware::require();
-    ob_start();
-?>
-
 <h5 style="margin-bottom:1.25rem">Work Permit / Gatepass</h5>
 
 <form method="POST" action="/processing-system/public/forms/work-permit">
@@ -68,11 +61,4 @@
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<script>
-initTable({ tableId: 'gatepass-table', addBtnId: 'add-row' });
-</script>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = 'Work Permit';
-require __DIR__ . '/../layouts/base.php';
+<script>initTable({ tableId: 'gatepass-table', addBtnId: 'add-row' });</script>

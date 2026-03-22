@@ -48,10 +48,12 @@ class FormController {
             $stmt->execute([$type, $userId]);
         }
 
-        $forms    = $stmt->fetchAll();
+        $forms = $stmt->fetchAll();
         $formType = $type;
-        $slug     = $slug;
-        $this->render('forms/list', compact('forms', 'formType', 'slug'));
+        $slug  = $slug;
+        $pageTitle = $formLabel[$type] ?? $type;
+
+        $this->render('forms/list', compact('forms', 'formType', 'slug', 'title', '$pageTitle'));
     }
 
     // ----------------------------------------------------------------
@@ -71,8 +73,9 @@ class FormController {
 
         $noSuffix = ['list', 'show', 'request_for_payment'];
         $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $pageTitle = ucwords(str_replace('_', ' ', $type));
 
-        $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug'));
+        $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle'));
     }
 
     // ----------------------------------------------------------------
@@ -91,9 +94,21 @@ class FormController {
         $approvalSteps = $approvals->fetchAll();
 
         $canAct = $this->canActOnForm($form, $approvalSteps);
-        $data   = json_decode($form['data'], true);
+        $data = json_decode($form['data'], true);
+        
+        $formLabel = [
+            'advance_payment'        => 'Advance Payment',
+            'overtime_authorization' => 'Overtime Authorization',
+            'request_for_payment'    => 'Request for Payment',
+            'work_permit'            => 'Work Permit',
+            'leave_application'      => 'Leave Application',
+            'reimbursement'          => 'Reimbursement',
+            'liquidation'            => 'Liquidation',
+            'vehicle_request'        => 'Vehicle Request',
+        ];
+        $pageTitle = ($formLabel[$form['form_type']] ?? $form['form_type']) . ' #' . $id;
 
-        $this->render('forms/show', compact('form', 'approvalSteps', 'canAct', 'data'));
+        $this->render('forms/show', compact('form', 'approvalSteps', 'canAct', 'data', 'pageTitle'));
     }
 
     // ----------------------------------------------------------------
@@ -335,7 +350,11 @@ class FormController {
 
         define('BASE_LOADED', true);
         extract($vars);
+        if(!isset($pageTitle)) $pageTitle = 'Processing System';
+        ob_start();
         require __DIR__ . '/../../views/' . $view . '.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../../views/layouts/base.php';
     }
 
 }

@@ -1,23 +1,22 @@
 <?php
-$formLabel = [
-    'advance_payment'        => 'Advance Payment',
-    'overtime_authorization' => 'Overtime Authorization',
-    'request_for_payment'    => 'Request for Payment',
-    'work_permit'            => 'Work Permit',
-    'leave_application'      => 'Leave Application',
-    'reimbursement'          => 'Reimbursement',
-    'liquidation'            => 'Liquidation',
-    'vehicle_request'        => 'Vehicle Request',
-];
+    $formLabel = [
+        'advance_payment'        => 'Advance Payment',
+        'overtime_authorization' => 'Overtime Authorization',
+        'request_for_payment'    => 'Request for Payment',
+        'work_permit'            => 'Work Permit',
+        'leave_application'      => 'Leave Application',
+        'reimbursement'          => 'Reimbursement',
+        'liquidation'            => 'Liquidation',
+        'vehicle_request'        => 'Vehicle Request',
+    ];
 
-$statusBadge = ['draft' => 'secondary', 'submitted' => 'primary', 'in_approval' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'dark'];
-$stepBadge   = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
+    $statusBadge = ['draft' => 'secondary', 'submitted' => 'primary', 'in_approval' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'dark'];
+    $stepBadge   = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
 
-$title  = $formLabel[$form['form_type']] ?? $form['form_type'];
-$roleId = $_SESSION['role_id'];
-$formId = $form['id'];
+    $title  = $formLabel[$form['form_type']] ?? $form['form_type'];
+    $roleId = $_SESSION['role_id'];
+    $formId = $form['id'];
 
-ob_start();
 ?>
 
 <?php if (!empty($_SESSION['success'])): ?>
@@ -118,8 +117,3 @@ ob_start();
     </div>
 
 </div>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = $title . ' #' . $formId;
-require __DIR__ . '/../layouts/base.php';

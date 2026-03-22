@@ -18,19 +18,20 @@ class EmployeeController {
         define('BASE_LOADED', true);
         ob_start();
         require __DIR__ . '/../../views/employees/create.php';
-        $content == ob_get_clean();
+        $content = ob_get_clean();
         $pageTitle = 'Add Employee';
         require __DIR__ . '/../../views/layouts/base.php';
     }
 
     private function store(): void {
+        \App\HelperCsrf::verify();
         $fields = ['employee_code', 'full_name', 'email', 'password', 'role_id', 'department'];
         $data = [];
         foreach ($fields as $f) {
             $val = trim($_POST[$f] ?? '');
             if ($val === '' && $f !== 'department') {
                 $_SESSION['error'] = "Field '{$f}' is required.";
-                header('Location: /processing-system/public/employment/create');
+                header('Location: /processing-system/public/employees/create');
                 exit;
             }
             $data[$f] = $val;

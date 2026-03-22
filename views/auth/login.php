@@ -1,6 +1,6 @@
 <?php
-$loginError = $_SESSION['error'] ?? null;
-unset($_SESSION['error']);
+    $loginError = $_SESSION['error'] ?? null;
+    unset($_SESSION['error']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,7 +8,7 @@ unset($_SESSION['error']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login — Processing System</title>
-    <link rel="stylesheet" href="/processing-system/public/css/app.css">
+    <link rel="stylesheet" href="/processing-system/public/stylesheets/app.css">
 </head>
 <body>
 <div class="login-wrap">

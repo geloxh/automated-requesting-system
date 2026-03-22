@@ -22,7 +22,6 @@ $statusBadge = [
 $roleId = $_SESSION['role_id'];
 $title  = $formLabel[$formType] ?? $formType;
 
-ob_start();
 ?>
 
 <div class="page-header">
@@ -80,8 +79,3 @@ ob_start();
     </table>
 </div>
 <?php endif; ?>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = $title;
-require __DIR__ . '/../layouts/base.php';

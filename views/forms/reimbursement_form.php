@@ -1,10 +1,3 @@
-<?php
-define('BASE_LOADED', true);
-use App\Middleware\AuthMiddleware;
-AuthMiddleware::require();
-ob_start();
-?>
-
 <h5 style="margin-bottom:1.25rem">Request for Reimbursement</h5>
 
 <form method="POST" action="/processing-system/public/forms/reimbursement">
@@ -59,11 +52,4 @@ ob_start();
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<script>
-initTable({ tableId: 'reimburse-table', addBtnId: 'add-row', recalc: 'amount-only', totalId: 'total_amount' });
-</script>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = 'Reimbursement';
-require __DIR__ . '/../layouts/base.php';
+<script>initTable({ tableId: 'reimburse-table', addBtnId: 'add-row', recalc: 'amount-only', totalId: 'total_amount' });</script>

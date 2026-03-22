@@ -1,10 +1,3 @@
-<?php
-define('BASE_LOADED', true);
-use App\Middleware\AuthMiddleware;
-AuthMiddleware::require();
-ob_start();
-?>
-
 <h5 style="margin-bottom:1.25rem">Request for Payment</h5>
 
 <form method="POST" action="/processing-system/public/forms/request-payment">
@@ -83,11 +76,4 @@ ob_start();
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<script>
-initTable({ tableId: 'items-table', addBtnId: 'add-row', recalc: 'items', totalId: 'total_amount' });
-</script>
-
-<?php
-$content   = ob_get_clean();
-$pageTitle = 'Request for Payment';
-require __DIR__ . '/../layouts/base.php';
+<script>initTable({ tableId: 'items-table', addBtnId: 'add-row', recalc: 'items', totalId: 'total_amount' });</script>
