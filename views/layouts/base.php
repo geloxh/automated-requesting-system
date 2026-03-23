@@ -1,4 +1,6 @@
-<?php if (!defined('BASE_LOADED')) die('Direct access not allowed'); ?>
+<?php 
+    if (!defined('BASE_LOADED')) die('Direct access not allowed'); 
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +42,9 @@
                 <span class="topbar-date"><?= date('l, F j, Y') ?></span>
             </div>
             <div class="topbar-right">
-                <span class="topbar-user"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
+                <a href="/processing-system/public/profile" class="topbar-user">
+                    <?= htmlspecialchars($_SESSION['user_name']) ?>
+                </a>
                 <form method="POST" action="/processing-system/public/logout">
                     <button class="btn btn-ghost btn-sm">Logout</button>
                 </form>
