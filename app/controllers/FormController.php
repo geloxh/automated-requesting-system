@@ -50,10 +50,9 @@ class FormController {
 
         $forms = $stmt->fetchAll();
         $formType = $type;
-        $slug  = $slug;
-        $pageTitle = $formLabel[$type] ?? $type;
+        $pageTitle = ucwords(str_replace('_', ' ', $type));
 
-        $this->render('forms/list', compact('forms', 'formType', 'slug', 'title', '$pageTitle'));
+        $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
     }
 
     // ----------------------------------------------------------------
