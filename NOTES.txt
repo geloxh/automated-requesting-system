@@ -31,3 +31,14 @@ Typical values:
 14+ = very slow (usually unnecessary)
 
 "C:\xampp\php\php.exe" -r "echo password_hash('yourpassword', PASSWORD_BCRYPT, ['cost' => 12]);"
+
+.env
+APP_NAME=ProcessingSystem
+APP_ENV=local
+APP_URL=http://localhost/processing-system/public
+
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=psdb
+DB_USERNAME=root
+DB_PASSWORD=
