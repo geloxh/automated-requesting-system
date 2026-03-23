@@ -24,7 +24,7 @@
         }
 
         private function store(): void {
-            \App\HelperCsrf::verify();
+            \App\Helpers\Csrf::verify();
             $fields = ['employee_code', 'full_name', 'email', 'password', 'role_id', 'department'];
             $data = [];
             foreach ($fields as $f) {

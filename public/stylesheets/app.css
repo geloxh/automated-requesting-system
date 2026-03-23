@@ -130,7 +130,22 @@ a { text-decoration: none; color: inherit; }
 .stat-count { font-size: 1.25rem; font-weight: 600; line-height: 1; margin-bottom: .2rem; }
 .stat-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; }
 
+.stat-submitted   { border-left: 3px solid #4361ee; }
+.stat-in_approval { border-left: 3px solid #f4a261; }
+.stat-approved    { border-left: 3px solid #2a9d8f; }
+.stat-rejected    { border-left: 3px solid #e63946; }
+
+.count-submitted   { color: #4361ee; }
+.count-in_approval { color: #f4a261; }
+.count-approved    { color: #2a9d8f; }
+.count-rejected    { color: #e63946; }
+
+.stat-icon { font-size: 1.2rem; }
+
 /* ── Table ── */
+.th-first, .td-first { padding-left: 1.25rem; }
+.td-last { padding-right: 1rem; }
+
 .table-wrap { background: #fff; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; }
 .table-wrap-header {
     padding: .75rem 1rem;
@@ -233,6 +248,13 @@ input:focus, select:focus, textarea:focus {
 input[readonly], input[disabled] { background: #f8f9fa; color: #6c757d; cursor: default; }
 textarea { resize: vertical; }
 
+/* Form helpers */
+.form-title { margin-bottom: 1.25rem; }
+.btn-add-row { margin-top: .75rem; }
+.mt-1 { margin-top: 1rem; }
+.table-scroll { overflow-x: auto; }
+.g-span-2 { grid-column: span 2; }
+
 /* ── Page header ── */
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .page-header h5 { font-size: 1rem; font-weight: 600; margin: 0; }
@@ -257,6 +279,16 @@ textarea { resize: vertical; }
 
 /* ── Two-col layout (show.php) ── */
 .two-col { display: grid; grid-template-columns: 1fr 380px; gap: 1.25rem; align-items: start; }
+
+/* show.php */
+.show-title { margin-bottom: .35rem; }
+.show-id { font-weight: 400; }
+.no-margin { margin: 0; }
+.card-action { margin-top: 1rem; }
+.form-group--spaced { margin-bottom: 1rem; }
+.action-btns { display: flex; gap: .5rem; }
+.btn-block { flex: 1; justify-content: center; }
+
 
 /* ── Empty state ── */
 .empty-state { text-align: center; padding: 3rem 1rem; color: #6c757d; }

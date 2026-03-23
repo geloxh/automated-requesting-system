@@ -1,4 +1,4 @@
-<h5 style="margin-bottom:1.25rem">Work Permit / Gatepass</h5>
+<h5 class="form-title">Work Permit / Gatepass</h5>
 
 <form method="POST" action="/processing-system/public/forms/work-permit">
     <?= \App\Helpers\Csrf::field(); ?>
@@ -23,16 +23,10 @@
 
     <div class="form-card">
         <div class="form-section-title">Gatepass Details</div>
-        <div style="overflow-x:auto">
+        <div class="table-scroll">
             <table class="form-table" id="gatepass-table">
                 <thead>
-                    <tr>
-                        <th>Quantity</th>
-                        <th>Description</th>
-                        <th>Time</th>
-                        <th>Remarks</th>
-                        <th></th>
-                    </tr>
+                    <tr><th>Quantity</th><th>Description</th><th>Time</th><th>Remarks</th><th></th></tr>
                 </thead>
                 <tbody>
                     <tr>
@@ -45,7 +39,7 @@
                 </tbody>
             </table>
         </div>
-        <button type="button" class="btn btn-ghost btn-sm" id="add-row" style="margin-top:.75rem">+ Add Row</button>
+        <button type="button" class="btn btn-ghost btn-sm btn-add-row" id="add-row">+ Add Row</button>
     </div>
 
     <div class="form-card">

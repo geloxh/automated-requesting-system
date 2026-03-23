@@ -16,7 +16,6 @@
     $title  = $formLabel[$form['form_type']] ?? $form['form_type'];
     $roleId = $_SESSION['role_id'];
     $formId = $form['id'];
-
 ?>
 
 <?php if (!empty($_SESSION['success'])): ?>
@@ -30,9 +29,9 @@
 
 <div class="page-header">
     <div>
-        <h5 style="margin-bottom:.35rem">
+        <h5 class="show-title">
             <?= htmlspecialchars($title) ?>
-            <span class="muted" style="font-weight:400">#<?= $formId ?></span>
+            <span class="muted show-id">#<?= $formId ?></span>
         </h5>
         <span class="badge badge-<?= $statusBadge[$form['status']] ?? 'secondary' ?>">
             <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
@@ -62,7 +61,7 @@
             <div class="card-header">Approval Chain</div>
             <?php if (empty($approvalSteps)): ?>
                 <div class="card-body">
-                    <p class="muted" style="margin:0">No approval steps assigned.</p>
+                    <p class="muted no-margin">No approval steps assigned.</p>
                 </div>
             <?php else: ?>
                 <ul class="step-list">
@@ -88,24 +87,24 @@
         </div>
 
         <?php if ($canAct): ?>
-        <div class="card" style="margin-top:1rem">
+        <div class="card card-action">
             <div class="card-header">Your Action</div>
             <div class="card-body">
                 <form method="POST" id="approvalForm">
                     <?= \App\Helpers\Csrf::field(); ?>
-                    <div class="form-group" style="margin-bottom:1rem">
+                    <div class="form-group form-group--spaced">
                         <label>Remarks <span class="muted">(optional)</span></label>
                         <textarea name="remarks" rows="2"></textarea>
                     </div>
-                    <div style="display:flex;gap:.5rem">
+                    <div class="action-btns">
                         <button type="submit"
                             formaction="/processing-system/public/forms/<?= $formId ?>/approve"
-                            class="btn btn-success" style="flex:1;justify-content:center">
+                            class="btn btn-success btn-block">
                             Approve
                         </button>
                         <button type="submit"
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
-                            class="btn btn-danger" style="flex:1;justify-content:center"
+                            class="btn btn-danger btn-block"
                             onclick="return confirm('Reject this form?')">
                             Reject
                         </button>

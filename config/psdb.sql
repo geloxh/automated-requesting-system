@@ -57,8 +57,10 @@ CREATE TABLE forms (
         'reimbursement',
         'liquidation',
         'vehicle_request'
-    ) NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','in_approval','approved','rejected','cancelled')),
+    ) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','in_approval','approved','rejected','cancelled')),
     submitted_by INT NOT NULL,
+    data JSON NULL,                          
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (submitted_by) REFERENCES employees(id) ON DELETE CASCADE

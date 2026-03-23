@@ -1,4 +1,4 @@
-<h5 style="margin-bottom:1.25rem">Advance Payment Request</h5>
+<h5 class="form-title">Advance Payment Request</h5>
 
 <form method="POST" action="/processing-system/public/forms/advance-payment">
     <?= \App\Helpers\Csrf::field(); ?>
@@ -11,7 +11,7 @@
             <div class="form-group"><label>Pages</label><input type="text" name="page_no" placeholder="No. of attachments"></div>
             <div class="form-group"><label>Date</label><input type="date" name="date" required></div>
         </div>
-        <div class="form-group" style="margin-top:1rem">
+        <div class="form-group mt-1">
             <label>Project Name</label><input type="text" name="project_name">
         </div>
     </div>
@@ -34,14 +34,14 @@
             <div class="form-group"><label>Bank Account No.</label><input type="text" name="bank_account_no"></div>
             <div class="form-group"><label>Address</label><input type="text" name="address"></div>
         </div>
-        <div class="form-group" style="margin-top:1rem">
+        <div class="form-group mt-1">
             <label>Purpose</label><textarea name="purpose" rows="2"></textarea>
         </div>
     </div>
 
     <div class="form-card">
         <div class="form-section-title">Item Details</div>
-        <div style="overflow-x:auto">
+        <div class="table-scroll">
             <table class="form-table" id="items-table">
                 <thead><tr><th>Item</th><th>Description</th><th>Unit Price</th><th>Quantity</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
@@ -56,10 +56,10 @@
                 </tbody>
             </table>
         </div>
-        <button type="button" class="btn btn-ghost btn-sm" id="add-row" style="margin-top:.75rem">+ Add Row</button>
-        <div class="form-grid g-4" style="margin-top:1rem">
+        <button type="button" class="btn btn-ghost btn-sm btn-add-row" id="add-row">+ Add Row</button>
+        <div class="form-grid g-4 mt-1">
             <div class="form-group"><label>Total Amount</label><input type="number" step="0.01" name="total_amount" id="total_amount" readonly></div>
-            <div class="form-group" style="grid-column:span 2"><label>Total Amount (in words)</label><input type="text" name="amount_words"></div>
+            <div class="form-group g-span-2"><label>Total Amount (in words)</label><input type="text" name="amount_words"></div>
         </div>
     </div>
 

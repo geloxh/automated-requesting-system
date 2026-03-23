@@ -1,4 +1,4 @@
-<h5 style="margin-bottom:1.25rem">Request for Reimbursement</h5>
+<h5 class="form-title">Request for Reimbursement</h5>
 
 <form method="POST" action="/processing-system/public/forms/reimbursement">
     <?= \App\Helpers\Csrf::field(); ?>
@@ -15,7 +15,7 @@
 
     <div class="form-card">
         <div class="form-section-title">Reimbursement Details</div>
-        <div style="overflow-x:auto">
+        <div class="table-scroll">
             <table class="form-table" id="reimburse-table">
                 <thead><tr><th>No.</th><th>Date</th><th>SI/OR #</th><th>Even</th><th>Particulars</th><th>Person/Place</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
@@ -32,10 +32,10 @@
                 </tbody>
             </table>
         </div>
-        <button type="button" class="btn btn-ghost btn-sm" id="add-row" style="margin-top:.75rem">+ Add Row</button>
-        <div class="form-grid g-4" style="margin-top:1rem">
+        <button type="button" class="btn btn-ghost btn-sm btn-add-row" id="add-row">+ Add Row</button>
+        <div class="form-grid g-4 mt-1">
             <div class="form-group"><label>Total Amount</label><input type="number" step="0.01" name="total_amount" id="total_amount" readonly></div>
-            <div class="form-group" style="grid-column:span 2"><label>Total Amount (in words)</label><input type="text" name="amount_words"></div>
+            <div class="form-group g-span-2"><label>Total Amount (in words)</label><input type="text" name="amount_words"></div>
         </div>
     </div>
 

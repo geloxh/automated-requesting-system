@@ -14,7 +14,7 @@
 
     <div id="sidebar">
         <div class="sidebar-brand">⚙ Processing System</div>
-        <div style="margin-top:.5rem">
+        <div class="sidebar-nav">
             <a href="/processing-system/public/dashboard"
                class="<?= ($uri === '/dashboard' || $uri === '/') ? 'active' : '' ?>">
                 ▦ Dashboard

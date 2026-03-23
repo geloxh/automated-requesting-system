@@ -21,7 +21,6 @@ $statusBadge = [
 
 $roleId = $_SESSION['role_id'];
 $title  = $formLabel[$formType] ?? $formType;
-
 ?>
 
 <div class="page-header">
@@ -50,7 +49,7 @@ $title  = $formLabel[$formType] ?? $formType;
     <table>
         <thead>
             <tr>
-                <th style="padding-left:1.25rem">#</th>
+                <th class="th-first">#</th>
                 <?php if ($roleId != 3): ?><th>Submitted By</th><?php endif; ?>
                 <th>Status</th>
                 <th>Date</th>
@@ -60,7 +59,7 @@ $title  = $formLabel[$formType] ?? $formType;
         <tbody>
         <?php foreach ($forms as $form): ?>
             <tr>
-                <td class="muted" style="padding-left:1.25rem"><?= $form['id'] ?></td>
+                <td class="muted td-first"><?= $form['id'] ?></td>
                 <?php if ($roleId != 3): ?>
                     <td><?= htmlspecialchars($form['full_name']) ?></td>
                 <?php endif; ?>
@@ -70,7 +69,7 @@ $title  = $formLabel[$formType] ?? $formType;
                     </span>
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
-                <td class="text-end" style="padding-right:1rem">
+                <td class="td-last text-end">
                     <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
                 </td>
             </tr>

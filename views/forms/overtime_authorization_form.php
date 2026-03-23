@@ -1,4 +1,4 @@
-<h5 style="margin-bottom:1.25rem">Overtime Authorization</h5>
+<h5 class="form-title">Overtime Authorization</h5>
 
 <form method="POST" action="/processing-system/public/forms/overtime">
     <?= \App\Helpers\Csrf::field(); ?>
@@ -14,7 +14,7 @@
 
     <div class="form-card">
         <div class="form-section-title">OT Request Details</div>
-        <div style="overflow-x:auto">
+        <div class="table-scroll">
             <table class="form-table" id="ot-table">
                 <thead><tr><th>Date</th><th>Reason/s</th><th>Hours Covered</th><th>Total Hours</th><th></th></tr></thead>
                 <tbody>
@@ -28,8 +28,8 @@
                 </tbody>
             </table>
         </div>
-        <button type="button" class="btn btn-ghost btn-sm" id="add-row" style="margin-top:.75rem">+ Add Row</button>
-        <div class="form-grid g-4" style="margin-top:1rem">
+        <button type="button" class="btn btn-ghost btn-sm btn-add-row" id="add-row">+ Add Row</button>
+        <div class="form-grid g-4 mt-1">
             <div class="form-group"><label>Total Hours Rendered</label><input type="number" name="total_hours" id="total_hours" step="0.1" readonly></div>
         </div>
     </div>

@@ -60,10 +60,10 @@
     foreach ($forms as $f) if (isset($counts[$f['status']])) $counts[$f['status']]++;
 
     $stats = [
-        ['label' => 'Submitted',   'key' => 'submitted',   'icon' => '📤', 'color' => '#4361ee'],
-        ['label' => 'In Approval', 'key' => 'in_approval', 'icon' => '⏳', 'color' => '#f4a261'],
-        ['label' => 'Approved',    'key' => 'approved',    'icon' => '✅', 'color' => '#2a9d8f'],
-        ['label' => 'Rejected',    'key' => 'rejected',    'icon' => '❌', 'color' => '#e63946'],
+        ['label' => 'Submitted',   'key' => 'submitted',   'icon' => '📤'],
+        ['label' => 'In Approval', 'key' => 'in_approval', 'icon' => '⏳'],
+        ['label' => 'Approved',    'key' => 'approved',    'icon' => '✅'],
+        ['label' => 'Rejected',    'key' => 'rejected',    'icon' => '❌'],
     ];
 ?>
 
@@ -73,10 +73,10 @@
 
 <div class="stat-grid">
 <?php foreach ($stats as $s): ?>
-    <div class="stat-card" style="border-left: 3px solid <?= $s['color'] ?>">
-        <span style="font-size:1.2rem"><?= $s['icon'] ?></span>
+    <div class="stat-card stat-<?= $s['key'] ?>">
+        <span class="stat-icon"><?= $s['icon'] ?></span>
         <div>
-            <div class="stat-count" style="color:<?= $s['color'] ?>"><?= $counts[$s['key']] ?></div>
+            <div class="stat-count count-<?= $s['key'] ?>"><?= $counts[$s['key']] ?></div>
             <div class="stat-label"><?= $s['label'] ?></div>
         </div>
     </div>
@@ -94,7 +94,7 @@
     <table>
         <thead>
             <tr>
-                <th style="padding-left:1.25rem">#</th>
+                <th class="th-first">#</th>
                 <th>Form Type</th>
                 <?php if ($roleId != 3): ?><th>Submitted By</th><?php endif; ?>
                 <th>Status</th>
@@ -105,7 +105,7 @@
         <tbody>
         <?php foreach ($forms as $form): ?>
             <tr>
-                <td class="muted" style="padding-left:1.25rem"><?= $form['id'] ?></td>
+                <td class="muted td-first"><?= $form['id'] ?></td>
                 <td><?= $formLabel[$form['form_type']] ?? $form['form_type'] ?></td>
                 <?php if ($roleId != 3): ?>
                     <td><?= htmlspecialchars($form['full_name']) ?></td>
@@ -116,7 +116,7 @@
                     </span>
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
-                <td class="text-end" style="padding-right:1rem">
+                <td class="td-last text-end">
                     <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
                 </td>
             </tr>
