@@ -41,9 +41,10 @@ class FormController {
             $stmt->execute([$type]);
         } else {
             $stmt = db()->prepare(
-                'SELECT id, status, created_at FROM forms
-                 WHERE form_type = ? AND submitted_by = ?
-                 ORDER BY created_at DESC LIMIT 30'
+                'SELECT f.id, f.status, f.created_at, e.full_name
+                 FROM forms f JOIN employees e ON e.id = f.submitted_by
+                 WHERE f.form_type = ? AND f.submitted_by = ?
+                 ORDER BY f.created_at DESC LIMIT 30'
             );
             $stmt->execute([$type, $userId]);
         }
@@ -93,7 +94,7 @@ class FormController {
         $approvalSteps = $approvals->fetchAll();
 
         $canAct = $this->canActOnForm($form, $approvalSteps);
-        $data = json_decode($form['data'], true);
+        $data = json_decode($form['data'], true) ?? [];
         
         $formLabel = [
             'advance_payment'        => 'Advance Payment',
@@ -138,13 +139,22 @@ class FormController {
         $data     = [];
 
         foreach ($required as $field) {
-            $val = trim($_POST[$field] ?? '');
-            if ($val === '') {
+            $val = $_POST[$field] ?? '';
+            if (is_string($val)) $val = trim($val);
+            if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
                 $_SESSION['error'] = "Field '{$field}' is required.";
                 header("Location: /processing-system/public/forms/{$slug}/create");
                 exit;
             }
-            $data[$field] = htmlspecialchars($val, ENT_QUOTES);
+        }
+
+        foreach ($_POST as $key => $val) {
+            if ($key === 'csrf_token') continue;
+            if (is_array($val)) {
+                $data[$key] = array_map(fn($v) => htmlspecialchars(trim($v), ENT_QUOTES), $val);
+            } else {
+                $data[$key] = htmlspecialchars(trim($val), ENT_QUOTES);
+            }
         }
 
         $pdo = db();

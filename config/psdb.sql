@@ -41,9 +41,9 @@ CREATE INDEX idx_employees_role  ON employees(role_id);
 
 -- password for all seeds: Admin@1234
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
-('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$K45782E/rWQ.CYGZtCQpcurvztBfh2jARRWyHn3okWtpzf4nowhj2', 1, 'IT Head'),
-('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$oeU3sEJkdRqG1Hue4BtGluxJ2ETBDYIaldd3XuyF0mhD7z7wVOlfy', 2, 'Finance'),
-('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$oeU3sEJkdRqG1Hue4BtGluxJ2ETBDYIaldd3XuyF0mhD7z7wVOlfy', 3, 'Operations');
+('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT Head'),
+('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$q0K4NQ9TlwDzWuaWIyLJt.sa/SNF0ynVTBi6z8o5XjLkIXE5H716a', 2, 'Finance'),
+('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$q0K4NQ9TlwDzWuaWIyLJt.sa/SNF0ynVTBi6z8o5XjLkIXE5H716a', 3, 'Operations');
 
 -- ============================================================
 -- FORMS
@@ -69,8 +69,8 @@ CREATE TABLE forms (
     FOREIGN KEY (submitted_by) REFERENCES employees(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_forms_type      ON forms(form_type);
-CREATE INDEX idx_forms_status    ON forms(status);
+CREATE INDEX idx_forms_type ON forms(form_type);
+CREATE INDEX idx_forms_status ON forms(status);
 CREATE INDEX idx_forms_submitted ON forms(submitted_by);
 
 -- ============================================================

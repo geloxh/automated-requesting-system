@@ -58,9 +58,13 @@ if (preg_match('#^/forms/([\w-]+)/create$#', $uri, $m)) {
     exit;
 }
 
-// GET /forms/{slug}
+// GET|POST /forms/{slug}
 if (preg_match('#^/forms/([\w-]+)$#', $uri, $m)) {
-    (new FormController)->index($m[1]);
+    if ($method === 'POST') {
+        (new FormController)->create($m[1]);
+    } else {
+        (new FormController)->index($m[1]);
+    }
     exit;
 }
 
