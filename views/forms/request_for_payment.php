@@ -1,6 +1,6 @@
 <h5 class="form-title">Request for Payment</h5>
 
-<form method="POST" action="/processing-system/public/forms/request-payment">
+<form method="POST" action="/processing-system/public/forms/leave/create" class="card p-4 bg-white shadow-sm">
     <?= \App\Helpers\Csrf::field(); ?>
 
     <div class="form-card">

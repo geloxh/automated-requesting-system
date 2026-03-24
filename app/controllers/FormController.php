@@ -1,6 +1,5 @@
 <?php
 class FormController {
-    // slug → db form_type
     private array $typeMap = [
         'advance-payment' => 'advance_payment',
         'overtime'        => 'overtime_authorization',
@@ -12,7 +11,6 @@ class FormController {
         'vehicle-request' => 'vehicle_request',
     ];
 
-    // Fields required per form type
     private array $fields = [
         'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
         'overtime_authorization' => ['employee_name', 'department', 'request_date'],
@@ -25,10 +23,10 @@ class FormController {
     ];
 
     // ----------------------------------------------------------------
-    // GET /forms/{slug}  — list forms of this type for current user
+    // GET /forms/{slug}
     // ----------------------------------------------------------------
     public function index(string $slug): void {
-        $type = $this->resolveType($slug);
+        $type   = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
@@ -49,8 +47,8 @@ class FormController {
             $stmt->execute([$type, $userId]);
         }
 
-        $forms = $stmt->fetchAll();
-        $formType = $type;
+        $forms     = $stmt->fetchAll();
+        $formType  = $type;
         $pageTitle = ucwords(str_replace('_', ' ', $type));
 
         $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
@@ -71,8 +69,8 @@ class FormController {
         $fields   = $this->fields[$type];
         $formType = $type;
 
-        $noSuffix = ['list', 'show', 'request_for_payment'];
-        $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $noSuffix  = ['list', 'show', 'request_for_payment'];
+        $viewName  = in_array($type, $noSuffix) ? $type : "{$type}_form";
         $pageTitle = ucwords(str_replace('_', ' ', $type));
 
         $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle'));
@@ -81,8 +79,7 @@ class FormController {
     // ----------------------------------------------------------------
     // GET /forms/view/{id}
     // ----------------------------------------------------------------
-    public function show(int $id): void
-    {
+    public function show(int $id): void {
         $form = $this->findForm($id);
 
         $approvals = db()->prepare(
@@ -94,8 +91,8 @@ class FormController {
         $approvalSteps = $approvals->fetchAll();
 
         $canAct = $this->canActOnForm($form, $approvalSteps);
-        $data = json_decode($form['data'], true) ?? [];
-        
+        $data   = json_decode($form['data'], true) ?? [];
+
         $formLabel = [
             'advance_payment'        => 'Advance Payment',
             'overtime_authorization' => 'Overtime Authorization',
@@ -112,18 +109,16 @@ class FormController {
     }
 
     // ----------------------------------------------------------------
-    // POST /forms/approve/{id}
+    // POST /forms/{id}/approve
     // ----------------------------------------------------------------
-    public function approve(int $id): void
-    {
+    public function approve(int $id): void {
         $this->processApproval($id, 'approved');
     }
 
     // ----------------------------------------------------------------
-    // POST /forms/reject/{id}
+    // POST /forms/{id}/reject
     // ----------------------------------------------------------------
-    public function reject(int $id): void
-    {
+    public function reject(int $id): void {
         $this->processApproval($id, 'rejected');
     }
 
@@ -132,7 +127,6 @@ class FormController {
     // ================================================================
 
     private function store(string $type, string $slug): void {
-
         \App\Helpers\Csrf::verify();
 
         $required = $this->fields[$type];
@@ -161,7 +155,6 @@ class FormController {
         $pdo->beginTransaction();
 
         try {
-            // Insert form
             $stmt = $pdo->prepare(
                 'INSERT INTO forms (form_type, status, submitted_by, data)
                  VALUES (?, \'submitted\', ?, ?)'
@@ -169,8 +162,6 @@ class FormController {
             $stmt->execute([$type, $_SESSION['user_id'], json_encode($data)]);
             $formId = (int) $pdo->lastInsertId();
 
-            // Build approval chain: first available approver role_id=2, sequence 1
-            // Extend this array per business rule (e.g. amount-based chains)
             $approvers = $this->resolveApprovers($type, $data);
             foreach ($approvers as $seq => $approverId) {
                 $pdo->prepare(
@@ -178,13 +169,11 @@ class FormController {
                 )->execute([$formId, $approverId, $seq + 1]);
             }
 
-            // Update status to in_approval if chain exists
             if (!empty($approvers)) {
                 $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')
                     ->execute(['in_approval', $formId]);
             }
 
-            // Audit log
             $this->audit('form_submitted', 'form', $formId, null, ['type' => $type, 'status' => 'in_approval']);
 
             $pdo->commit();
@@ -202,14 +191,12 @@ class FormController {
     }
 
     private function processApproval(int $id, string $action): void {
-
         \App\Helpers\Csrf::verify();
-        
-        $form      = $this->findForm($id);
-        $approverId = $_SESSION['user_id'];
-        $remarks   = trim($_POST['remarks'] ?? '');
 
-        // Find the current pending step for this approver
+        $form       = $this->findForm($id);
+        $approverId = $_SESSION['user_id'];
+        $remarks    = trim($_POST['remarks'] ?? '');
+
         $step = db()->prepare(
             'SELECT * FROM approvals
              WHERE form_id = ? AND approver_id = ? AND status = \'pending\'
@@ -228,7 +215,6 @@ class FormController {
         $pdo->beginTransaction();
 
         try {
-            // Update this approval step
             $pdo->prepare(
                 'UPDATE approvals SET status = ?, remarks = ?, approved_at = NOW()
                  WHERE id = ?'
@@ -239,7 +225,6 @@ class FormController {
                     ->execute([$id]);
                 $newStatus = 'rejected';
             } else {
-                // Check if all steps are now approved
                 $pending = db()->prepare(
                     'SELECT COUNT(*) FROM approvals WHERE form_id = ? AND status = \'pending\''
                 );
@@ -265,10 +250,7 @@ class FormController {
         exit;
     }
 
-    private function resolveApprovers(string $type, array $data): array
-    {
-        // Fetch all employees with role approver (role_id = 2)
-        // Extend this with per-type or amount-based logic as needed
+    private function resolveApprovers(string $type, array $data): array {
         $stmt = db()->prepare(
             'SELECT id FROM employees WHERE role_id = 2 AND is_active = 1 ORDER BY id LIMIT 1'
         );
@@ -278,8 +260,7 @@ class FormController {
         return $approver ? [$approver] : [];
     }
 
-    private function canActOnForm(array $form, array $steps): bool
-    {
+    private function canActOnForm(array $form, array $steps): bool {
         $userId = $_SESSION['user_id'];
         foreach ($steps as $step) {
             if ($step['approver_id'] == $userId && $step['status'] === 'pending') {
@@ -289,8 +270,7 @@ class FormController {
         return false;
     }
 
-    private function findForm(int $id): array
-    {
+    private function findForm(int $id): array {
         $stmt = db()->prepare('SELECT * FROM forms WHERE id = ?');
         $stmt->execute([$id]);
         $form = $stmt->fetch();
@@ -301,7 +281,6 @@ class FormController {
             exit;
         }
 
-        // Ownership check: staff can only see their own
         if ($_SESSION['role_id'] == 3 && $form['submitted_by'] != $_SESSION['user_id']) {
             http_response_code(403);
             echo '<h3>Access denied.</h3>';
@@ -311,8 +290,7 @@ class FormController {
         return $form;
     }
 
-    private function audit(string $action, string $entity, int $entityId, ?array $old, ?array $new): void
-    {
+    private function audit(string $action, string $entity, int $entityId, ?array $old, ?array $new): void {
         db()->prepare(
             'INSERT INTO audit_logs (performed_by, action, entity_type, entity_id, old_values, new_values, ip_address)
              VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -327,8 +305,7 @@ class FormController {
         ]);
     }
 
-    private function resolveType(string $slug): string
-    {
+    private function resolveType(string $slug): string {
         if (!isset($this->typeMap[$slug])) {
             http_response_code(404);
             echo '<h3>Unknown form type.</h3>';
@@ -337,13 +314,14 @@ class FormController {
         return $this->typeMap[$slug];
     }
 
+    // Path Traversal — validate with realpath() + boundary check
     private function render(string $view, array $vars = []): void {
         $allowed = [
             'forms/list',
             'forms/show',
             'forms/advance_payment_form',
             'forms/overtime_authorization_form',
-            'forms/request_for_payment_form',
+            'forms/request_for_payment',         
             'forms/work_permit_form',
             'forms/leave_application_form',
             'forms/reimbursement_form',
@@ -357,13 +335,22 @@ class FormController {
             exit;
         }
 
+        // realpath() boundary check prevents path traversal
+        $basePath = realpath(__DIR__ . '/../../views');
+        $fullPath = realpath($basePath . '/' . $view . '.php');
+
+        if ($fullPath === false || strpos($fullPath, $basePath) !== 0) {
+            http_response_code(403);
+            echo '<h3>Access denied.</h3>';
+            exit;
+        }
+
         define('BASE_LOADED', true);
         extract($vars);
-        if(!isset($pageTitle)) $pageTitle = 'Processing System';
+        if (!isset($pageTitle)) $pageTitle = 'Processing System';
         ob_start();
-        require __DIR__ . '/../../views/' . $view . '.php';
+        require $fullPath;
         $content = ob_get_clean();
         require __DIR__ . '/../../views/layouts/base.php';
     }
-
 }

@@ -1,7 +1,7 @@
 <h5 class="mb-4">Leave Application Form</h5>
 
 <form method="POST" action="/processing-system/public/forms/leave" class="card p-4 bg-white shadow-sm">
-
+    <?= \App\Helpers\Csrf::field(); ?>
     <h6 class="mb-3 text-secondary">Leave Details</h6>
     <div class="row g-3 mb-4">
         <div class="col-md-4">

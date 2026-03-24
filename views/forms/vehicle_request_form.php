@@ -1,7 +1,7 @@
 <h5 class="mb-4">Vehicle Request Form</h5>
 
-<form method="POST" action="/processing-system/public/forms/vehicle-request" class="card p-4 bg-white shadow-sm">
-
+<form method="POST" action="/processing-system/public/forms/vehicle-request/create" class="card p-4 bg-white shadow-sm">
+    <?= \App\Helpers\Csrf::field(); ?>   
     <h6 class="mb-3 text-secondary">Applicant Details</h6>
     <div class="row g-3 mb-4">
         <div class="col-md-3">

@@ -1,13 +1,13 @@
 <?php
     $formLabel = [
-        'advance_payment' => 'Advance Payment',
+        'advance_payment'        => 'Advance Payment',
         'overtime_authorization' => 'Overtime Authorization',
-        'request_for_payment' => 'Request for Payment',
-        'work_permit' => 'Work Permit',
-        'leave_application' => 'Leave Application',
-        'reimbursement' => 'Reimbursement',
-        'liquidation' => 'Liquidation',
-        'vehicle_request' => 'Vehicle Request',
+        'request_for_payment'    => 'Request for Payment',
+        'work_permit'            => 'Work Permit',
+        'leave_application'      => 'Leave Application',
+        'reimbursement'          => 'Reimbursement',
+        'liquidation'            => 'Liquidation',
+        'vehicle_request'        => 'Vehicle Request',
     ];
 
     $statusBadge = ['draft' => 'secondary', 'submitted' => 'primary', 'in_approval' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'dark'];
@@ -46,9 +46,15 @@
         <div class="card-header">Form Details</div>
         <div class="card-body">
             <div class="dl-grid">
-                <?php foreach ($data as $key => $value): ?>
+                <?php foreach ($data ?? [] as $key => $value): ?>
                     <span class="dl-label"><?= htmlspecialchars(str_replace('_', ' ', $key)) ?></span>
-                    <span class="dl-value"><?= htmlspecialchars($value) ?></span>
+                    <span class="dl-value">
+                        <?php if (is_array($value)): ?>
+                            <?= htmlspecialchars(implode(', ', $value)) ?>
+                        <?php else: ?>
+                            <?= htmlspecialchars($value) ?>
+                        <?php endif; ?>
+                    </span>
                 <?php endforeach; ?>
                 <span class="dl-label">Submitted</span>
                 <span class="dl-value"><?= date('M d, Y h:i A', strtotime($form['created_at'])) ?></span>
