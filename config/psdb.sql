@@ -15,9 +15,9 @@ CREATE TABLE roles (
 );
 
 INSERT INTO roles (name, description) VALUES
-('admin', 'Full system access'),
+('admin',    'Full system access'),
 ('approver', 'Can approve/reject forms'),
-('staff', 'Can submit forms only');
+('staff',    'Can submit forms only');
 
 -- ============================================================
 -- EMPLOYEES
@@ -39,9 +39,11 @@ CREATE TABLE employees (
 CREATE INDEX idx_employees_email ON employees(email);
 CREATE INDEX idx_employees_role  ON employees(role_id);
 
--- Default admin account (password: Admin@1234)
+-- password for all seeds: Admin@1234
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
-('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$oXUiiZmq9z9xWcoxM1Po6.aTsaXeENvWBDvuarVE4D.rtFAKwE8RK', 1, 'IT Head');
+('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$K45782E/rWQ.CYGZtCQpcurvztBfh2jARRWyHn3okWtpzf4nowhj2', 1, 'IT Head'),
+('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$oeU3sEJkdRqG1Hue4BtGluxJ2ETBDYIaldd3XuyF0mhD7z7wVOlfy', 2, 'Finance'),
+('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$oeU3sEJkdRqG1Hue4BtGluxJ2ETBDYIaldd3XuyF0mhD7z7wVOlfy', 3, 'Operations');
 
 -- ============================================================
 -- FORMS
@@ -58,31 +60,18 @@ CREATE TABLE forms (
         'liquidation',
         'vehicle_request'
     ) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','in_approval','approved','rejected','cancelled')),
+    status VARCHAR(20) NOT NULL DEFAULT 'draft'
+        CHECK (status IN ('draft','submitted','in_approval','approved','rejected','cancelled')),
     submitted_by INT NOT NULL,
-    data JSON NULL,                          
+    data JSON NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (submitted_by) REFERENCES employees(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_forms_type ON forms(form_type);
-CREATE INDEX idx_forms_status ON forms(status);
-CREATE INDEX idx_forms_submitted  ON forms(submitted_by);
-
--- ============================================================
--- FORM DATA  (EAV / JSON per form)
--- ============================================================
-CREATE TABLE form_data (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    form_id BIGINT NOT NULL,
-    field_key VARCHAR(100) NOT NULL,
-    field_value TEXT,
-    FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
-    UNIQUE KEY uk_form_field (form_id, field_key)
-);
-
-CREATE INDEX idx_form_data_form ON form_data(form_id);
+CREATE INDEX idx_forms_type      ON forms(form_type);
+CREATE INDEX idx_forms_status    ON forms(status);
+CREATE INDEX idx_forms_submitted ON forms(submitted_by);
 
 -- ============================================================
 -- APPROVALS
@@ -93,7 +82,7 @@ CREATE TABLE approvals (
     approver_id INT NOT NULL,
     sequence SMALLINT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending','approved','rejected','skipped')),
+        CHECK (status IN ('pending','approved','rejected','skipped')),
     remarks TEXT,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approved_at TIMESTAMP NULL DEFAULT NULL,
@@ -102,9 +91,9 @@ CREATE TABLE approvals (
     CONSTRAINT uk_approval_form_seq UNIQUE (form_id, sequence)
 );
 
-CREATE INDEX idx_approvals_form ON approvals(form_id);
+CREATE INDEX idx_approvals_form     ON approvals(form_id);
 CREATE INDEX idx_approvals_approver ON approvals(approver_id);
-CREATE INDEX idx_approvals_status ON approvals(status);
+CREATE INDEX idx_approvals_status   ON approvals(status);
 
 -- ============================================================
 -- PASSWORD RESET TOKENS
@@ -119,7 +108,7 @@ CREATE TABLE password_reset_tokens (
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_prt_token ON password_reset_tokens(token);
+CREATE INDEX idx_prt_token    ON password_reset_tokens(token);
 CREATE INDEX idx_prt_employee ON password_reset_tokens(employee_id);
 
 -- ============================================================
@@ -140,7 +129,7 @@ CREATE TABLE audit_logs (
 );
 
 CREATE INDEX idx_audit_performed_by ON audit_logs(performed_by);
-CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX idx_audit_entity       ON audit_logs(entity_type, entity_id);
 CREATE INDEX idx_audit_performed_at ON audit_logs(performed_at);
 
 -- ============================================================
@@ -155,7 +144,7 @@ SELECT
     f.created_at,
     COUNT(a.id) AS total_steps,
     COUNT(CASE WHEN a.status = 'approved' THEN 1 END) AS approved_steps,
-    MIN(CASE WHEN a.status = 'pending'  THEN a.sequence END) AS next_pending_sequence,
+    MIN(CASE WHEN a.status = 'pending' THEN a.sequence END) AS next_pending_sequence,
     GROUP_CONCAT(a.approver_id ORDER BY a.sequence SEPARATOR ',') AS approver_chain
 FROM forms f
 JOIN employees e ON e.id = f.submitted_by

@@ -14,14 +14,14 @@ class FormController {
 
     // Fields required per form type
     private array $fields = [
-        'advance_payment'        => ['purpose', 'amount', 'date_needed'],
-        'overtime_authorization' => ['date', 'start_time', 'end_time', 'reason'],
-        'request_for_payment'    => ['payee', 'amount', 'particulars', 'date_needed'],
-        'work_permit'            => ['work_description', 'location', 'date_start', 'date_end'],
-        'leave_application'      => ['leave_type', 'date_start', 'date_end', 'reason'],
-        'reimbursement'          => ['particulars', 'amount', 'date_incurred'],
-        'liquidation'            => ['reference_form_id', 'amount_liquidated', 'particulars'],
-        'vehicle_request'        => ['destination', 'purpose', 'date_needed', 'passengers'],
+        'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
+        'overtime_authorization' => ['employee_name', 'department', 'request_date'],
+        'request_for_payment'    => ['payee', 'payment_type', 'purpose', 'date'],
+        'work_permit'            => ['unit_owner', 'bearer_name', 'date', 'service_type'],
+        'leave_application'      => ['leave_type', 'from_date', 'to_date', 'payment_term'],
+        'reimbursement'          => ['employee_name', 'department', 'request_date'],
+        'liquidation'            => ['employee_name', 'department', 'request_date'],
+        'vehicle_request'        => ['car_available', 'employee_name', 'date', 'trip_type'],
     ];
 
     // ----------------------------------------------------------------

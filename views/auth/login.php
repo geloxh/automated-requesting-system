@@ -19,15 +19,15 @@
         <?php endif; ?>
         <form method="POST" action="/processing-system/public/login">
             <?= \App\Helpers\Csrf::field(); ?>
-            <div class="form-group" style="margin-bottom:1rem">
+            <div class="form-group mt-1">
                 <label>Email</label>
                 <input type="email" name="email" required autofocus>
             </div>
-            <div class="form-group" style="margin-bottom:1.25rem">
+            <div class="form-group mt-1-25">
                 <label>Password</label>
                 <input type="password" name="password" required>
             </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center">Login</button>
+            <button class="btn btn-primary btn-full">Login</button>
         </form>
     </div>
 </div>
