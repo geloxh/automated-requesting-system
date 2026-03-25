@@ -56,4 +56,48 @@ class AuthController {
         header('Location: /processing-system/public/login');
         exit;
     }
+
+    public function register(): void {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+
+        \App\Helpers\Csrf::verify();
+
+        $name     = trim($_POST['name'] ?? '');
+        $email    = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $role     = $_POST['role'] ?? 2; // Default to employee
+
+        // Validate input
+        if (empty($name) || empty($email) || empty($password)) {
+            $_SESSION['error'] = 'All fields are required.';
+            header('Location: /processing-system/public/register');
+            exit;
+        }
+
+        if (strlen($password) < 8) {
+            $_SESSION['error'] = 'Password must be at least 8 characters long.';
+            header('Location: /processing-system/public/register');
+            exit;
+        }
+
+        // Check if email already exists
+        $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            $_SESSION['error'] = 'Email already registered.';
+            header('Location: /processing-system/public/register');
+            exit;
+        }
+
+        // Hash password and insert new user
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = db()->prepare(
+            'INSERT INTO employees (full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?)'
+        );
+        $stmt->execute([$name, $email, $passwordHash, $role]);
+
+        $_SESSION['success'] = 'Registration successful. You can now log in.';
+        header('Location: /processing-system/public/login');
+        exit;
+    }
 }

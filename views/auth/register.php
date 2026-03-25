@@ -1,5 +1,5 @@
 <?php
-    $loginError = $_SESSION['error'] ?? null;
+    $registerError = $_SESSION['error'] ?? null;
     unset($_SESSION['error']);
 ?>
 <!DOCTYPE html>
@@ -8,18 +8,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Register — Processing System</title>
-    <script src="https://unpkg.com/lucide@latest"></script> <!-- downloaded source code for toggle function-->
-    <link href="style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
 <body>
 
-<div class="login-card">
-    <div class="login-title">⚙ Register - Processing System</div>
+<div class="register-card">
+    <div class="register-title">⚙ Register - Processing System</div>
 
-    <?php if ($loginError): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($loginError) ?></div>
+    <?php if ($registerError): ?>
+        <div class="alert alert-danger"><?= htmlspecialchars($registerError) ?></div>
     <?php endif; ?>
 
     <form method="POST" action="/processing-system/public/register">
+        <?= \App\Helpers\Csrf::field(); ?>
 
         <div class="form-group">
             <label for="firstname">First Name</label>
@@ -52,7 +53,7 @@
     <div class="divider"></div>
 
     <div class="form-footer">
-        Already have an account? <a href="processing-system/login">Login</a>
+        Already have an account? <a href="/processing-system/public/login">Login</a>
     </div>
 </div>
 

@@ -14,6 +14,11 @@ if ($uri === '/login') {
     exit;
 }
 
+if ($uri === '/register') {
+    require __DIR__ . '/../views/auth/register.php';
+    exit;
+}
+
 // ---------------------------------------------------------------
 // AUTH GATGE = everything below requires login
 // ---------------------------------------------------------------

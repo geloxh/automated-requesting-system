@@ -9,8 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login — Processing System</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="../public/stylesheets/auth.css" rel="stylesheet">
-</head>
+    <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
 <body>
 
 <div class="login-card">
@@ -48,7 +47,7 @@
     <div class="divider"></div>
 
     <div class="form-footer">
-        Don't have an account? <a href="../views/auth/register.php">Create an account</a>
+        Don't have an account? <a href="/processing-system/public/register">Create an account</a>
     </div>
 </div>
 
