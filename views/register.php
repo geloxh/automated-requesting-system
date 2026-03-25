@@ -7,25 +7,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login — Processing System</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="../public/stylesheets/auth.css" rel="stylesheet">
-</head>
+    <title>Register — Processing System</title>
+    <script src="https://unpkg.com/lucide@latest"></script> <!-- downloaded source code for toggle function-->
+    <link href="style.css" rel="stylesheet">
 <body>
 
 <div class="login-card">
-    <div class="login-title">⚙ Login - Processing System</div>
+    <div class="login-title">⚙ Register - Processing System</div>
 
     <?php if ($loginError): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($loginError) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="/processing-system/public/login">
-        <?= \App\Helpers\Csrf::field(); ?>
-        
+    <form method="POST" action="/processing-system/public/register">
+
         <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="name@email.com" required autofocus>
+            <label for="firstname">First Name</label>
+            <input type="text" id="firstname" name="firstname" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="lastname">Last Name</label>
+            <input type="text" id="lastname" name="lastname" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" placeholder="name@email.com" required autofocus>
         </div>
 
         <div class="form-group">
@@ -38,17 +46,13 @@
             </div>
         </div>
 
-        <div style="text-align: center;">
-            <a href="/forgot-password" style="font-size: 0.8rem; color: #64748b; text-decoration: none;">Forgot password?</a>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary">Register</button>
     </form>
 
     <div class="divider"></div>
 
     <div class="form-footer">
-        Don't have an account? <a href="../views/auth/register.php">Create an account</a>
+        Already have an account? <a href="processing-system/login">Login</a>
     </div>
 </div>
 
