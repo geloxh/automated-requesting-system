@@ -1,15 +1,31 @@
-### processing-system
-system for SMEs for paperless and make the indicated features below automated, get record online and easy.
+### PROCESSING-SYSTEM
+System for SMEs for paperless and make the indicated features below automated, get record online and easy.
 
 ## FEATURES
-- *Advance Payment Form*
-- *Overtime Authorization Form*
-- *Request for Payment Form*
-- *Work Permit Form*
-- *Leave Application Form*
-- *Reimbursement Form*
-- *Liquidation Form*
-- *Vehicle Request Form*
+
+- **Advance Payment Form**  
+  Allows employees to request advance payments for anticipated expenses, subject to approval.
+
+- **Overtime Authorization Form**  
+  Used to request and approve overtime work, ensuring proper documentation and authorization.
+
+- **Request for Payment Form**  
+  Enables submission of payment requests for services, purchases, or obligations.
+
+- **Work Permit Form**  
+  Facilitates the application and approval of permits required before starting specific tasks or projects.
+
+- **Leave Application Form**  
+  Allows employees to apply for leave (e.g., vacation, sick leave) and track approval status.
+
+- **Reimbursement Form**  
+  Used to claim repayment for business-related expenses already paid by the employee.
+
+- **Liquidation Form**  
+  Helps document and reconcile expenses against previously issued cash advances.
+
+- **Vehicle Request Form**  
+  Allows users to request company vehicles for official use, including scheduling and approval.
 
 ## TECH-STACK
 - *PHP*
@@ -18,15 +34,15 @@ system for SMEs for paperless and make the indicated features below automated, g
 ## TOOLS TO USE
 - *Composer*
 - *PHPMailer*
-- *vlucas/phpdotenv
-- Bootstrap 5
+- *vlucas/phpdotenv*
+- *Bootstrap 5*
 
 ## DB DESIGN
-- **users**           -- employees + roles (admin, approver, staff)
-- **forms**        -- generic: id, type, status, submitted_by, created_at
-- **form_data**     -- JSON or EAV for form-specific fields
-- **approvals**       -- approval chain: form_id, approver_id, status, remarks
-- **audit_logs**      -- who did what and when
+- **users** -- employees + roles (admin, approver, staff)
+- **forms** -- generic: id, type, status, submitted_by, created_at
+- **form_data** -- JSON or EAV for form-specific fields
+- **approvals** -- approval chain: form_id, approver_id, status, remarks
+- **audit_logs** -- who did what and when
 
 ## PROJECT-STRUCTURE
 ```
@@ -39,6 +55,7 @@ system for SMEs for paperless and make the indicated features below automated, g
     ├── config/
     │   ├── database.php
     │   └── app.php
+    |   └── psdb.sql
     ├── public/                 # Entry point, assets
     │   └── index.php
     ├── views/
