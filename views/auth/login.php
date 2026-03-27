@@ -37,8 +37,8 @@
             </div>
         </div>
 
-        <div style="text-align: center;">
-            <a href="/forgot-password" style="font-size: 0.8rem; color: #64748b; text-decoration: none;">Forgot password?</a>
+        <div style="text-align: right; margin-bottom: 1rem;">
+            <a href="/processing-system/public/forgot-password" style="font-size: 0.8rem; color: #64748b; text-decoration: none;">Forgot password?</a>
         </div>
 
         <button type="submit" class="btn btn-primary">Login</button>

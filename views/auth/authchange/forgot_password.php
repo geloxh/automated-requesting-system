@@ -14,15 +14,19 @@
 </head>
 <body>
 
-<div class="login-card">
-    <div class="login-title">⚙ Reset Password</div>
+<div class="forgot-password-card">
+    <div class="forgot-password-title">⚙ Reset Password</div>
     
     <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem; text-align: center;">
         Enter your email address and we'll send you a link to reset your password.
     </p>
 
     <?php if ($error): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-danger" 
+        style="color: #721c24; background-color: #f8d7da; 
+        padding: 10px; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #f5c6cb;">
+            <?= htmlspecialchars($error) ?>
+        </div>
     <?php endif; ?>
 
     <?php if ($status): ?>
@@ -44,7 +48,7 @@
     <div class="divider"></div>
 
     <div class="form-footer">
-        <a href="/login" style="display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; color: #64748b;">
+        <a href="/processing-system/public/login" style="display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; color: #64748b;">
             <i data-lucide="arrow-left" style="width: 16px;"></i> Back to Login
         </a>
     </div>

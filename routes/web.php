@@ -19,6 +19,11 @@ if ($uri === '/register') {
     exit;
 }
 
+if ($uri === '/forgot-password') {
+    require __DIR__ . '/../views/auth/authchange/forgot_password.php';
+    exit;
+}
+
 // ---------------------------------------------------------------
 // AUTH GATGE = everything below requires login
 // ---------------------------------------------------------------

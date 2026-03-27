@@ -16,8 +16,8 @@
 </head>
 <body>
 
-<div class="login-card">
-    <div class="login-title">⚙ Create New Password</div>
+<div class="reset-password-card">
+    <div class="reset-password-title">⚙ Create New Password</div>
     
     <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem; text-align: center;">
         Please enter your new password below to secure your account.
@@ -54,7 +54,7 @@
     <div class="divider"></div>
 
     <div class="form-footer">
-        <a href="/login" style="display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; color: #64748b;">
+        <a href="/processing-system/public/login" style="display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; color: #64748b;">
             <i data-lucide="x-circle" style="width: 16px;"></i> Cancel and Login
         </a>
     </div>
