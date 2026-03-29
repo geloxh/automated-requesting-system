@@ -15,7 +15,7 @@ if ($uri === '/login') {
 }
 
 if ($uri === '/register') {
-    if ($method === 'POST') (NEW AuthController)->register();
+    if ($method === 'POST') (new AuthController)->register();
     else require __DIR__ . '/../views/auth/register.php';
     exit;
 }

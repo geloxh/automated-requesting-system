@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reset Password — Processing System</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="style.css" rel="stylesheet">
+    <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
 </head>
 <body>
 
@@ -37,7 +37,7 @@
 
     <form method="POST" action="/processing-system/public/forgot-password">
 
-        <? \App\Helpers\Csrf::field() ?>
+        <?=  \App\Helpers\Csrf::field() ?>
 
         <div class="form-group">
             <label for="email">Email Address</label>

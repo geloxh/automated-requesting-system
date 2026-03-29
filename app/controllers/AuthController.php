@@ -63,10 +63,10 @@ class AuthController {
 
         \App\Helpers\Csrf::verify();
 
-        $name     = trim(($_POST['firstname'] ?? '') . ' ' . ($_POST['lastname'] ?? ''));
-        $email    = trim($_POST['email'] ?? '');
+        $name = trim(($_POST['firstname'] ?? '') . ' ' . ($_POST['lastname'] ?? ''));
+        $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
-        $role     = $_POST['role'] ?? 2;
+        $role = $_POST['role'] ?? 2;
 
         if (empty($name) || empty($email) || empty($password)) {
             $_SESSION['error'] = 'All fields are required.';
