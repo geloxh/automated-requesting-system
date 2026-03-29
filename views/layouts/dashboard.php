@@ -16,21 +16,25 @@
         $stmt->execute();
     } elseif ($roleId == 2) {
         $stmt = db()->prepare(
-            'SELECT f.id, f.form_type, f.status, e.full_name, f.created_at
+            'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
             WHERE a.approver_id = ? AND a.status = "pending"
-            ORDER BY a.sequence ASC, f.created_at ASC'
+            ORDER BY f.created_at ASC'
         );
         $stmt->execute([$userId]);
     } else {
         $stmt = db()->prepare(
-            'SELECT id, form_type, status, created_at
-            FROM forms WHERE submitted_by = ?
-            ORDER BY created_at DESC LIMIT 30'
+            'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            WHERE f.submitted_by = ?
+            ORDER BY f.created_at DESC LIMIT 30'
         );
         $stmt->execute([$userId]);
     }
+
+
+
 
     $forms = $stmt->fetchAll();
 

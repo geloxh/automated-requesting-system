@@ -88,7 +88,7 @@ class AuthController {
             exit;
         }
 
-        $lastCode = db()->query("SELECT employe_code FROM employees ORDER BY id DESC LIMIT 1")->fetchColumn();
+        $lastCode = db()->query("SELECT employee_code FROM employees ORDER BY id DESC LIMIT 1")->fetchColumn();
         $nextNum = $lastCode ? (int) filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT) + 1 : 1;
         $empCode = 'EMP-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
 

@@ -46,6 +46,9 @@
                     <?= htmlspecialchars($_SESSION['user_name']) ?>
                 </a>
                 <form method="POST" action="/processing-system/public/logout">
+
+                    <?= \App\Helpers\Csrf::field() ?>
+                    
                     <button class="btn btn-ghost btn-sm">Logout</button>
                 </form>
             </div>
