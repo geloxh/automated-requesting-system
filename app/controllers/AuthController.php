@@ -88,11 +88,15 @@ class AuthController {
             exit;
         }
 
+        $lastCode = db()->query("SELECT employe_code FROM employees ORDER BY id DESC LIMIT 1")->fetchColumn();
+        $nextNum = $lastCode ? (int) filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT) + 1 : 1;
+        $empCode = 'EMP-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
+
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = db()->prepare(
-            'INSERT INTO employees (full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?)'
+            'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$name, $email, $passwordHash, $role]);
+        $stmt->execute([$empCode, $name, $email, $passwordHash, $role]);
 
         $_SESSION['success'] = 'Registration successful. You can now log in.';
         header('Location: /processing-system/public/login');
