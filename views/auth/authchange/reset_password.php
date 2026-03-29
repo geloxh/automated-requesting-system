@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Create New Password — Processing System</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="style.css" rel="stylesheet">
+    <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
 </head>
 <body>
 
@@ -32,8 +32,10 @@
     <?php endif; ?>
 
     <form method="POST" action="/processing-system/public/update-password">
-        <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
+        <?= \App\Helpers\Csrf::field() ?>
+        
+        <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
         <div class="form-group">
             <label for="password">New Password</label>
             <div style="position: relative;">

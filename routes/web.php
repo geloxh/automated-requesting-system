@@ -15,12 +15,24 @@ if ($uri === '/login') {
 }
 
 if ($uri === '/register') {
-    require __DIR__ . '/../views/auth/register.php';
+    if ($method === 'POST') (NEW AuthController)->register();
+    else require __DIR__ . '/../views/auth/register.php';
     exit;
 }
 
 if ($uri === '/forgot-password') {
-    require __DIR__ . '/../views/auth/authchange/forgot_password.php';
+    if ($method === 'POST') (new AuthController)->forgotPassword();
+    else require __DIR__ . '/../views/auth/authchange/forgot_password.php';
+    exit;
+}
+
+if ($uri === '/reset-password') {
+    require __DIR__ . '/../views/auth/authchange/reset_password.php';
+    exit;
+}
+
+if ($uri === '/update-password' && $method === 'POST') {
+    (new AuthController)->updatePassword();
     exit;
 }
 

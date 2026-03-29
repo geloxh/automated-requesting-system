@@ -37,6 +37,8 @@
 
     <form method="POST" action="/processing-system/public/forgot-password">
 
+        <? \App\Helpers\Csrf::field() ?>
+
         <div class="form-group">
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" placeholder="name@email.com" required autofocus>

@@ -10,52 +10,54 @@
     <title>Register — Processing System</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
+</head>
+
 <body>
+    <div class="register-card">
+        <div class="register-title">⚙ Register - Processing System</div>
 
-<div class="register-card">
-    <div class="register-title">⚙ Register - Processing System</div>
+        <?php if ($registerError): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($registerError) ?></div>
+        <?php endif; ?>
 
-    <?php if ($registerError): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($registerError) ?></div>
-    <?php endif; ?>
+        <form method="POST" action="/processing-system/public/register">
 
-    <form method="POST" action="/processing-system/public/register">
-        <?= \App\Helpers\Csrf::field(); ?>
+            <?= \App\Helpers\Csrf::field(); ?>
 
-        <div class="form-group">
-            <label for="firstname">First Name</label>
-            <input type="text" id="firstname" name="firstname" required autofocus>
-        </div>
-
-        <div class="form-group">
-            <label for="lastname">Last Name</label>
-            <input type="text" id="lastname" name="lastname" required autofocus>
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="text" id="email" name="email" placeholder="name@email.com" required autofocus>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <div class="password-wrapper">
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
-                <button type="button" class="toggle-icon" onclick="togglePassword()" aria-label="Toggle password visibility">
-                    <i data-lucide="eye" id="eyeIcon"></i>
-                </button>
+            <div class="form-group">
+                <label for="firstname">First Name</label>
+                <input type="text" id="firstname" name="firstname" required autofocus>
             </div>
+
+            <div class="form-group">
+                <label for="lastname">Last Name</label>
+                <input type="text" id="lastname" name="lastname" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" placeholder="name@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <button type="button" class="toggle-icon" onclick="togglePassword()" aria-label="Toggle password visibility">
+                        <i data-lucide="eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+
+        <div class="divider"></div>
+
+        <div class="form-footer">
+            Already have an account? <a href="/processing-system/public/login">Login</a>
         </div>
-
-        <button type="submit" class="btn btn-primary">Register</button>
-    </form>
-
-    <div class="divider"></div>
-
-    <div class="form-footer">
-        Already have an account? <a href="/processing-system/public/login">Login</a>
     </div>
-</div>
 
 <script>
     // Initialize Lucide icons
