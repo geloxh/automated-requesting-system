@@ -66,7 +66,7 @@
             $name = trim(($_POST['firstname'] ?? '') . ' ' . ($_POST['lastname'] ?? ''));
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
-            $role = $_POST['role'] ?? 2;
+            $role = 3; // Default to employee role
 
             if (empty($name) || empty($email) || empty($password)) {
                 $_SESSION['error'] = 'All fields are required.';
