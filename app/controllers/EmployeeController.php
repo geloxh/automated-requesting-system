@@ -1,7 +1,9 @@
 <?php
     class EmployeeController {
         public function index(): void {
-            $employees = db()->query('SELECT id, employee_code, full_name, email, department, is_active FROM employees ORDER BY full_name')->fetchAll();
+            $employees = db()->query(
+                'SELECT id, employee_code, full_name, email, department, is_active, employment_status, role_id FROM employees ORDER BY full_name'
+            )->fetchAll();
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/employees/index.php';
@@ -39,7 +41,7 @@
 
             db()->prepare(
                 'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department)
-                VALUES (?, ?, ?, ?, ? , ?)'
+                VALUES (?, ?, ?, ?, ?, ?)'
             )->execute([
                 $data['employee_code'],
                 $data['full_name'],
@@ -51,6 +53,123 @@
 
             $_SESSION['success'] = 'Employee created.';
             header('Location: /processing-system/public/employees');
+            exit;
+        }
+
+        public function delete(int $id): void {
+            \App\Helpers\Csrf::verify();
+
+            // Prevent self-deletion
+            if ($id === (int)$_SESSION['user_id']) {
+                $_SESSION['error'] = 'You cannot delete your own account.';
+                header('Location: /processing-system/public/employees');
+                exit;
+            }
+
+            $stmt = db()->prepare('SELECT id FROM employees WHERE id = ?');
+            $stmt->execute([$id]);
+            if (!$stmt->fetch()) {
+                $_SESSION['error'] = 'Employee not found.';
+                header('Location: /processing-system/public/employees');
+                exit;
+            }
+
+            db()->prepare('DELETE FROM employees WHERE id = ?')->execute([$id]);
+
+            $_SESSION['success'] = 'Employee deleted.';
+            header('Location: /processing-system/public/employees');
+            exit;
+        }
+
+        public function updateStatus(int $id): void {
+            \App\Helpers\Csrf::verify();
+
+            $allowed = ['employed', 'resigned', 'floating'];
+            $status = trim($_POST['employment_status'] ?? '');
+
+            if (!in_array($status, $allowed, true)) {
+                $_SESSION['error'] = 'Invalid employment status.';
+                header('Location: /processing-system/public/employees');
+                exit;
+            }
+
+            db()->prepare('UPDATE employees SET employment_status = ? WHERE id = ?')
+                ->execute([$status, $id]);
+
+            $_SESSION['success'] = 'Employment status updated.';
+            header('Location: /processing-system/public/employees');
+            exit;
+        }
+
+        public function actAsApprover(int $formId, string $action): void {
+            \App\Helpers\Csrf::verify();
+
+            if (!in_array($action, ['approved', 'rejected'], true)) {
+                http_response_code(400);
+                exit;
+            }
+
+            $stmt = db()->prepare('SELECT * FROM forms WHERE id = ?');
+            $stmt->execute([$formId]);
+            $form = $stmt->fetch();
+
+            if (!$form) {
+                $_SESSION['error'] = 'Form not found.';
+                header("Location: /processing-system/public/forms/view/{$formId}");
+                exit;
+            }
+
+            $remarks = trim($_POST['remarks'] ?? '(SysAdmin override)');
+
+            // Find the next pending approval step
+            $step = db()->prepare(
+                'SELECT * FROM approvals WHERE form_id = ? AND status = \'pending\' ORDER BY sequence LIMIT 1'
+            );
+            $step->execute([$formId]);
+            $approval = $step->fetch();
+
+            $pdo = db();
+            $pdo->beginTransaction();
+
+            try {
+                if ($approval) {
+                    $pdo->prepare(
+                        'UPDATE approvals SET status = ?, remarks = ?, approved_at = NOW() WHERE id = ?'
+                    )->execute([$action, $remarks, $approval['id']]);
+                }
+
+                if ($action === 'rejected') {
+                    $newStatus = 'rejected';
+                } else {
+                    $pending = $pdo->prepare(
+                        'SELECT COUNT(*) FROM approvals WHERE form_id = ? AND status = \'pending\''
+                    );
+                    $pending->execute([$formId]);
+                    $newStatus = (int)$pending->fetchColumn() === 0 ? 'approved' : 'in_approval';
+                }
+
+                $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')->execute([$newStatus, $formId]);
+
+                $pdo->prepare(
+                    'INSERT INTO audit_logs (performed_by, action, entity_type, entity_id, old_values, new_values, ip_address)
+                    VALUES (?, ?, \'form\', ?, ?, ?, ?)'
+                )->execute([
+                    $_SESSION['user_id'],
+                    "sysadmin_form_{$action}",
+                    $formId,
+                    json_encode(['status' => $form['status']]),
+                    json_encode(['status' => $newStatus, 'remarks' => $remarks]),
+                    $_SERVER['REMOTE_ADDR'] ?? null,
+                ]);
+
+                $pdo->commit();
+                $_SESSION['success'] = 'Form ' . $action . ' by SysAdmin.';
+            } catch (\Throwable $e) {
+                $pdo->rollBack();
+                $_SESSION['error'] = 'Action failed.';
+            }
+
+            header("Location: /processing-system/public/forms/view/{$formId}");
             exit;
         }
 
@@ -84,7 +203,6 @@
                 exit;
             }
 
-            // Change password if provided
             if (!empty($_POST['new_password'])) {
                 $emp = db()->prepare('SELECT password_hash FROM employees WHERE id = ?');
                 $emp->execute([$_SESSION['user_id']]);

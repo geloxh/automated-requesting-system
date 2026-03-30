@@ -93,15 +93,39 @@
     // ---------------------------------------------------------------
     // ADMIN
     // ---------------------------------------------------------------
+
+    // employees
     if ($uri === '/employees') {
         \App\Middleware\RoleMiddleware::requireRole(1);
         (new EmployeeController)->index();
         exit;
     }
 
+    // GET|POST /employees/create
     if ($uri === '/employees/create') {
         \App\Middleware\RoleMiddleware::requireRole(1);
         (new EmployeeController)->create();
+        exit;
+    }
+
+    // POST /employees/{id}/delete
+    if (preg_match('#^/employees/(\d+)/delete$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new EmployeeController)->delete((int)$m[1]);
+        exit;
+    }
+
+    // POST /employees/{id}/status
+    if (preg_match('#^/employees/(\d+)/status$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new EmployeeController)->updateStatus((int)$m[1]);
+        exit;
+    }
+
+    // POST /forms/{id}/admin-approve  and  /forms/{id}/admin-reject
+    if (preg_match('#^/forms/(\d+)/admin-(approve|reject)$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new EmployeeController)->actAsApprover((int)$m[1], $m[2] === 'approve' ? 'approved' : 'rejected');
         exit;
     }
 

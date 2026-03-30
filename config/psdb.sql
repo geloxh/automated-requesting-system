@@ -31,6 +31,7 @@ CREATE TABLE employees (
     role_id INT NOT NULL,
     department VARCHAR(50),
     is_active TINYINT(1) DEFAULT 1,
+    employment_status ENUM('employed','resigned','floating') NOT NULL DEFAULT 'employed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
