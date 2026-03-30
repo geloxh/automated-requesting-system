@@ -2,12 +2,12 @@
     class FormController {
         private array $typeMap = [
             'advance-payment' => 'advance_payment',
-            'overtime'        => 'overtime_authorization',
+            'overtime' => 'overtime_authorization',
             'request-payment' => 'request_for_payment',
-            'work-permit'     => 'work_permit',
-            'leave'           => 'leave_application',
-            'reimbursement'   => 'reimbursement',
-            'liquidation'     => 'liquidation',
+            'work-permit' => 'work_permit',
+            'leave' => 'leave_application',
+            'reimbursement' => 'reimbursement',
+            'liquidation' => 'liquidation',
             'vehicle-request' => 'vehicle_request',
         ];
 
@@ -57,8 +57,8 @@
                 $stmt->execute([$type, $userId]);
             }
 
-            $forms     = $stmt->fetchAll();
-            $formType  = $type;
+            $forms = $stmt->fetchAll();
+            $formType = $type;
             $pageTitle = ucwords(str_replace('_', ' ', $type));
 
             $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
@@ -76,11 +76,11 @@
                 return;
             }
 
-            $fields   = $this->fields[$type];
+            $fields = $this->fields[$type];
             $formType = $type;
 
-            $noSuffix  = ['list', 'show', 'request_for_payment'];
-            $viewName  = in_array($type, $noSuffix) ? $type : "{$type}_form";
+            $noSuffix = ['list', 'show', 'request_for_payment'];
+            $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
             $pageTitle = ucwords(str_replace('_', ' ', $type));
 
             $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle'));
@@ -101,17 +101,17 @@
             $approvalSteps = $approvals->fetchAll();
 
             $canAct = $this->canActOnForm($form, $approvalSteps);
-            $data   = json_decode($form['data'], true) ?? [];
+            $data = json_decode($form['data'], true) ?? [];
 
             $formLabel = [
-                'advance_payment'        => 'Advance Payment',
+                'advance_payment' => 'Advance Payment',
                 'overtime_authorization' => 'Overtime Authorization',
-                'request_for_payment'    => 'Request for Payment',
-                'work_permit'            => 'Work Permit',
-                'leave_application'      => 'Leave Application',
-                'reimbursement'          => 'Reimbursement',
-                'liquidation'            => 'Liquidation',
-                'vehicle_request'        => 'Vehicle Request',
+                'request_for_payment' => 'Request for Payment',
+                'work_permit' => 'Work Permit',
+                'leave_application' => 'Leave Application',
+                'reimbursement' => 'Reimbursement',
+                'liquidation' => 'Liquidation',
+                'vehicle_request' => 'Vehicle Request',
             ];
             $pageTitle = ($formLabel[$form['form_type']] ?? $form['form_type']) . ' #' . $id;
 
@@ -140,7 +140,7 @@
             \App\Helpers\Csrf::verify();
 
             $required = $this->fields[$type];
-            $data     = [];
+            $data = [];
 
             foreach ($required as $field) {
                 $val = $_POST[$field] ?? '';
