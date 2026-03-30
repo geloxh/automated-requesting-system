@@ -204,18 +204,25 @@
             \App\Helpers\Csrf::verify();
 
             $form = $this->findForm($id);
-            $approverId = $_SESSION['user_id'];
             $remarks = trim($_POST['remarks'] ?? '');
+            $isSysAdmin = $_SESSION['role_id'] == 1;
 
-            $step = db()->prepare(
-                'SELECT * FROM approvals
-                WHERE form_id = ? AND approver_id = ? AND status = \'pending\'
-                ORDER BY sequence LIMIT 1'
-            );
-            $step->execute([$id, $approverId]);
+            if ($isSysAdmin) {
+                // Find the next pending step regardless of who the approver is
+                $step = db()->prepare(
+                    'SELECT * FROM approvals WHERE form_id = ? AND status = \'pending\' ORDER BY sequence LIMIT 1'
+                );
+                $step->execute([$id]);
+            } else {
+                $step = db()->prepare(
+                    'SELECT * FROM approvals WHERE form_id = ? AND approver_id = ? AND status = \'pending\' ORDER BY sequence LIMIT 1'
+                );
+                $step->execute([$id, $_SESSION['user_id']]);
+            }
+
             $approval = $step->fetch();
 
-            if (!$approval) {
+            if (!$approval && !$isSysAdmin) {
                 $_SESSION['error'] = 'No pending approval step found for you.';
                 header("Location: /processing-system/public/forms/view/{$id}");
                 exit;
@@ -225,31 +232,27 @@
             $pdo->beginTransaction();
 
             try {
-                $pdo->prepare(
-                    'UPDATE approvals SET status = ?, remarks = ?, approved_at = NOW()
-                    WHERE id = ?'
-                )->execute([$action, $remarks, $approval['id']]);
+                if ($approval) {
+                    $pdo->prepare(
+                        'UPDATE approvals SET status = ?, remarks = ?, approved_at = NOW() WHERE id = ?'
+                    )->execute([$action, $remarks ?: ($isSysAdmin ? '(SysAdmin override)' : ''), $approval['id']]);
+                }
 
                 if ($action === 'rejected') {
-                    $pdo->prepare('UPDATE forms SET status = \'rejected\' WHERE id = ?')
-                        ->execute([$id]);
+                    $pdo->prepare('UPDATE forms SET status = \'rejected\' WHERE id = ?')->execute([$id]);
                     $newStatus = 'rejected';
                 } else {
-                    $pending = db()->prepare(
+                    $pending = $pdo->prepare(
                         'SELECT COUNT(*) FROM approvals WHERE form_id = ? AND status = \'pending\''
                     );
                     $pending->execute([$id]);
-                    $remainingPending = (int) $pending->fetchColumn();
-
-                    $newStatus = $remainingPending === 0 ? 'approved' : 'in_approval';
-                    $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')
-                        ->execute([$newStatus, $id]);
+                    $newStatus = (int)$pending->fetchColumn() === 0 ? 'approved' : 'in_approval';
+                    $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')->execute([$newStatus, $id]);
                 }
 
                 $this->audit("form_{$action}", 'form', $id, ['status' => $form['status']], ['status' => $newStatus, 'remarks' => $remarks]);
 
                 $pdo->commit();
-
                 $_SESSION['success'] = 'Form ' . $action . ' successfully.';
             } catch (\Throwable $e) {
                 $pdo->rollBack();
@@ -269,6 +272,9 @@
         }
 
         private function canActOnForm(array $form, array $steps): bool {
+            if ($_SESSION['role_id'] == 1) {
+                return in_array($form['status'], ['submitted', 'in_approval']);
+            }
             $userId = $_SESSION['user_id'];
             foreach ($steps as $step) {
                 if ($step['approver_id'] == $userId && $step['status'] === 'pending') {
@@ -277,6 +283,7 @@
             }
             return false;
         }
+
 
         private function findForm(int $id): array {
             $stmt = db()->prepare('SELECT * FROM forms WHERE id = ?');
