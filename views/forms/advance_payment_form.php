@@ -1,6 +1,7 @@
 <h5 class="form-title">Advance Payment Request</h5>
 
 <form method="POST" action="/processing-system/public/forms/advance-payment">
+    
     <?= \App\Helpers\Csrf::field(); ?>
 
     <div class="form-card">

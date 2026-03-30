@@ -1,13 +1,13 @@
 <?php
     $formLabel = [
-        'advance_payment'        => 'Advance Payment',
+        'advance_payment' => 'Advance Payment',
         'overtime_authorization' => 'Overtime Authorization',
-        'request_for_payment'    => 'Request for Payment',
-        'work_permit'            => 'Work Permit',
-        'leave_application'      => 'Leave Application',
-        'reimbursement'          => 'Reimbursement',
-        'liquidation'            => 'Liquidation',
-        'vehicle_request'        => 'Vehicle Request',
+        'request_for_payment' => 'Request for Payment',
+        'work_permit' => 'Work Permit',
+        'leave_application' => 'Leave Application',
+        'reimbursement' => 'Reimbursement',
+        'liquidation' => 'Liquidation',
+        'vehicle_request' => 'Vehicle Request',
     ];
 
     $statusBadge = ['draft' => 'secondary', 'submitted' => 'primary', 'in_approval' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'dark'];
@@ -37,7 +37,7 @@
             <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
         </span>
     </div>
-    <a href="javascript:history.back()" class="btn btn-ghost btn-sm">← Back</a>
+    <button id="btn-back" class="btn btn-ghost btn-sm">← Back</button>
 </div>
 
 <div class="two-col">
@@ -109,9 +109,9 @@
                             Approve
                         </button>
                         <button type="submit"
+                            id="btn-reject"
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
-                            class="btn btn-danger btn-block"
-                            onclick="return confirm('Reject this form?')">
+                            class="btn btn-danger btn-block">
                             Reject
                         </button>
                     </div>
@@ -122,3 +122,21 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const backBtn = document.getElementById('btn-back');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => history.back());
+    }
+
+    const rejectBtn = document.getElementById('btn-reject');
+    if (rejectBtn) {
+        rejectBtn.addEventListener('click', function(e) {
+            if (!confirm('Reject this form?')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>

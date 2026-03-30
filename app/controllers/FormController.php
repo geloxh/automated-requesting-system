@@ -12,14 +12,14 @@
         ];
 
         private array $fields = [
-            'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
+            'advance_payment' => ['purpose', 'payment_type', 'payee', 'date'],
             'overtime_authorization' => ['employee_name', 'department', 'request_date'],
-            'request_for_payment'    => ['payee', 'payment_type', 'purpose', 'date'],
-            'work_permit'            => ['unit_owner', 'bearer_name', 'date', 'service_type'],
-            'leave_application'      => ['leave_type', 'from_date', 'to_date', 'payment_term'],
-            'reimbursement'          => ['employee_name', 'department', 'request_date'],
-            'liquidation'            => ['employee_name', 'department', 'request_date'],
-            'vehicle_request'        => ['car_available', 'employee_name', 'date', 'trip_type'],
+            'request_for_payment' => ['payee', 'payment_type', 'purpose', 'date'],
+            'work_permit' => ['unit_owner', 'bearer_name', 'date', 'service_type'],
+            'leave_application' => ['leave_type', 'from_date', 'to_date', 'payment_term'],
+            'reimbursement' => ['employee_name', 'department', 'request_date'],
+            'liquidation' => ['employee_name', 'department', 'request_date'],
+            'vehicle_request' => ['car_available', 'employee_name', 'date', 'trip_type'],
         ];
 
         // ----------------------------------------------------------------

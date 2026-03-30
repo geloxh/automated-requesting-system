@@ -15,9 +15,9 @@ CREATE TABLE roles (
 );
 
 INSERT INTO roles (name, description) VALUES
-('admin',    'Full system access'),
-('approver', 'Can approve/reject forms'),
-('staff',    'Can submit forms only');
+('SysAdmin', 'Full system access'),
+('Approver', 'Can approve/reject forms'),
+('Staff', 'Can submit forms only');
 
 -- ============================================================
 -- EMPLOYEES
@@ -42,8 +42,8 @@ CREATE INDEX idx_employees_role  ON employees(role_id);
 -- main accounts
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
 ('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT Head'),
-('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$q0K4NQ9TlwDzWuaWIyLJt.sa/SNF0ynVTBi6z8o5XjLkIXE5H716a', 2, 'Finance'),
-('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$q0K4NQ9TlwDzWuaWIyLJt.sa/SNF0ynVTBi6z8o5XjLkIXE5H716a', 3, 'Operations');
+('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 2, 'Approver'),
+('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 3, 'Staff');
 
 -- ============================================================
 -- FORMS

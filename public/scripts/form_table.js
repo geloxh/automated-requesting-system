@@ -13,8 +13,8 @@ function recalcItems(tableId, totalId) {
     let total = 0;
     document.querySelectorAll(`#${tableId} tbody tr`).forEach(row => {
         const price = parseFloat(row.querySelector('.unit-price')?.value) || 0;
-        const qty   = parseFloat(row.querySelector('.qty')?.value) || 0;
-        const amt   = price * qty;
+        const qty = parseFloat(row.querySelector('.qty')?.value) || 0;
+        const amt = price * qty;
         const amtEl = row.querySelector('.row-amount');
         if (amtEl) amtEl.value = amt.toFixed(2);
         total += amt;
