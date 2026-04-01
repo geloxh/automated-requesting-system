@@ -42,7 +42,7 @@
                 <label for="password">Password</label>
                 <div class="password-wrapper">
                     <input type="password" id="password" name="password" placeholder="••••••••" required>
-                    <button type="button" class="toggle-icon" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility">
+                    <button type="button" class="toggle-icon" id="toggleBtn" aria-label="Toggle password visibility">
                         <i data-lucide="eye" id="eyeIcon"></i>
                     </button>
                 </div>
