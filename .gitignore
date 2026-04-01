@@ -1,3 +1,4 @@
 /vendor
 .env
 hash.php
+NOTES.txt

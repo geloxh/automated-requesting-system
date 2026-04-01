@@ -151,3 +151,14 @@
         max-width: 400px;
     }
 
+    .forgot-wrap {
+        text-align: right;
+        margin-bottom: 1rem;
+    }
+
+    .forgot-link {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-decoration: none;
+    }
+
