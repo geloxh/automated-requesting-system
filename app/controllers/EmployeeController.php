@@ -27,7 +27,7 @@
 
         private function store(): void {
             \App\Helpers\Csrf::verify();
-            $fields = ['employee_code', 'full_name', 'email', 'password', 'role_id', 'department'];
+            $fields = ['full_name', 'email', 'password', 'role_id', 'department'];
             $data = [];
             foreach ($fields as $f) {
                 $val = trim($_POST[$f] ?? '');
@@ -39,17 +39,28 @@
                 $data[$f] = $val;
             }
 
-            db()->prepare(
-                'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department)
-                VALUES (?, ?, ?, ?, ?, ?)'
-            )->execute([
-                $data['employee_code'],
-                $data['full_name'],
-                $data['email'],
-                password_hash($data['password'], PASSWORD_BCRYPT),
-                (int)$data['role_id'],
-                $data['department'],
-            ]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $empCode = \App\Helpers\generateEmployeeCode($pdo);
+                $pdo->prepare(
+                    'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department)
+                    VALUES (?, ?, ?, ?, ?, ?)'
+                )->execute([
+                    $empCode,
+                    $data['full_name'],
+                    $data['email'],
+                    password_hash($data['password'], PASSWORD_BCRYPT),
+                    (int)$data['role_id'],
+                    $data['department'],
+                ]);
+                $pdo->commit();
+            } catch (\Throwable $e) {
+                $pdo->rollBack();
+                $_SESSION['error'] = 'Failed to create employee.';
+                header('Location: /processing-system/public/employees/create');
+                exit;
+            }
 
             $_SESSION['success'] = 'Employee created.';
             header('Location: /processing-system/public/employees');

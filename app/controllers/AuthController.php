@@ -88,17 +88,23 @@
                 exit;
             }
 
-            $lastCode = db()->query("SELECT employee_code FROM employees ORDER BY id DESC LIMIT 1")->fetchColumn();
-            $nextNum = $lastCode ? (int) filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT) + 1 : 1;
-            $empCode = 'EMP-' . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
-
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = db()->prepare(
-                'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
-            );
-            $stmt->execute([$empCode, $name, $email, $passwordHash, $role]);
-
-            $_SESSION['success'] = 'Registration successful. You can now log in.';
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $empCode = \App\Helpers\generateEmployeeCode($pdo);
+                $pdo->prepare(
+                    'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
+                )->execute([$empCode, $name, $email, $passwordHash, $role]);
+                $pdo->commit();
+            } catch (\Throwable $e) {
+                $pdo->rollBack();
+                $_SESSION['error'] = 'Registration failed. Please try again.';
+                header('Location: /processing-system/public/register');
+                exit;
+            }
+            
+            $_SESSION['success'] = 'Registration successful. You can noe log in.';
             header('Location: /processing-system/public/login');
             exit;
         }
