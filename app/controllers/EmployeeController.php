@@ -27,16 +27,32 @@
 
         private function store(): void {
             \App\Helpers\Csrf::verify();
-            $fields = ['full_name', 'email', 'password', 'role_id', 'department'];
+
             $data = [];
-            foreach ($fields as $f) {
+            foreach (['full_name', 'email', 'password', 'role_id', 'department'] as $f) {
                 $val = trim($_POST[$f] ?? '');
                 if ($val === '' && $f !== 'department') {
                     $_SESSION['error'] = "Field '{$f}' is required.";
-                    header('Location: /processing-system/public/employees/create');
-                    exit;
+                    header('Location: /processing-system/public/employees/create'); exit;
                 }
                 $data[$f] = $val;
+            }
+
+            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['error'] = 'Invalid email address.';
+                header('Location: /processing-system/public/employees/create'); exit;
+            }
+
+            if (strlen($data['password']) < 8) {
+                $_SESSION['error'] = 'Password must be at least 8 characters.';
+                header('Location: /processing-system/public/employees/create'); exit;
+            }
+
+            $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
+            $stmt->execute([$data['email']]);
+            if ($stmt->fetch()) {
+                $_SESSION['error'] = 'Email already registered.';
+                header('Location: /processing-system/public/employees/create'); exit;
             }
 
             $pdo = db();
@@ -50,20 +66,19 @@
                     $data['full_name'],
                     $data['email'],
                     password_hash($data['password'], PASSWORD_BCRYPT),
-                    (int)$data['role_id'],
+                    (int) $data['role_id'],
                     $data['department'],
                 ]);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 $_SESSION['error'] = 'Failed to create employee.';
-                header('Location: /processing-system/public/employees/create');
-                exit;
+                header('Location: /processing-system/public/employees/create'); exit;
             }
 
             $_SESSION['success'] = 'Employee created.';
             header('Location: /processing-system/public/employees');
             exit;
         }
-
+        
         public function delete(int $id): void {
             \App\Helpers\Csrf::verify();
 

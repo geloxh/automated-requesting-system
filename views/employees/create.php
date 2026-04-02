@@ -11,7 +11,6 @@
     <form method="POST" action="/processing-system/public/employees/create">
         <?= \App\Helpers\Csrf::field() ?>
         <div class="form-grid g-2">
-            <div class="form-group"><label>Employee Code</label><input type="text" name="employee_code" required></div>
             <div class="form-group"><label>Full Name</label><input type="text" name="full_name" required></div>
             <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
             <div class="form-group"><label>Password</label><input type="password" name="password" required></div>

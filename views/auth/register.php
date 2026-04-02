@@ -46,6 +46,12 @@
                         <i data-lucide="eye" id="eyeIcon"></i>
                     </button>
                 </div>
+                <div class="form-group">
+                    <label for="password-confirmation">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password_confirmation" name="password_confirmation" placeholder="••••••••" required>
+                    </div>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Register</button>

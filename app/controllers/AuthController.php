@@ -63,44 +63,50 @@
 
             \App\Helpers\Csrf::verify();
 
-            $name = trim(($_POST['firstname'] ?? '') . ' ' . ($_POST['lastname'] ?? ''));
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $role = 3; // Default to employee role
+            $first    = trim($_POST['firstname'] ?? '');
+            $last     = trim($_POST['lastname']  ?? '');
+            $email    = trim($_POST['email']     ?? '');
+            $password = $_POST['password']              ?? '';
+            $confirm  = $_POST['password_confirmation'] ?? '';
 
-            if (empty($name) || empty($email) || empty($password)) {
+            if (!$first || !$last || !$email || !$password || !$confirm) {
                 $_SESSION['error'] = 'All fields are required.';
-                header('Location: /processing-system/public/register');
-                exit;
+                header('Location: /processing-system/public/register'); exit;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['error'] = 'Invalid email address.';
+                header('Location: /processing-system/public/register'); exit;
             }
 
             if (strlen($password) < 8) {
-                $_SESSION['error'] = 'Password must be at least 8 characters long.';
-                header('Location: /processing-system/public/register');
-                exit;
+                $_SESSION['error'] = 'Password must be at least 8 characters.';
+                header('Location: /processing-system/public/register'); exit;
+            }
+
+            if ($password !== $confirm) {
+                $_SESSION['error'] = 'Passwords do not match.';
+                header('Location: /processing-system/public/register'); exit;
             }
 
             $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
                 $_SESSION['error'] = 'Email already registered.';
-                header('Location: /processing-system/public/register');
-                exit;
+                header('Location: /processing-system/public/register'); exit;
             }
 
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
             $pdo = db();
             try {
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
                     'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
-                )->execute([$empCode, $name, $email, $passwordHash, $role]);
-            } catch (\Throwable $e) {
+                )->execute([$empCode, "$first $last", $email, password_hash($password, PASSWORD_BCRYPT), 3]);
+            } catch (\Throwable) {
                 $_SESSION['error'] = 'Registration failed. Please try again.';
-                header('Location: /processing-system/public/register');
-                exit;
+                header('Location: /processing-system/public/register'); exit;
             }
-            
+
             $_SESSION['success'] = 'Registration successful. You can now log in.';
             header('Location: /processing-system/public/login');
             exit;
