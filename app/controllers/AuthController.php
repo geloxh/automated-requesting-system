@@ -90,21 +90,18 @@
 
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
             $pdo = db();
-            $pdo->beginTransaction();
             try {
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
                     'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
                 )->execute([$empCode, $name, $email, $passwordHash, $role]);
-                $pdo->commit();
             } catch (\Throwable $e) {
-                $pdo->rollBack();
                 $_SESSION['error'] = 'Registration failed. Please try again.';
                 header('Location: /processing-system/public/register');
                 exit;
             }
             
-            $_SESSION['success'] = 'Registration successful. You can noe log in.';
+            $_SESSION['success'] = 'Registration successful. You can now log in.';
             header('Location: /processing-system/public/login');
             exit;
         }

@@ -40,7 +40,6 @@
             }
 
             $pdo = db();
-            $pdo->beginTransaction();
             try {
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
@@ -54,9 +53,7 @@
                     (int)$data['role_id'],
                     $data['department'],
                 ]);
-                $pdo->commit();
             } catch (\Throwable $e) {
-                $pdo->rollBack();
                 $_SESSION['error'] = 'Failed to create employee.';
                 header('Location: /processing-system/public/employees/create');
                 exit;
