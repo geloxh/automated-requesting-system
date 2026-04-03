@@ -33,6 +33,11 @@
             margin-bottom: 2rem;
         }
 
+        .auth-logo {
+            width: 40px;
+            margin-bottom: 0.5rem;
+        }
+
         .alert-danger {
             background: #fef2f2;
             color: #b91c1c;

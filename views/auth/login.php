@@ -13,7 +13,10 @@
 
 <body>
     <div class="login-card">
-        <div class="login-title">⚙ Login - Processing System</div>
+        <div class="login-title">
+            <img src="/processing-system/views/images/logo.png" alt="3E Logo" class="auth-logo">
+            <div>Login - Processing System</div>
+        </div>
 
         <?php if ($loginError): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($loginError) ?></div>

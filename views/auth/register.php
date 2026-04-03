@@ -13,7 +13,10 @@
 
 <body>
     <div class="register-card">
-        <div class="register-title">⚙ Register - Processing System</div>
+        <div class="register-title">
+            <img src="/processing-system/views/images/logo.png" alt="3E Logo" class="auth-logo">
+            <div>⚙ Register - Processing System</div>
+        </div>
 
         <?php if ($registerError): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($registerError) ?></div>
