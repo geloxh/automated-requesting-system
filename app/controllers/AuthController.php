@@ -21,7 +21,7 @@
             }
 
             if ($_SESSION[$key]['count'] >= 5) {
-                $_SESSION['error'] = 'Too many login attempts. Try again in 15 minutes.';
+                $_SESSION['login_error'] = 'Too many login attempts. Try again in 15 minutes.';
                 header('Location: /processing-system/public/login');
                 exit;
             }
@@ -37,7 +37,8 @@
 
             if (!$employee || !$employee['is_active'] || !password_verify($password, $employee['password_hash'])) {
                 $_SESSION[$key]['count']++;
-                $_SESSION['error'] = 'Invalid credentials or account inactive.';
+                $_SESSION['login_error'] = 'Invalid credentials or account inactive.';
+                $_SESSION['old_email'] = htmlspecialchars($email);
                 header('Location: /processing-system/public/login');
                 exit;
             }
@@ -63,37 +64,46 @@
 
             \App\Helpers\Csrf::verify();
 
-            $first    = trim($_POST['firstname'] ?? '');
-            $last     = trim($_POST['lastname']  ?? '');
-            $email    = trim($_POST['email']     ?? '');
-            $password = $_POST['password']              ?? '';
+            $first = trim($_POST['firstname'] ?? '');
+            $last = trim($_POST['lastname'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
             $confirm  = $_POST['password_confirmation'] ?? '';
+            
+            $old = [
+                'firstname' => htmlspecialchars($first),
+                'lastname' => htmlspecialchars($last),
+                'email' => htmlspecialchars($email),
+            ];
+
+            $fail = function (string $msg) use ($old): never {
+                $_SESSION['register_error'] = $msg;
+                $_SESSION['show_signup'] = true;
+                $_SESSION['old_register'] = $old;
+                header('Location: /processing-system/public/login');
+                exit;
+            };
 
             if (!$first || !$last || !$email || !$password || !$confirm) {
-                $_SESSION['error'] = 'All fields are required.';
-                header('Location: /processing-system/public/register'); exit;
+                $fail('All fields are requried.');
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $_SESSION['error'] = 'Invalid email address.';
-                header('Location: /processing-system/public/register'); exit;
+               $fail('Invalid email address.');
             }
 
             if (strlen($password) < 8) {
-                $_SESSION['error'] = 'Password must be at least 8 characters.';
-                header('Location: /processing-system/public/register'); exit;
+                $fail('Password must be at least 8 characters.');
             }
 
             if ($password !== $confirm) {
-                $_SESSION['error'] = 'Passwords do not match.';
-                header('Location: /processing-system/public/register'); exit;
+                $fail('Passwords do not match.');
             }
 
             $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
-                $_SESSION['error'] = 'Email already registered.';
-                header('Location: /processing-system/public/register'); exit;
+                $fail('Email already registgered.');
             }
 
             $pdo = db();
@@ -103,8 +113,7 @@
                     'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
                 )->execute([$empCode, "$first $last", $email, password_hash($password, PASSWORD_BCRYPT), 3]);
             } catch (\Throwable) {
-                $_SESSION['error'] = 'Registration failed. Please try again.';
-                header('Location: /processing-system/public/register'); exit;
+                $fail('Registration failed. Please try again.');
             }
 
             $_SESSION['success'] = 'Registration successful. You can now log in.';
@@ -196,7 +205,7 @@
             $row = $stmt->fetch();
 
             if (!$row) {
-                $_SESSION['error'] = 'Reset link is invalid or has expired.';
+                $_SESSION['login_error'] = 'Reset link is invalid or has expired.';
                 header('Location: /processing-system/public/forgot-password');
                 exit;
             }
