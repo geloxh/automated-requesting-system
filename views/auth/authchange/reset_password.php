@@ -1,7 +1,6 @@
 <?php
-    $token = $_GET['token'] ?? '';
-    
-    $error = $_SESSION['error'] ?? null;
+    $token  = $_GET['token'] ?? '';
+    $error  = $_SESSION['error']  ?? null;
     $status = $_SESSION['status'] ?? null;
     unset($_SESSION['error'], $_SESSION['status']);
 ?>
@@ -14,52 +13,49 @@
     <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
 </head>
 <body>
-    <div class="reset-password-card">
-        <div class="reset-password-title">⚙ Create New Password</div>
-        
-        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem; text-align: center;">
-            Please enter your new password below to secure your account.
-        </p>
+    <div class="forgot-password-card">
+        <div class="forgot-password-title">⚙ Create New Password</div>
+
+        <p class="card-subtitle">Enter your new password below to secure your account.</p>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+            <p class="form-error" role="alert"><?= htmlspecialchars($error) ?></p>
         <?php endif; ?>
 
         <form method="POST" action="/processing-system/public/update-password">
-
             <?= \App\Helpers\Csrf::field() ?>
-            
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
-            <div class="form-group">
+
+            <div class="card-form-group">
                 <label for="password">New Password</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="••••••••" required autofocus style="width: 100%;">
+                    <input type="password" id="password" name="password"
+                           placeholder="••••••••" autocomplete="new-password" required autofocus>
                     <button type="button" class="toggle-icon" id="toggleBtn" aria-label="Toggle password visibility">
                         <i data-lucide="eye" id="eyeIcon"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 1rem;">
+            <div class="card-form-group">
                 <label for="password_confirmation">Confirm New Password</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="••••••••" required style="width: 100%;">
-                    <button type="button" class="toggle-icon" id="toggleBtnConfirm" aria-label="Toggle password visibility">
+                    <input type="password" id="password_confirmation" name="password_confirmation"
+                           placeholder="••••••••" autocomplete="new-password" required>
+                    <button type="button" class="toggle-icon" id="toggleBtnConfirm" aria-label="Toggle confirm password visibility">
                         <i data-lucide="eye" id="eyeIconConfirm"></i>
                     </button>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">
-                Update Password
-            </button>
+            <button type="submit" class="card-btn">Update Password</button>
         </form>
 
-        <div class="divider"></div>
+        <div class="card-divider"></div>
 
-        <div class="form-footer">
-            <a href="/processing-system/public/login">
-                <i data-lucide="x-circle" style="width: 16px;"></i> Cancel and Login
+        <div class="card-footer">
+            <a href="/processing-system/public/login" class="card-back-link">
+                <i data-lucide="x-circle" style="width:16px;"></i> Cancel and Login
             </a>
         </div>
     </div>

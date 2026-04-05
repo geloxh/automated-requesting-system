@@ -1,16 +1,12 @@
-lucide.createIcons();
+document.addEventListener('DOMContentLoaded', function () {
+    lucide.createIcons();
 
-/**
- * Generic function to handle password visibility toggling.
- * ensures elements inside the listener to ensure we have the current DOM elements,
- * as Lucide replaces icons with SVG elements.
- */
-function setupPasswordToggle(buttonId, inputId, iconId) {
-    const button = document.getElementById(buttonId);
-    if (button) {
-        button.addEventListener('click', function() {
+    function setupPasswordToggle(buttonId, inputId, iconId) {
+        const button = document.getElementById(buttonId);
+        if (!button) return;
+        button.addEventListener('click', function () {
             const input = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
+            const icon  = document.getElementById(iconId);
             if (input && icon) {
                 const isPassword = input.type === 'password';
                 input.type = isPassword ? 'text' : 'password';
@@ -19,17 +15,16 @@ function setupPasswordToggle(buttonId, inputId, iconId) {
             }
         });
     }
-}
 
-// Initialize toggles for password fields across Login, Register, and Reset Password views
-setupPasswordToggle('toggleBtn', 'password', 'eyeIcon');
-setupPasswordToggle('toggleBtnConfirm', 'password_confirmation', 'eyeIconConfirm');
+    setupPasswordToggle('toggleBtn',       'login_password', 'eyeIcon');
+    setupPasswordToggle('toggleBtnReg',    'reg_password',   'eyeIconReg');
+    setupPasswordToggle('toggleBtnConfirm','reg_confirm',    'eyeIconConfirm');
 
-// Sliding panel toggle
-const cont = document.querySelector('.cont');
-const imgBtn = document.querySelector('.img__btn');
-if (cont && imgBtn) {
-    imgBtn.addEventListener('click', function () {
-        cont.classList.toggle('s--signup');
-    });
-}
+    const cont   = document.querySelector('.cont');
+    const imgBtn = document.querySelector('.img__btn');
+    if (cont && imgBtn) {
+        imgBtn.addEventListener('click', function () {
+            cont.classList.toggle('s--signup');
+        });
+    }
+});
