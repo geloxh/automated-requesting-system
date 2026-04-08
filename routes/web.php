@@ -36,7 +36,7 @@
         (new AuthController)->updatePassword();
         exit;
     }
-
+    
     // ---------------------------------------------------------------
     // AUTH GATGE = everything below requires login
     // ---------------------------------------------------------------

@@ -1,79 +1,47 @@
-<h5 class="mb-4">Vehicle Request Form</h5>
+<h5 class="form-title">Vehicle Request Form</h5>
 
-<form method="POST" action="/processing-system/public/forms/vehicle-request/create" class="card p-4 bg-white shadow-sm">
-    <?= \App\Helpers\Csrf::field(); ?>   
-    <h6 class="mb-3 text-secondary">Applicant Details</h6>
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <label class="form-label">Car / Plate Number</label>
-            <input type="text" name="car_available" class="form-control" required>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Date</label>
-            <input type="date" name="date" class="form-control" required>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Applicant</label>
-            <input type="text" name="employee_name" class="form-control" required>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Department</label>
-            <input type="text" name="department" class="form-control" required>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Total Mileage</label>
-            <input type="number" name="total_mileage" class="form-control" required>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Schedule Time</label>
-            <input type="text" name="schedule_time" class="form-control" placeholder="Departure and arrival time">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Type of Trip</label>
-            <select name="trip_type" class="form-select" required>
-                <option value="">-- Select --</option>
-                <option value="journey">Journey</option>
-                <option value="round">Round Trip</option>
-                <option value="single">Single</option>
-            </select>
+<form method="POST" action="/processing-system/public/forms/vehicle-request/create">
+    <?= \App\Helpers\Csrf::field(); ?>
+
+    <div class="form-card">
+        <div class="form-section-title">Applicant Details</div>
+        <div class="form-grid g-4">
+            <div class="form-group"><label>Car / Plate Number</label><input type="text" name="car_available" required></div>
+            <div class="form-group"><label>Date</label><input type="date" name="date" required></div>
+            <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" required></div>
+            <div class="form-group"><label>Department</label><input type="text" name="department" required></div>
+            <div class="form-group"><label>Total Mileage</label><input type="number" name="total_mileage"></div>
+            <div class="form-group"><label>Schedule Time</label><input type="text" name="schedule_time" placeholder="Departure and arrival time"></div>
+            <div class="form-group">
+                <label>Type of Trip</label>
+                <select name="trip_type" required>
+                    <option value="">-- Select --</option>
+                    <option value="journey">Journey</option>
+                    <option value="round">Round Trip</option>
+                    <option value="single">Single</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <h6 class="mb-3 text-secondary">Destination Details</h6>
-    <div class="row g-3 mb-4">
+    <div class="form-card">
+        <div class="form-section-title">Destination Details</div>
         <?php for ($i = 1; $i <= 4; $i++): ?>
-        <div class="col-md-6">
-            <label class="form-label">Destination <?= $i ?></label>
-            <input type="text" name="destination_<?= $i ?>" class="form-control">
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Purpose <?= $i ?></label>
-            <input type="text" name="purpose_<?= $i ?>" class="form-control">
+        <div class="form-grid g-2 mt-1">
+            <div class="form-group"><label>Destination <?= $i ?></label><input type="text" name="destination_<?= $i ?>"></div>
+            <div class="form-group"><label>Purpose <?= $i ?></label><input type="text" name="purpose_<?= $i ?>"></div>
         </div>
         <?php endfor; ?>
-        <div class="col-12">
-            <label class="form-label">Notes</label>
-            <input type="text" name="notes" class="form-control">
-        </div>
+        <div class="form-group mt-1"><label>Notes</label><input type="text" name="notes"></div>
     </div>
 
-    <h6 class="mb-3 text-secondary">Approval</h6>
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <label class="form-label">Prepared By</label>
-            <input type="text" name="prepared_by" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Confirmed By</label>
-            <input type="text" name="confirmed_by" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Checked By</label>
-            <input type="text" name="checked_by" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Driver</label>
-            <input type="text" name="driver" class="form-control">
+    <div class="form-card">
+        <div class="form-section-title">Approval</div>
+        <div class="form-grid g-4">
+            <div class="form-group"><label>Prepared By</label><input type="text" name="prepared_by"></div>
+            <div class="form-group"><label>Confirmed By</label><input type="text" name="confirmed_by"></div>
+            <div class="form-group"><label>Checked By</label><input type="text" name="checked_by"></div>
+            <div class="form-group"><label>Driver</label><input type="text" name="driver"></div>
         </div>
     </div>
 
