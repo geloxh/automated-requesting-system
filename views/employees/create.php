@@ -9,7 +9,9 @@
 
 <div class="form-card">
     <form method="POST" action="/processing-system/public/employees/create">
+
         <?= \App\Helpers\Csrf::field() ?>
+        
         <div class="form-grid g-2">
             <div class="form-group"><label>Full Name</label><input type="text" name="full_name" required></div>
             <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
