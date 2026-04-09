@@ -67,3 +67,16 @@ function initTable(config) {
         runRecalc();
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('table[data-recalc').forEach(table => {
+        initTable({
+             tableId: table.id,
+             addBtnId: table.dataset.addBtnId,
+             recalc: table.dataset.recalc,
+             totalId: table.dataset.totalId,
+             balanceId: table.dataset.balanceId ?? null,
+             advanceID: table.dataset.advanceId ?? null,
+        });
+    });
+});

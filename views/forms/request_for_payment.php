@@ -42,7 +42,11 @@
     <div class="form-card">
         <div class="form-section-title">Item Details</div>
         <div class="table-scroll">
-            <table class="form-table" id="items-table">
+            <table class="form-table" id="items-table"
+                data-recalc="items"
+                data-add-btn-id="add-row"
+                data-total-id="total_amount"
+            >
                 <thead><tr><th>Item</th><th>Description</th><th>Unit Price</th><th>Quantity</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
                     <tr>
@@ -75,5 +79,3 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
-<script>initTable({ tableId: 'items-table', addBtnId: 'add-row', recalc: 'items', totalId: 'total_amount' });</script>

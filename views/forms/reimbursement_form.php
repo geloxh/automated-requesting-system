@@ -16,7 +16,11 @@
     <div class="form-card">
         <div class="form-section-title">Reimbursement Details</div>
         <div class="table-scroll">
-            <table class="form-table" id="reimburse-table">
+            <table class="form-table" id="reimburse-table"
+                data-recalc="amount-only"
+                data-add-btn-id="add-row"
+                data-total-id="total_amount"
+            >
                 <thead><tr><th>No.</th><th>Date</th><th>SI/OR #</th><th>Even</th><th>Particulars</th><th>Person/Place</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
                     <tr>
@@ -51,5 +55,3 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
-<script>initTable({ tableId: 'reimburse-table', addBtnId: 'add-row', recalc: 'amount-only', totalId: 'total_amount' });</script>

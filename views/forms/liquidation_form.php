@@ -1,6 +1,7 @@
 <h5 class="form-title">Request for Liquidation</h5>
 
 <form method="POST" action="/processing-system/public/forms/liquidation">
+
     <?= \App\Helpers\Csrf::field(); ?>
 
     <div class="form-card">
@@ -25,7 +26,13 @@
     <div class="form-card">
         <div class="form-section-title">Expense Details</div>
         <div class="table-scroll">
-            <table class="form-table" id="liquidation-table">
+            <table class="form-table" id="liquidation-table"
+                data-recalc="amount-only"
+                data-add-btn-id="add-row"
+                data-total-id="total_amount"
+                data-balance-id="balance"
+                data-advance-id="advance_amount"
+            >
                 <thead><tr><th>No.</th><th>Date</th><th>SI/OR #</th><th>Even</th><th>Particulars</th><th>Person/Place</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
                     <tr>
@@ -61,7 +68,3 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
-<script>
-initTable({ tableId: 'liquidation-table', addBtnId: 'add-row', recalc: 'amount-only', totalId: 'total_amount', balanceId: 'balance', advanceId: 'advance_amount' });
-</script>
