@@ -23,7 +23,11 @@
     <div class="form-card">
         <div class="form-section-title">OT Request Details</div>
         <div class="table-scroll">
-            <table class="form-table" id="ot-table">
+            <table class="form-table" id="items-table"
+                data-recalc="items"
+                data-add-btn-id="add-row"
+                data-total-id="total_amount"
+            >
                 <thead><tr><th>Date</th><th>Reason/s</th><th>Hours Covered</th><th>Total Hours</th><th></th></tr></thead>
                 <tbody>
                     <tr>
@@ -52,5 +56,3 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
-<script>initTable({ tableId: 'ot-table', addBtnId: 'add-row', recalc: 'ot', totalId: 'total_hours' });</script>
