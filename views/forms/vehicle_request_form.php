@@ -9,7 +9,15 @@
             <div class="form-group"><label>Car / Plate Number</label><input type="text" name="car_available" required></div>
             <div class="form-group"><label>Date</label><input type="date" name="date" required></div>
             <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" required></div>
-            <div class="form-group"><label>Department</label><input type="text" name="department" required></div>
+            <div class="form-group">
+                <label>Department</label>
+                <input type="text" name="department" list="dept-list" autocomplete="off" required>
+                <datalist id="dept-list">
+                    <?php foreach ($departments ?? [] as $dept): ?>
+                        <option value="<?= htmlspecialchars($dept) ?>">
+                    <?php endforeach; ?>
+                </datalist>
+            </div>
             <div class="form-group"><label>Total Mileage</label><input type="number" name="total_mileage"></div>
             <div class="form-group"><label>Schedule Time</label><input type="text" name="schedule_time" placeholder="Departure and arrival time"></div>
             <div class="form-group">

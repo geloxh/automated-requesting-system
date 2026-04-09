@@ -83,7 +83,11 @@
             $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
             $pageTitle = ucwords(str_replace('_', ' ', $type));
 
-            $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle'));
+            $departments = db()->query(
+                'SELECT DISTINCT department FROM employees WHERE department IS NOT NULL ORDER BY department'
+            )->fetchAll(PDO::FETCH_COLUMN);
+
+            $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle', 'departments'));
         }
 
         // ----------------------------------------------------------------
