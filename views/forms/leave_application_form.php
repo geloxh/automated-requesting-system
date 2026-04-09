@@ -9,12 +9,14 @@
             <div class="form-group"><label>Name</label><input type="text" name="employee_name" required></div>
             <div class="form-group">
                 <label>Department</label>
-                <input type="text" name="department" list="dept-list" autocomplete="off" required>
-                <datalist id="dept-list">
-                    <?php foreach ($departments ?? [] as $dept): ?>
-                        <option value="<?= htmlspecialchars($dept) ?>">
-                    <?php endforeach; ?>
-                </datalist>
+                <div class="input-select">
+                    <input type="text" name="department" list="dept-list" autocomplete="off" required>
+                    <datalist id="dept-list">
+                        <?php foreach ($departments ?? [] as $dept): ?>
+                            <option value="<?= htmlspecialchars($dept) ?>">
+                        <?php endforeach; ?>
+                    </datalist>
+                </div>
             </div>
             <div class="form-group"><label>ID No.</label><input type="text" name="id_no"></div>
             <div class="form-group"><label>Date Filed</label><input type="date" name="date" required></div>

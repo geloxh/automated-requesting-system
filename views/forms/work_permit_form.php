@@ -12,11 +12,13 @@
             <div class="form-group"><label>Date</label><input type="date" name="date" required></div>
             <div class="form-group">
                 <label>Type of Service</label>
-                <select name="service_type" required>
-                    <option value="">-- Select --</option>
-                    <option value="delivery">Delivery</option>
-                    <option value="pull_out">Pull-Out</option>
-                </select>
+                <div class="input-select">
+                    <select name="service_type" required>
+                        <option value="">-- Select --</option>
+                        <option value="delivery">Delivery</option>
+                        <option value="pull_out">Pull-Out</option>
+                     </select>
+                </div>     
             </div>
         </div>
     </div>

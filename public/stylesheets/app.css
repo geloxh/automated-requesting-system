@@ -248,6 +248,33 @@ input:focus, select:focus, textarea:focus {
 input[readonly], input[disabled] { background: #f8f9fa; color: #6c757d; cursor: default; }
 textarea { resize: vertical; }
 
+
+/* ── Custom select / datalist arrow ── */
+.input-select {
+    position: relative;
+}
+
+.input-select::after {
+    content: '';
+    position: absolute;
+    right: .75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #6c757d;
+    pointer-events: none;
+}
+
+.input-select select,
+.input-select input {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2rem;
+}
+
 /* Form helpers */
 .form-title { margin-bottom: 1.25rem; }
 .btn-add-row { margin-top: .75rem; }
