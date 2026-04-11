@@ -124,6 +124,8 @@
         public function forgotPassword(): void {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
 
+            \App\Helpers\Csrf::verify();
+            
             $email = trim($_POST['email'] ?? '');
 
             $stmt = db()->prepare('SELECT id FROM employees WHERE email = ? AND is_active = 1');
