@@ -388,6 +388,8 @@ input {
 }
 
 .card-back-link {
+    width: 16px;
+    height: 16px;
     display: inline-flex;
     align-items: center;
     gap: 5px;

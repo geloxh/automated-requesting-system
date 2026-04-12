@@ -38,7 +38,7 @@
 
         <div class="card-footer">
             <a href="/processing-system/public/login" class="card-back-link">
-                <i data-lucide="arrow-left" style="width:16px;"></i> Back to Login
+                <i data-lucide="arrow-left"></i> Back to Login
             </a>
         </div>
     </div>
