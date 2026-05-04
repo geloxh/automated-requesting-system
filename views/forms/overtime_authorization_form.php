@@ -30,12 +30,13 @@
                 data-add-btn-id="add-row"
                 data-total-id="total_amount"
             >
-                <thead><tr><th>Date</th><th>Reason/s</th><th>Hours Covered</th><th>Total Hours</th><th></th></tr></thead>
+                <thead><tr><th>Date</th><th>Reason/s</th><th>Start</th><th>To</th><th>Total Hours</th><th></th></tr></thead>
                 <tbody>
                     <tr>
                         <td><input type="date" name="ot_date[]" required></td>
                         <td><input type="text" name="reason[]"></td>
-                        <td><input type="text" name="hours_covered[]" placeholder="e.g. 5:00PM–8:00PM"></td>
+                        <td><input type="time" name="hours_covered[]"></td>
+                        <td><input type="time" name="hours_covered[]"></td>
                         <td><input type="number" name="hours_total[]" step="0.1" class="ot-hours"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>

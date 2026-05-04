@@ -103,7 +103,7 @@
             $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
             $stmt->execute([$email]);
             if ($stmt->fetch()) {
-                $fail('Email already registgered.');
+                $fail('Email already registered.');
             }
 
             $pdo = db();

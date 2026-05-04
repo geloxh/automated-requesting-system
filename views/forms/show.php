@@ -1,3 +1,5 @@
+<?php include __DIR__ . '/pipeline_stepper.php'; ?>
+
 <?php
     $formLabel = [
         'advance_payment' => 'Advance Payment',
@@ -28,11 +30,7 @@
 <?php endif; ?>
 
 <div class="page-header">
-    <div>
-        <h5 class="show-title">
-            <?= htmlspecialchars($title) ?>
-            <span class="muted show-id">#<?= $formId ?></span>
-        </h5>
+    <div>    
         <span class="badge badge-<?= $statusBadge[$form['status']] ?? 'secondary' ?>">
             <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
         </span>
@@ -99,17 +97,32 @@
                 <form method="POST" id="approvalForm">
                     <?= \App\Helpers\Csrf::field(); ?>
                     <div class="form-group form-group--spaced">
-                        <label>Remarks <span class="muted">(optional)</span></label>
+                        <label>
+                            Approval
+                        </label>
+
+                        <textarea name="text" rows="2" placeholder="(Attach your name and signature)"></textarea>
+
+                        <input type="file" name="approval_file" accept="image/*,.pdf">
+
+                        <label>
+                            Remarks <span class="muted">(optional)</span>
+                        </label>
                         <textarea name="remarks" rows="2"></textarea>
                     </div>
+
                     <div class="action-btns">
                         <button type="submit"
+                            name="action"
+                            value="approve"
                             formaction="/processing-system/public/forms/<?= $formId ?>/approve"
                             class="btn btn-success btn-block">
                             Approve
                         </button>
+
                         <button type="submit"
-                            id="btn-reject"
+                            name="action"
+                            value="reject"
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
                             class="btn btn-danger btn-block">
                             Reject
