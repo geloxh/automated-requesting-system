@@ -1,11 +1,10 @@
 <?php
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
-    $uri = $uri ?? '/';
+    $uri        = $uri ?? '/';
     $roleLabels = [1 => 'Admin', 2 => 'Approver', 3 => 'Staff'];
     $roleName   = $roleLabels[$_SESSION['role_id']] ?? 'User';
     $initials   = strtoupper(substr($_SESSION['user_name'], 0, 2));
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +18,7 @@
 <body>
 <div class="layout">
 
+    <!-- ── SIDEBAR ── -->
     <nav id="sidebar">
         <div class="sidebar-brand">
             <div class="brand-icon"><i class="ti ti-bolt"></i></div>
@@ -78,7 +78,7 @@
         </div>
 
         <div class="sidebar-footer">
-            <a href="/processing-system/public/profile" class="user-card" style="text-decoration:none">
+            <a href="/processing-system/public/profile" class="user-card">
                 <div class="user-avatar"><?= $initials ?></div>
                 <div>
                     <div class="user-name"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
@@ -89,25 +89,114 @@
         </div>
     </nav>
 
+    <!-- ── NOTIFICATION PANEL ── -->
+    <div class="notif-panel" id="notifPanel">
+        <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <span class="notif-mark-read" onclick="clearNotifDot()">Mark all read</span>
+        </div>
+        <div class="notif-item">
+            <div class="notif-dot-sm"></div>
+            <div>
+                <div class="notif-text">Your <strong>Leave Application</strong> is pending approval</div>
+                <div class="notif-ago">Just now</div>
+            </div>
+        </div>
+        <div class="notif-item">
+            <div class="notif-dot-sm"></div>
+            <div>
+                <div class="notif-text"><strong>Advance Payment</strong> has been approved</div>
+                <div class="notif-ago">1 hour ago</div>
+            </div>
+        </div>
+        <div class="notif-item">
+            <div class="notif-dot-sm" style="background:var(--warning)"></div>
+            <div>
+                <div class="notif-text"><strong>Reimbursement</strong> was returned for revision</div>
+                <div class="notif-ago">Yesterday</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MAIN ── -->
     <div class="layout-right">
+
         <div id="topbar">
+            <!-- Mobile hamburger -->
+            <button class="icon-btn" id="sidebarToggle" style="display:none">
+                <i class="ti ti-menu-2"></i>
+            </button>
+
             <div class="topbar-left">
                 <span class="topbar-title"><?= htmlspecialchars($pageTitle ?? '') ?></span>
                 <span class="topbar-date"><?= date('l, F j, Y') ?></span>
             </div>
+
             <div class="topbar-right">
+                <!-- Search -->
+                <div class="topbar-search">
+                    <i class="ti ti-search"></i>
+                    <input type="text" placeholder="Search requests…" id="topbarSearch">
+                </div>
+
+                <!-- Notification bell -->
+                <button class="icon-btn" id="notifBtn" onclick="toggleNotif()" title="Notifications">
+                    <i class="ti ti-bell"></i>
+                    <span class="notif-dot" id="notifDot"></span>
+                </button>
+
+                <!-- New Request -->
+                <a href="/processing-system/public/forms/advance-payment/create" class="btn-new-req">
+                    <i class="ti ti-plus"></i> New Request
+                </a>
+
+                <!-- Logout -->
                 <form method="POST" action="/processing-system/public/logout">
                     <?= \App\Helpers\Csrf::field() ?>
-                    <button class="btn btn-ghost btn-sm">
-                        <i class="ti ti-logout"></i> Logout
+                    <button class="icon-btn" title="Logout">
+                        <i class="ti ti-logout"></i>
                     </button>
                 </form>
             </div>
         </div>
+
         <div id="main"><?= $content ?></div>
     </div>
 
 </div>
+
 <script src="/processing-system/public/scripts/form_table.js"></script>
+<script>
+    // Notification toggle
+    function toggleNotif() {
+        document.getElementById('notifPanel').classList.toggle('open');
+    }
+    function clearNotifDot() {
+        document.getElementById('notifDot').style.display = 'none';
+        document.querySelectorAll('.notif-dot-sm').forEach(d => d.style.background = '#cbd5e1');
+    }
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) {
+            document.getElementById('notifPanel').classList.remove('open');
+        }
+    });
+
+    // Mobile sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar       = document.getElementById('sidebar');
+    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#sidebar') && !e.target.closest('#sidebarToggle')) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // Show hamburger only on mobile
+    function checkMobile() {
+        sidebarToggle.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+    }
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+</script>
 </body>
 </html>
