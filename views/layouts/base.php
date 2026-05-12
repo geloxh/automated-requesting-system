@@ -22,8 +22,10 @@
             <?php if ($_SESSION['role_id'] == 1): ?>
                 <div class="sidebar-label">Admin</div>
                 <a href="/processing-system/public/employees">👥 Employees</a>
+                <a href="/processing-system/public/reports">📋 Reports</a>
+                <a href="/processing-system/public/approvals"> 📅 Approvals Queue</a>
             <?php endif; ?>
-            <div class="sidebar-label">Forms</div>
+            <div class="sidebar-label">Forms</div>--
             <a href="/processing-system/public/forms/advance-payment">💵 Advance Payment</a>
             <a href="/processing-system/public/forms/overtime">🕐 Overtime Auth.</a>
             <a href="/processing-system/public/forms/request-payment">🧾 Request for Payment</a>

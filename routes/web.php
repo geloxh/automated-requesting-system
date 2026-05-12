@@ -57,13 +57,20 @@
     // Forms
     // ---------------------------------------------------------------
 
-    // POST /forms/{id}/approve
-    if (preg_match('#^/forms/(\d+)/approve$#', $uri, $m) && $method === 'POST') {
-        (new FormController)->approve((int)$m[1]);
-        exit;
+
+
+    // Multilevel Approval Routes
+    $approvalActions = ['submit', 'supervisor-review', 'department-check', 'checker-supervisor', 'final-approval', 'complete', 'reject'];
+
+    foreach ($approvalActions as $action) {
+        $safeAction = preg_quote($action, '#');
+        if (preg_match("#^/forms/(\d+)/approve/{$safeAction}$#", $uri, $m) && $method === 'POST') {
+            (new FormController)->approve((int)$m[1], $action);
+            exit;
+        }
     }
 
-    // POST /forms/{id}/reject
+     // POST /forms/{id}/reject
     if (preg_match('#^/forms/(\d+)/reject$#', $uri, $m) && $method === 'POST') {
         (new FormController)->reject((int)$m[1]);
         exit;
@@ -126,7 +133,7 @@
     // POST /forms/{id}/admin-approve  and  /forms/{id}/admin-reject
     if (preg_match('#^/forms/(\d+)/admin-(approve|reject)$#', $uri, $m) && $method === 'POST') {
         \App\Middleware\RoleMiddleware::requireRole(1);
-        (new EmployeeController)->actAsApprover((int)$m[1], $m[2] === 'approve' ? 'approved' : 'rejected');
+        (new EmployeeController)->actAsApprover((int)$m[1], $m[2]  === 'approve' ? 'approved' : 'rejected');
         exit;
     }
 

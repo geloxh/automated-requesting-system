@@ -20,6 +20,14 @@ INSERT INTO roles (name, description) VALUES
 ('Staff', 'Can submit forms only');
 
 -- ============================================================
+-- COMPANY
+-- ============================================================
+CREATE TABLE department (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) UNIQUE NOT NULL,
+    description TEXT
+);
+-- ============================================================
 -- EMPLOYEES
 -- ============================================================
 CREATE TABLE employees (
@@ -29,12 +37,13 @@ CREATE TABLE employees (
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
-    department VARCHAR(50),
+    department_id VARCHAR(50),
     is_active TINYINT(1) DEFAULT 1,
     employment_status ENUM('employed','resigned','floating') NOT NULL DEFAULT 'employed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT,
+    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX idx_employees_email ON employees(email);

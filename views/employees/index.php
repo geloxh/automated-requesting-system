@@ -19,7 +19,8 @@
                 <th>Code</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Department</th>
+                <th>Department</th> 
+                <th>Role</th>
                 <th>Active</th>
                 <th>Employment Status</th>
                 <th>Actions</th>
@@ -32,6 +33,7 @@
                 <td><?= htmlspecialchars($e['full_name']) ?></td>
                 <td><?= htmlspecialchars($e['email']) ?></td>
                 <td><?= htmlspecialchars($e['department']) ?></td>
+                <td><?= htmlspecialchars($e['role_id']) ?></td>
                 <td>
                     <?php if ($e['is_active']): ?>
                         <span class="badge badge-success">Active</span>

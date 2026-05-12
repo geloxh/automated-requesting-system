@@ -28,7 +28,10 @@ System for SMEs for paperless and make the indicated features below automated, g
   Allows users to request company vehicles for official use, including scheduling and approval.
 
 ## FUTURE FEATURES
-- **indicate here**
+- **multilevel_approval** -- Submit request for approval
+                              Move request to next approval level
+                              Approve / reject actions
+                              Fetch approval status
 
 ## TECH-STACK
 - *PHP*
@@ -84,3 +87,12 @@ is a type of approach iterative and incremental process models.
 - **Feedback**
 
 ![SDLC](images/Agile.drawio.png)
+
+### Workflow Schema Design
+```
+    processing-system/config
+    ├── psdb/
+    │   ├── requests        # Tracks current position in workflow
+    │   ├── workflows       # Defines different approval processes (e.g., “Leave Request”, “Purchase Request”)
+    │   ├── workflow_steps   #Assigns who can approve (role-based)
+    │   └── approvals         # Tracks each approval decision

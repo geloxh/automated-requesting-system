@@ -1,5 +1,3 @@
-<h5 class="form-title">Work Permit / Gatepass</h5>
-
 <form method="POST" action="/processing-system/public/forms/work-permit">
     <?= \App\Helpers\Csrf::field(); ?>
 
@@ -55,6 +53,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="draft" class="btn btn-light">Save as Draft</button>
 </form>
 
 <script>initTable({ tableId: 'gatepass-table', addBtnId: 'add-row' });</script>

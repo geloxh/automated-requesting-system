@@ -1,5 +1,3 @@
-<h5 class="form-title">Request for Reimbursement</h5>
-
 <form method="POST" action="/processing-system/public/forms/reimbursement">
     <?= \App\Helpers\Csrf::field(); ?>
 
@@ -62,6 +60,6 @@
             <div class="form-group"><label>Approved By</label><input type="text" name="approved_by"></div>
         </div>
     </div>
-
     <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="draft" class="btn btn-light">Save as Draft</button>
 </form>

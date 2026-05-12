@@ -1,5 +1,3 @@
-<h5 class="form-title">Request for Payment</h5>
-
 <form method="POST" action="/processing-system/public/forms/leave/create" class="card p-4 bg-white shadow-sm">
     <?= \App\Helpers\Csrf::field(); ?>
 
@@ -86,6 +84,6 @@
             <div class="form-group"><label>Received By</label><input type="text" name="receive_by"></div>
         </div>
     </div>
-
     <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="draft" class="btn btn-light">Save as Draft</button>
 </form>

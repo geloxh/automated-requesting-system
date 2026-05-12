@@ -60,7 +60,7 @@
 
     ob_start();
 
-    $counts = ['submitted' => 0, 'in_approval' => 0, 'approved' => 0, 'rejected' => 0];
+    $counts = ['draft' => 0, 'submitted' => 0, 'in_approval' => 0, 'approved' => 0, 'rejected' => 0];
     foreach ($forms as $f) if (isset($counts[$f['status']])) $counts[$f['status']]++;
 
     $stats = [
