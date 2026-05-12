@@ -33,19 +33,7 @@
         $stmt->execute([$userId]);
     }
 
-
-
-
     $forms = $stmt->fetchAll();
-
-    $statusBadge = [
-        'draft' => 'secondary',
-        'submitted' => 'primary',
-        'in_approval' => 'warning',
-        'approved' => 'success',
-        'rejected' => 'danger',
-        'cancelled' => 'dark',
-    ];
 
     $formLabel = [
         'advance_payment' => 'Advance Payment',
@@ -58,15 +46,55 @@
         'vehicle_request' => 'Vehicle Request',
     ];
 
-        ob_start();
+    ob_start();
 
+    // KPI counts
     $counts = ['draft' => 0, 'submitted' => 0, 'in_approval' => 0, 'approved' => 0, 'rejected' => 0];
     foreach ($forms as $f) if (isset($counts[$f['status']])) $counts[$f['status']]++;
+
+    // Form volume counts per type
+    $typeCounts = [];
+    foreach ($forms as $f) {
+        $typeCounts[$f['form_type']] = ($typeCounts[$f['form_type']] ?? 0) + 1;
+    }
+    $maxTypeCount = max(array_values($typeCounts) ?: [1]);
+
+    // Icon + color map
+    $iconMap = [
+        'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash'],
+        'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
+        'request_for_payment' => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        'work_permit' => ['bg' => '#fef3c7', 'color' => '#f59e0b', 'icon' => 'ti-clipboard-list'],
+        'leave_application' => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
+        'reimbursement' => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
+        'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
+        'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
+    ];
+
+    $badgeMap = [
+        'draft' => 'secondary',
+        'submitted' => 'primary',
+        'in_approval' => 'warning',
+        'approved' => 'success',
+        'rejected' => 'danger',
+        'cancelled' => 'dark',
+    ];
+
+    $quickForms = [
+        ['slug' => 'advance-payment', 'label' => 'Advance',   'desc' => 'Cash advance',    'color' => '#10b981', 'icon' => 'ti-cash'],
+        ['slug' => 'overtime', 'label' => 'Overtime',  'desc' => 'OT authorization','color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
+        ['slug' => 'leave', 'label' => 'Leave', 'desc' => 'File absence',    'color' => '#0ea5e9', 'icon' => 'ti-beach'],
+        ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#f59e0b', 'icon' => 'ti-car'],
+        ['slug' => 'request-payment', 'label' => 'Payment', 'desc' => 'Request payment', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        ['slug' => 'reimbursement', 'label' => 'Reimburse', 'desc' => 'Claim expenses',  'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
+    ];
 ?>
 
+<!-- ── Page heading ── -->
 <div class="page-heading">Welcome back, <?= htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]) ?> 👋</div>
 <div class="page-subheading"><?= date('l, F j, Y') ?> — here's your current activity.</div>
 
+<!-- ── KPI Cards ── -->
 <div class="kpi-grid">
     <div class="kpi-card blue">
         <div class="kpi-icon blue"><i class="ti ti-send"></i></div>
@@ -94,91 +122,94 @@
     </div>
 </div>
 
+<!-- ── Section row: Activity + Right column ── -->
 <div class="section-row">
+
+    <!-- Activity feed -->
     <div class="card-panel">
         <div class="card-panel-header">
             <span class="card-panel-title">Recent Activity</span>
+            <a href="/processing-system/public/forms/advance-payment" class="card-panel-link">View all →</a>
         </div>
         <?php if (empty($forms)): ?>
             <div class="empty-state">
-                <div class="empty-icon">📭</div>
-                No forms found.
+                <i class="ti ti-inbox" style="font-size:2.5rem;color:var(--border);display:block;margin-bottom:.5rem"></i>
+                No activity yet.
             </div>
         <?php else: ?>
-            <?php
-            $iconMap = [
-                'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash'],
-                'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-                'request_for_payment' => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
-                'work_permit' => ['bg' => '#fef3c7', 'color' => '#f59e0b', 'icon' => 'ti-clipboard-list'],
-                'leave_application' => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
-                'reimbursement' => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
-                'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
-                'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
-            ];
-            $badgeMap = [
-                'draft' => 'secondary',
-                'submitted' => 'primary',
-                'in_approval' => 'warning',
-                'approved' => 'success',
-                'rejected' => 'danger',
-                'cancelled' => 'dark',
-            ];
-            foreach (array_slice($forms, 0, 8) as $form):
-                $ic = $iconMap[$form['form_type']] ?? ['bg' => '#e2e8f0', 'color' => '#64748b', 'icon' => 'ti-file'];
+            <?php foreach (array_slice($forms, 0, 8) as $form):
+                $ic  = $iconMap[$form['form_type']] ?? ['bg' => '#e2e8f0', 'color' => '#64748b', 'icon' => 'ti-file'];
                 $ago = (new DateTime())->diff(new DateTime($form['created_at']));
                 $timeStr = $ago->days >= 1
                     ? date('M d', strtotime($form['created_at']))
                     : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
             ?>
-            <div class="activity-item">
+            <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="activity-item" style="text-decoration:none">
                 <div class="activity-icon" style="background:<?= $ic['bg'] ?>;color:<?= $ic['color'] ?>">
                     <i class="ti <?= $ic['icon'] ?>"></i>
                 </div>
-                <div>
+                <div style="flex:1;min-width:0">
                     <div class="activity-text"><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></div>
                     <div class="activity-sub"><?= htmlspecialchars($form['full_name']) ?></div>
                 </div>
                 <div class="activity-time">
-                    <div style="margin-bottom:4px"><?= $timeStr ?></div>
+                    <div style="margin-bottom:4px;text-align:right"><?= $timeStr ?></div>
                     <span class="badge badge-<?= $badgeMap[$form['status']] ?? 'secondary' ?>">
                         <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
                     </span>
                 </div>
-            </div>
+            </a>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
 
-    <div class="card-panel">
-        <div class="card-panel-header">
-            <span class="card-panel-title">New Request</span>
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+        <!-- Quick new request -->
+        <div class="card-panel">
+            <div class="card-panel-header">
+                <span class="card-panel-title">New Request</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr)">
+                <?php foreach ($quickForms as $i => $qf): ?>
+                <a href="/processing-system/public/forms/<?= $qf['slug'] ?>/create"
+                   class="quick-form-btn"
+                   style="border-right:<?= ($i % 2 === 0) ? '1px solid var(--border)' : 'none' ?>;
+                          border-bottom:<?= ($i < 4) ? '1px solid var(--border)' : 'none' ?>">
+                    <span class="qf-icon" style="color:<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
+                    <span class="qf-label"><?= $qf['label'] ?></span>
+                    <span class="qf-desc"><?= $qf['desc'] ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
         </div>
-        <?php
-        $quickForms = [
-            ['slug' => 'advance-payment', 'label' => 'Advance', 'desc' => 'Cash advance', 'color' => '#10b981', 'icon' => 'ti-cash'],
-            ['slug' => 'overtime', 'label' => 'Overtime', 'desc' => 'OT authorization','color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-            ['slug' => 'leave', 'label' => 'Leave', 'desc' => 'File absence', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
-            ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#f59e0b', 'icon' => 'ti-car'],
-            ['slug' => 'request-payment', 'label' => 'Payment', 'desc' => 'Request payment', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
-            ['slug' => 'reimbursement', 'label' => 'Reimburse', 'desc' => 'Claim expenses', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
-        ];
-        ?>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr)">
-            <?php foreach ($quickForms as $i => $qf): ?>
-            <a href="/processing-system/public/forms/<?= $qf['slug'] ?>/create"
-               style="display:flex;flex-direction:column;gap:4px;padding:14px 16px;
-                      border-right:<?= ($i % 2 === 0) ? '1px solid var(--border)' : 'none' ?>;
-                      border-bottom:<?= ($i < 4) ? '1px solid var(--border)' : 'none' ?>;
-                      text-decoration:none;transition:background .15s;"
-               onmouseover="this.style.background='var(--surface)'"
-               onmouseout="this.style.background='transparent'">
-                <span style="font-size:20px;color:<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
-                <span style="font-size:12.5px;font-weight:600;color:var(--text-main)"><?= $qf['label'] ?></span>
-                <span style="font-size:11px;color:var(--text-muted)"><?= $qf['desc'] ?></span>
-            </a>
-            <?php endforeach; ?>
+
+        <!-- Form volume -->
+        <div class="card-panel">
+            <div class="card-panel-header">
+                <span class="card-panel-title">Form Volume</span>
+                <span class="card-panel-link">This period</span>
+            </div>
+            <?php if (empty($typeCounts)): ?>
+                <div class="empty-state" style="padding:1.5rem">No data yet.</div>
+            <?php else:
+                $barColors = ['#0ea5e9','#10b981','#f59e0b','#8b5cf6','#f97316','#ec4899','#0284c7','#ca8a04'];
+                $i = 0;
+                arsort($typeCounts);
+                foreach ($typeCounts as $type => $count):
+                    $pct = round(($count / $maxTypeCount) * 100);
+            ?>
+            <div class="vol-row">
+                <span class="vol-label"><?= $formLabel[$type] ?? $type ?></span>
+                <div class="vol-bar">
+                    <div class="vol-fill" style="width:<?= $pct ?>%;background:<?= $barColors[$i % count($barColors)] ?>"></div>
+                </div>
+                <span class="vol-count"><?= $count ?></span>
+            </div>
+            <?php $i++; endforeach; endif; ?>
         </div>
+
     </div>
 </div>
 
