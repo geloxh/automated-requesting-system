@@ -145,6 +145,7 @@ class FormController {
     // ----------------------------------------------------------------
     // GET /forms/view/{id}
     // ----------------------------------------------------------------
+<<<<<<< HEAD
 public function show(int $id): void {
     $form = $this->findForm($id);
 
@@ -192,6 +193,38 @@ public function show(int $id): void {
         'nextAction'       // ← new: used by approve button in show.php
     ));
 }
+=======
+    public function show(int $id): void {
+        $form = $this->findForm($id);
+
+        $approvals = db()->prepare(
+            'SELECT a.*, e.full_name FROM approvals a
+            JOIN employees e ON e.id = a.approver_id
+            WHERE a.form_id = ? ORDER BY a.sequence'
+        );
+        $approvals->execute([$id]);
+        $approvalSteps = $approvals->fetchAll();
+
+        $canAct   = $this->canActOnForm($form, $approvalSteps);
+        $data     = json_decode($form['data'], true) ?? [];
+        $pipeline = self::PIPELINE;          // pass to view for timeline UI
+
+        $formLabel = [
+            'advance_payment'        => 'Advance Payment',
+            'overtime_authorization' => 'Overtime Authorization',
+            'request_for_payment'    => 'Request for Payment',
+            'work_permit'            => 'Work Permit',
+            'leave_application'      => 'Leave Application',
+            'reimbursement'          => 'Reimbursement',
+            'liquidation'            => 'Liquidation',
+            'vehicle_request'        => 'Vehicle Request',
+        ];
+        $pageTitle = ($formLabel[$form['form_type']] ?? $form['form_type']) . ' #' . $id;
+
+        $this->render('forms/show', compact('form', 'approvalSteps', 'canAct', 'data', 'pageTitle', 'pipeline'));
+    }
+
+>>>>>>> 46fea0869533eaf040877a533411278f8cb4f45b
     // ----------------------------------------------------------------
     // POST /forms/{id}/approve/{action}
     // Route passes $action from: submit | supervisor-review |
@@ -300,7 +333,11 @@ public function show(int $id): void {
 
         // ── form must not be finalised ──────────────────────────
         if (in_array($form['status'], ['completed', 'rejected'], true)) {
+<<<<<<< HEAD
             $_SESSION['error'] = 'This form is already finalized.';
+=======
+            $_SESSION['error'] = 'This form is already finalised.';
+>>>>>>> 46fea0869533eaf040877a533411278f8cb4f45b
             header("Location: /processing-system/public/forms/view/{$id}");
             exit;
         }
@@ -314,7 +351,11 @@ public function show(int $id): void {
             || $roleId === $step['role_id'];
 
         if (!$actorAllowed) {
+<<<<<<< HEAD
             $_SESSION['error'] = 'You are not authorized to perform this action.';
+=======
+            $_SESSION['error'] = 'You are not authorised to perform this action.';
+>>>>>>> 46fea0869533eaf040877a533411278f8cb4f45b
             header("Location: /processing-system/public/forms/view/{$id}");
             exit;
         }
@@ -518,6 +559,7 @@ public function show(int $id): void {
     // ----------------------------------------------------------------
     // Fetch form, enforce basic access control
     // ----------------------------------------------------------------
+<<<<<<< HEAD
 private function findForm(int $id): array {
     $stmt = db()->prepare(
         'SELECT f.id, f.form_type, f.status, f.data, f.submitted_by
@@ -571,6 +613,56 @@ private function findForm(int $id): array {
             echo '<h3>Unknown form type.</h3>';
             exit;
         }
+=======
+    private function findForm(int $id): array {
+        $stmt = db()->prepare('SELECT * FROM forms WHERE id = ?');
+        $stmt->execute([$id]);
+        $form = $stmt->fetch();
+
+        if (!$form) {
+            http_response_code(404);
+            echo '<h3>Form not found.</h3>';
+            exit;
+        }
+
+        // Regular employees (role 3) may only see their own forms
+        if ($_SESSION['role_id'] == 3 && $form['submitted_by'] != $_SESSION['user_id']) {
+            http_response_code(403);
+            echo '<h3>Access denied.</h3>';
+            exit;
+        }
+
+        return $form;
+    }
+
+    // ----------------------------------------------------------------
+    // Audit log helper (unchanged from original)
+    // ----------------------------------------------------------------
+    private function audit(string $action, string $entity, int $entityId, ?array $old, ?array $new): void {
+        db()->prepare(
+            'INSERT INTO audit_logs (performed_by, action, entity_type, entity_id, old_values, new_values, ip_address)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
+        )->execute([
+            $_SESSION['user_id'],
+            $action,
+            $entity,
+            $entityId,
+            $old ? json_encode($old) : null,
+            $new ? json_encode($new)  : null,
+            $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
+    }
+
+    // ----------------------------------------------------------------
+    // Slug → internal type name
+    // ----------------------------------------------------------------
+    private function resolveType(string $slug): string {
+        if (!isset($this->typeMap[$slug])) {
+            http_response_code(404);
+            echo '<h3>Unknown form type.</h3>';
+            exit;
+        }
+>>>>>>> 46fea0869533eaf040877a533411278f8cb4f45b
         return $this->typeMap[$slug];
     }
 

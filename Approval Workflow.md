@@ -49,10 +49,17 @@ config/
 	approval.php
 	return [
   		'levels' => [
+<<<<<<< HEAD
    		 1 => 'Immediate Head Review',
    		 2 => 'Department Checker',
     		3 => 'Checker Supervisor'
 			4 => 'Final Approval'
+=======
+   		 1 => 'Manager',
+   		 2 => 'Director',
+    		3 => 'CEO'
+  			]
+>>>>>>> 46fea0869533eaf040877a533411278f8cb4f45b
 		];
 
 public/(optional)

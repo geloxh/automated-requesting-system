@@ -1,5 +1,3 @@
-<h2><?= htmlspecialchars($pageTitle) ?></h2>
-<?php include __DIR__ . '/pipeline_stepper.php'; ?>
 <?php
     $formLabel = [
         'advance_payment' => 'Advance Payment',
