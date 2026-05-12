@@ -463,11 +463,11 @@ class FormController {
         foreach ($stagesNeedingApprover as $action => $step) {
             $approver = $this->resolveApproverByRole($pdo, $step['role_id'], $data);
 
-            if ($approver) {
-                $insert->execute([$formId, $approver, $step['sequence']]);
+            if (!$approver) {
+                throw new \RuntimeException("No active approver found for role ID {$step['role_id']}.");
             }
-            // If no approver found for a role you may log a warning or throw;
-            // for now we skip silently so the form can still be created.
+
+            $insert->execute([$formId, $approver, $step['sequence']]);
         }
     }
 

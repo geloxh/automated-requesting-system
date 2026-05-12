@@ -44,10 +44,11 @@
             }
 
             unset($_SESSION[$key]);
+            session_regenerate_id(true);
             $_SESSION['user_id']   = $employee['id'];
             $_SESSION['user_name'] = $employee['full_name'];
             $_SESSION['role_id']   = $employee['role_id'];
-            session_regenerate_id(true);
+            unset($_SESSION['csrf_token']); // Rotate CSRF token on successful login
 
             header('Location: /processing-system/public/dashboard');
             exit;
@@ -85,7 +86,7 @@
             };
 
             if (!$first || !$last || !$email || !$password || !$confirm) {
-                $fail('All fields are requried.');
+                $fail('All fields are required.');
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -176,6 +177,8 @@
 
         public function updatePassword(): void {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
+
+            \App\Helpers\Csrf::verify();
 
             $token = trim($_POST['token'] ?? '');
             $password = $_POST['password'] ?? '';

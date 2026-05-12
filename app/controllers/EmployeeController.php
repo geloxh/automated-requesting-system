@@ -132,9 +132,9 @@
                 exit;
             }
 
-            $stmt = db()->prepare('SELECT * FROM forms WHERE id = ?');
+            $stmt = db()->prepare('SELECT status FROM forms WHERE id = ?');
             $stmt->execute([$formId]);
-            $form = $stmt->fetch();
+            $form = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$form) {
                 $_SESSION['error'] = 'Form not found.';
@@ -227,6 +227,12 @@
             }
 
             if (!empty($_POST['new_password'])) {
+                if (strlen($_POST['new_password']) < 8) {
+                    $_SESSION['error'] = 'New password must be at least 8 characters.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
+
                 $emp = db()->prepare('SELECT password_hash FROM employees WHERE id = ?');
                 $emp->execute([$_SESSION['user_id']]);
                 $emp = $emp->fetch();

@@ -3,6 +3,10 @@
 
     class RoleMiddleware {
         public static function requireRole(int $roleId): void {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
             if (($_SESSION['role_id'] ?? 0) != $roleId) {
                 http_response_code(403);
                 echo '<h3>403 - Access Denied</h3>';
