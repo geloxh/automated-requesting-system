@@ -61,34 +61,12 @@
 
     <div>
         <div class="card">
-            <div class="card-header">Approval Chain</div>
-            <?php if (empty($approvalSteps)): ?>
-                <div class="card-body">
-                    <p class="muted no-margin">No approval steps assigned.</p>
-                </div>
-            <?php else: ?>
-                <ul class="step-list">
-                    <?php foreach ($approvalSteps as $step): ?>
-                    <li class="step-item">
-                        <div>
-                            <div class="step-name"><?= htmlspecialchars($step['full_name']) ?></div>
-                            <div class="step-meta">Step <?= $step['sequence'] ?></div>
-                            <?php if ($step['remarks']): ?>
-                                <div class="step-meta">"<?= htmlspecialchars($step['remarks']) ?>"</div>
-                            <?php endif; ?>
-                            <?php if ($step['approved_at']): ?>
-                                <div class="step-meta"><?= date('M d, Y h:i A', strtotime($step['approved_at'])) ?></div>
-                            <?php endif; ?>
-                        </div>
-                        <span class="badge badge-<?= $stepBadge[$step['status']] ?? 'secondary' ?>">
-                            <?= ucfirst($step['status']) ?>
-                        </span>
-                    </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+            <div class="card-header">Approval Trail</div>
+            <div class="card-body">
+                <?php require __DIR__ . '/approval_trail.php'; ?>
+            </div>
         </div>
-
+        
         <?php if ($canAct): ?>
         <div class="card card-action">
             <div class="card-header">Your Action</div>
