@@ -148,7 +148,7 @@
 
     // GET /approvals — pending approval inbox
     if ($uri === '/approvals') {
-        \App\Middleware\RoleMiddleware::requireRole(1, 2); // extend for roles 4,5,6 as needed
+        \App\Middleware\RoleMiddleware::requireRole(2); // extend for roles 4,5,6 as needed
         (new \App\Controllers\ApprovalController)->inbox();
         exit;
     }
