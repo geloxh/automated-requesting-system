@@ -73,7 +73,14 @@
             <div class="form-group"><label>Approved By</label><input type="text" name="approved_by"></div>
         </div>
     </div>
-
+    
+    <div class="form-card">
+        <?php
+        // Static preview — no real steps yet, show all as pending except level 1
+        $approvalSteps = [['level' => 1, 'status' => 'pending', 'approver_name' => null, 'remarks' => null, 'approved_at' => null]];
+        require __DIR__ . '/approval_trail.php';
+        ?>
+    </div>
     <button type="submit" class="btn btn-primary">Submit</button>
     <button type="draft" class="btn btn-light">Save as Draft</button>
 </form>
