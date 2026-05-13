@@ -263,6 +263,68 @@ class FormController {
         exit;
     }
 
+    // GET /my-submissions
+    public function mySubmissions(): void {
+        $userId = $_SESSION['user_id'];
+
+        $stmt = db()->prepare(
+            'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            WHERE f.submitted_by = ?
+            ORDER BY f.created_at DESC LIMIT 50'
+        );
+        $stmt->execute([$userId]);
+        $forms = $stmt->fetchAll();
+
+        $formLabel = [
+            'advance_payment' => 'Advance Payment',
+            'overtime_authorization' => 'Overtime Authorization',
+            'request_for_payment' => 'Request for Payment',
+            'work_permit' => 'Work Permit',
+            'leave_application' => 'Leave Application',
+            'reimbursement' => 'Reimbursement',
+            'liquidation' => 'Liquidation',
+            'vehicle_request' => 'Vehicle Request',
+        ];
+
+        $pageTitle = 'My Submissions';
+        define('BASE_LOADED', true);
+        ob_start();
+        require __DIR__ . '/../../views/forms/my_submissions.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../../views/layouts/base.php';
+    }
+
+    // GET /requests — admin: all forms
+    public function allRequests(): void {
+        $stmt = db()->prepare(
+            'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            WHERE f.status NOT IN ("draft","cancelled")
+            ORDER BY f.created_at DESC LIMIT 100'
+        );
+        $stmt->execute();
+        $forms = $stmt->fetchAll();
+
+        $formLabel = [
+            'advance_payment' => 'Advance Payment',
+            'overtime_authorization' => 'Overtime Authorization',
+            'request_for_payment' => 'Request for Payment',
+            'work_permit' => 'Work Permit',
+            'leave_application' => 'Leave Application',
+            'reimbursement' => 'Reimbursement',
+            'liquidation' => 'Liquidation',
+            'vehicle_request' => 'Vehicle Request',
+        ];
+
+        $pageTitle = 'All Requests';
+        define('BASE_LOADED', true);
+        ob_start();
+        require __DIR__ . '/../../views/forms/all_requests.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../../views/layouts/base.php';
+    }
+
     // ================================================================
     // PRIVATE
     // ================================================================

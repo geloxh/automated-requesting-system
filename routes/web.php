@@ -145,6 +145,26 @@
         exit;
     }
 
+    // GET /approvals — pending approval inbox
+    if ($uri === '/approvals') {
+        \App\Middleware\RoleMiddleware::requireRole(2); // extend for roles 4,5,6 as needed
+        (new \App\Controllers\ApprovalController)->inbox();
+        exit;
+    }
+
+    // GET /my-submissions — current user's own forms
+    if ($uri === '/my-submissions') {
+        (new FormController)->mySubmissions();
+        exit;
+    }
+
+    // GET /requests — all requests (admin only)
+    if ($uri === '/requests') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new FormController)->allRequests();
+        exit;
+    }
+
     // ---------------------------------------------------------------
     // 404
     // ---------------------------------------------------------------
