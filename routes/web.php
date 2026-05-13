@@ -1,6 +1,7 @@
 <?php
     require_once __DIR__ . '/../app/controllers/AuthController.php';
     require_once __DIR__ . '/../app/controllers/FormController.php';
+    require_once __DIR__ . '/../app/controllers/ApprovalController.php';
     require_once __DIR__ . '/../app/controllers/EmployeeController.php';
     require_once __DIR__ . '/../app/Helpers/EmployeeCode.php';
 
@@ -147,7 +148,7 @@
 
     // GET /approvals — pending approval inbox
     if ($uri === '/approvals') {
-        \App\Middleware\RoleMiddleware::requireRole(2); // extend for roles 4,5,6 as needed
+        \App\Middleware\RoleMiddleware::requireRole(1, 2); // extend for roles 4,5,6 as needed
         (new \App\Controllers\ApprovalController)->inbox();
         exit;
     }
