@@ -34,45 +34,45 @@ class FormController {
     private const PIPELINE = [
         'submit' => [
             'sequence' => 1,
-            'from'     => 'draft',
-            'to'       => 'submitted',
-            'role_id'  => 3,   // the employee who owns the form
-            'label'    => 'Submitted',
+            'from' => 'draft',
+            'to' => 'submitted',
+            'role_id' => 3,   // the employee who owns the form
+            'label' => 'Submitted',
         ],
         'supervisor-review' => [
             'sequence' => 2,
-            'from'     => 'submitted',
-            'to'       => 'supervisor_reviewed',
-            'role_id'  => 2,   // supervisor / manager
-            'label'    => 'Supervisor Reviewed',
+            'from' => 'submitted',
+            'to' => 'supervisor_reviewed',
+            'role_id' => 2,   // supervisor / manager
+            'label' => 'Supervisor Reviewed',
         ],
         'department-check' => [
             'sequence' => 3,
-            'from'     => 'supervisor_reviewed',
-            'to'       => 'department_checked',
-            'role_id'  => 4,   // department head
-            'label'    => 'Department Checked',
+            'from' => 'supervisor_reviewed',
+            'to' => 'department_checked',
+            'role_id' => 4,   // department head
+            'label' => 'Department Checked',
         ],
         'checker-supervisor' => [
             'sequence' => 4,
-            'from'     => 'department_checked',
-            'to'       => 'checker_approved',
-            'role_id'  => 5,   // checker
-            'label'    => 'Checker Supervisor Approved',
+            'from' => 'department_checked',
+            'to' => 'checker_approved',
+            'role_id' => 5,   // checker
+            'label' => 'Checker Supervisor Approved',
         ],
         'final-approval' => [
             'sequence' => 5,
-            'from'     => 'checker_approved',
-            'to'       => 'final_approved',
-            'role_id'  => 6,   // final approver
-            'label'    => 'Final Approval Granted',
+            'from' => 'checker_approved',
+            'to' => 'final_approved',
+            'role_id' => 6,   // final approver
+            'label' => 'Final Approval Granted',
         ],
         'complete' => [
             'sequence' => 6,
-            'from'     => 'final_approved',
-            'to'       => 'completed',
-            'role_id'  => 6,   // final approver completes the request
-            'label'    => 'Completed',
+            'from' => 'final_approved',
+            'to' => 'completed',
+            'role_id' => 6,   // final approver completes the request
+            'label' => 'Completed',
         ],
     ];
 
@@ -80,7 +80,7 @@ class FormController {
     // GET /forms/{slug}
     // ----------------------------------------------------------------
     public function index(string $slug): void {
-        $type   = $this->resolveType($slug);
+        $type = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
@@ -110,8 +110,8 @@ class FormController {
             $stmt->execute([$type, $userId]);
         }
 
-        $forms     = $stmt->fetchAll();
-        $formType  = $type;
+        $forms = $stmt->fetchAll();
+        $formType = $type;
         $pageTitle = ucwords(str_replace('_', ' ', $type));
 
         $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
@@ -129,10 +129,10 @@ class FormController {
             return;
         }
 
-        $fields    = $this->fields[$type];
-        $formType  = $type;
-        $noSuffix  = ['list', 'show', 'request_for_payment'];
-        $viewName  = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $fields = $this->fields[$type];
+        $formType = $type;
+        $noSuffix = ['list', 'show', 'request_for_payment'];
+        $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
         $pageTitle = ucwords(str_replace('_', ' ', $type));
 
         $departments = db()->query(
@@ -158,27 +158,27 @@ class FormController {
 
         // What action button to show next based on current status
         $statusToAction = [
-            'draft'               => 'submit',
-            'submitted'           => 'supervisor-review',
+            'draft' => 'submit',
+            'submitted' => 'supervisor-review',
             'supervisor_reviewed' => 'department-check',
-            'department_checked'  => 'checker-supervisor',
-            'checker_approved'    => 'final-approval',
-            'final_approved'      => 'complete',
+            'department_checked' => 'checker-supervisor',
+            'checker_approved' => 'final-approval',
+            'final_approved' => 'complete',
         ];
         $nextAction = $statusToAction[$form['status']] ?? null;
 
         $canAct = $this->canActOnForm($form, $approvalSteps);
-        $data   = json_decode($form['data'], true) ?? [];
+        $data = json_decode($form['data'], true) ?? [];
 
         $formLabel = [
-            'advance_payment'        => 'Advance Payment',
+            'advance_payment' => 'Advance Payment',
             'overtime_authorization' => 'Overtime Authorization',
-            'request_for_payment'    => 'Request for Payment',
-            'work_permit'            => 'Work Permit',
-            'leave_application'      => 'Leave Application',
-            'reimbursement'          => 'Reimbursement',
-            'liquidation'            => 'Liquidation',
-            'vehicle_request'        => 'Vehicle Request',
+            'request_for_payment' => 'Request for Payment',
+            'work_permit' => 'Work Permit',
+            'leave_application' => 'Leave Application',
+            'reimbursement' => 'Reimbursement',
+            'liquidation' => 'Liquidation',
+            'vehicle_request' => 'Vehicle Request',
         ];
         $pageTitle = ($formLabel[$form['form_type']] ?? $form['form_type']) . ' #' . $id;
 
@@ -207,10 +207,10 @@ class FormController {
     public function reject(int $id): void {
         \App\Helpers\Csrf::verify();
 
-        $form    = $this->findForm($id);
+        $form = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
-        $userId  = $_SESSION['user_id'];
-        $roleId  = $_SESSION['role_id'];
+        $userId = $_SESSION['user_id'];
+        $roleId = $_SESSION['role_id'];
 
         // Rejection is allowed by admin or any role that has a pending step
         $allowedRoles = [1, 2, 4, 5, 6];
@@ -273,10 +273,10 @@ class FormController {
     private function processApproval(int $id, string $action): void {
         \App\Helpers\Csrf::verify();
 
-        $form    = $this->findForm($id);
+        $form = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
-        $userId  = (int) $_SESSION['user_id'];
-        $roleId  = (int) $_SESSION['role_id'];
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
         $isAdmin = $roleId === 1;
 
         // ── Guard: valid pipeline action ──────────────────────────────
@@ -389,7 +389,7 @@ class FormController {
         \App\Helpers\Csrf::verify();
 
         $required = $this->fields[$type];
-        $data     = [];
+        $data = [];
 
         foreach ($required as $field) {
             $val = $_POST[$field] ?? '';

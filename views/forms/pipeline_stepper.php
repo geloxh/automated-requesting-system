@@ -1,21 +1,21 @@
 <?php
 
-$statusOrder = [
-    'draft'               => 'Draft',
-    'submitted'           => 'Submitted',
-    'supervisor_reviewed' => 'Supervisor',
-    'department_checked'  => 'Dept. Check',
-    'checker_approved'    => 'Checker',
-    'final_approved'      => 'Final Approval',
-    'completed'           => 'Approved',
-];
+  $statusOrder = [
+      'draft' => 'Draft',
+      'submitted' => 'Submitted',
+      'supervisor_reviewed' => 'Supervisor',
+      'department_checked' => 'Dept. Check',
+      'checker_approved' => 'Checker',
+      'final_approved' => 'Final Approval',
+      'completed' => 'Approved',
+  ];
 
-$isRejected   = $form['status'] === 'rejected';
-$form = 
-$statusKeys   = array_keys($statusOrder);
-$currentIndex = array_search($form['status'], $statusKeys, true);
-if ($currentIndex === false) $currentIndex = 0;
-$total        = count($statusOrder);
+  $isRejected = $form['status'] === 'rejected';
+  $form = 
+  $statusKeys = array_keys($statusOrder);
+  $currentIndex = array_search($form['status'], $statusKeys, true);
+  if ($currentIndex === false) $currentIndex = 0;
+  $total = count($statusOrder);
 ?>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%"
@@ -52,14 +52,14 @@ $total        = count($statusOrder);
         $rightColor = ($state === 'done') ? '#16a34a' : '#d1d5db';
 
         // Circle colours
-        $bg     = $state === 'done'   ? '#16a34a' : '#ffffff';
-        $border = $state === 'done'   ? '#16a34a'
+        $bg = $state === 'done' ? '#16a34a' : '#ffffff';
+        $border = $state === 'done' ? '#16a34a'
                 : ($state === 'active' ? '#2563eb' : '#d1d5db');
-        $color  = $state === 'done'   ? '#ffffff'
+        $color = $state === 'done' ? '#ffffff'
                 : ($state === 'active' ? '#2563eb' : '#9ca3af');
 
         // Label
-        $lColor  = $state === 'done'   ? '#15803d'
+        $lColor = $state === 'done' ? '#15803d'
                  : ($state === 'active' ? '#1d4ed8' : '#6b7280');
         $lWeight = $state === 'active' ? 'bold' : 'normal';
     ?>
@@ -126,23 +126,23 @@ $total        = count($statusOrder);
 <?php
 
 $statusOrder = [
-    'draft'               => 'Draft',
-    'submitted'           => 'Submitted',
+    'draft' => 'Draft',
+    'submitted' => 'Submitted',
     'supervisor_reviewed' => 'Supervisor',
-    'department_checked'  => 'Dept. Check',
-    'checker_approved'    => 'Checker',
-    'final_approved'      => 'Final Approval',
-    'completed'           => 'Approved',
+    'department_checked' => 'Dept. Check',
+    'checker_approved' => 'Checker',
+    'final_approved' => 'Final Approval',
+    'completed' => 'Approved',
 ];
 
-$isRejected   = $form['status'] === 'rejected';
+$isRejected = $form['status'] === 'rejected';
 $form = 
-$statusKeys   = array_keys($statusOrder);
-$formStatus   = $form['status'] ?? $form['form_status'] ?? 'draft';
-$isRejected   = $formStatus === 'rejected';
+$statusKeys = array_keys($statusOrder);
+$formStatus = $form['status'] ?? $form['form_status'] ?? 'draft';
+$isRejected = $formStatus === 'rejected';
 $currentIndex = array_search($formStatus, $statusKeys, true);
 if ($currentIndex === false) $currentIndex = 0;
-$total        = count($statusOrder);
+$total = count($statusOrder);
 ?>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%"
@@ -179,14 +179,14 @@ $total        = count($statusOrder);
         $rightColor = ($state === 'done') ? '#16a34a' : '#d1d5db';
 
         // Circle colours
-        $bg     = $state === 'done'   ? '#16a34a' : '#ffffff';
-        $border = $state === 'done'   ? '#16a34a'
+        $bg     = $state === 'done' ? '#16a34a' : '#ffffff';
+        $border = $state === 'done' ? '#16a34a'
                 : ($state === 'active' ? '#2563eb' : '#d1d5db');
-        $color  = $state === 'done'   ? '#ffffff'
+        $color  = $state === 'done' ? '#ffffff'
                 : ($state === 'active' ? '#2563eb' : '#9ca3af');
 
         // Label
-        $lColor  = $state === 'done'   ? '#15803d'
+        $lColor  = $state === 'done' ? '#15803d'
                  : ($state === 'active' ? '#1d4ed8' : '#6b7280');
         $lWeight = $state === 'active' ? 'bold' : 'normal';
     ?>

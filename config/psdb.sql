@@ -15,12 +15,12 @@ CREATE TABLE roles (
 );
 
 INSERT INTO roles (name, description) VALUES
-('SysAdmin',       'Full system access'),
-('Approver',       'Can approve/reject forms'),
-('Staff',          'Can submit forms only'),
+('SysAdmin', 'Full system access'),
+('Approver', 'Can approve/reject forms'),
+('Staff', 'Can submit forms only'),
 ('DepartmentHead', 'Department-level approval'),
-('Checker',        'Checker / verifier approval'),
-('FinalApprover',  'Final sign-off authority');
+('Checker', 'Checker / verifier approval'),
+('FinalApprover', 'Final sign-off authority');
 
 -- ============================================================
 -- EMPLOYEES
@@ -44,12 +44,12 @@ CREATE INDEX idx_employees_email ON employees(email);
 CREATE INDEX idx_employees_role  ON employees(role_id);
 
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
-('EMP-0001', 'System Admin', 'it@3ehitech.com',       '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT'),
-('EMP-0002', 'Approver',     'approver@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 2, 'Management'),
-('EMP-0003', 'Staff',        'staff@3ehitech.com',    '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 3, 'Operations'),
-('EMP-0004', 'Dept Head',    'depthead@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 4, 'Management'),
-('EMP-0005', 'Checker',      'checker@3ehitech.com',  '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 5, 'Finance'),
-('EMP-0006', 'Final Approver','final@3ehitech.com',   '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 6, 'Executive');
+('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT'),
+('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 2, 'Management'),
+('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 3, 'Operations'),
+('EMP-0004', 'Dept Head', 'depthead@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 4, 'Management'),
+('EMP-0005', 'Checker', 'checker@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 5, 'Finance'),
+('EMP-0006', 'Final Approver','final@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 6, 'Executive');
 
 -- ============================================================
 -- FORMS
@@ -80,8 +80,8 @@ CREATE TABLE forms (
     FOREIGN KEY (submitted_by) REFERENCES employees(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_forms_type      ON forms(form_type);
-CREATE INDEX idx_forms_status    ON forms(status);
+CREATE INDEX idx_forms_type ON forms(form_type);
+CREATE INDEX idx_forms_status ON forms(status);
 CREATE INDEX idx_forms_submitted ON forms(submitted_by);
 
 -- ============================================================
@@ -103,9 +103,9 @@ CREATE TABLE approvals (
     CONSTRAINT uk_approval_form_seq UNIQUE (form_id, sequence)
 );
 
-CREATE INDEX idx_approvals_form     ON approvals(form_id);
+CREATE INDEX idx_approvals_form ON approvals(form_id);
 CREATE INDEX idx_approvals_approver ON approvals(approver_id);
-CREATE INDEX idx_approvals_status   ON approvals(status);
+CREATE INDEX idx_approvals_status ON approvals(status);
 
 -- ============================================================
 -- PASSWORD RESET TOKENS
@@ -120,7 +120,7 @@ CREATE TABLE password_reset_tokens (
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_prt_token    ON password_reset_tokens(token);
+CREATE INDEX idx_prt_token ON password_reset_tokens(token);
 CREATE INDEX idx_prt_employee ON password_reset_tokens(employee_id);
 
 -- ============================================================
@@ -141,7 +141,7 @@ CREATE TABLE audit_logs (
 );
 
 CREATE INDEX idx_audit_performed_by ON audit_logs(performed_by);
-CREATE INDEX idx_audit_entity       ON audit_logs(entity_type, entity_id);
+CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
 CREATE INDEX idx_audit_performed_at ON audit_logs(performed_at);
 
 -- ============================================================
