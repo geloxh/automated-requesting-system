@@ -23,8 +23,8 @@
         <div class="sidebar-brand">
             <div class="brand-icon"><i class="ti ti-bolt"></i></div>
             <div>
-                <div class="brand-name">ProFlow</div>
-                <div class="brand-tag">SME Processing</div>
+                <div class="brand-name">SysPro</div>
+                <div class="brand-tag">Automated Requesting System</div>
             </div>
         </div>
 
