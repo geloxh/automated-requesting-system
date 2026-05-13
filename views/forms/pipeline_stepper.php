@@ -11,7 +11,6 @@
   ];
 
   $isRejected = $form['status'] === 'rejected';
-  $form = 
   $statusKeys = array_keys($statusOrder);
   $currentIndex = array_search($form['status'], $statusKeys, true);
   if ($currentIndex === false) $currentIndex = 0;
