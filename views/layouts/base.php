@@ -74,13 +74,25 @@
             <!-- Approval — visible to roles 1,2,4,5,6 -->
             <?php if ($_SESSION['role_id'] != 3):
                 $pendingCount = (function() {
-                    $stmt = db()->prepare(
-                        'SELECT COUNT(*) FROM approvals a
-                        JOIN forms f ON f.id = a.form_id
-                        WHERE a.approver_id = ? AND a.status = "pending"
-                        AND f.status NOT IN ("draft","cancelled","completed","rejected")'
-                    );
-                    $stmt->execute([$_SESSION['user_id']]);
+                    if ($_SESSION['role_id'] == 1) {
+                        // Admin sees all pending approvals across the system
+                        $stmt = db()->prepare(
+                            'SELECT COUNT(*) FROM approvals a
+                            JOIN forms f ON f.id = a.form_id
+                            WHERE a.status = "pending"
+                            AND f.status NOT IN ("draft","cancelled","completed","rejected")'
+                        );
+                        $stmt->execute();
+                    } else {
+                        // Other approver roles see only their assigned steps
+                        $stmt = db()->prepare(
+                            'SELECT COUNT(*) FROM approvals a
+                            JOIN forms f ON f.id = a.form_id
+                            WHERE a.approver_id = ? AND a.status = "pending"
+                            AND f.status NOT IN ("draft","cancelled","completed","rejected")'
+                        );
+                        $stmt->execute([$_SESSION['user_id']]);
+                    }
                     return (int) $stmt->fetchColumn();
                 })();
             ?>
