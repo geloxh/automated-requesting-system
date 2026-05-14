@@ -539,7 +539,14 @@ class FormController {
      */
     private function resolveApproverByRole(\PDO $pdo, int $roleId, array $data): ?int {
         $stmt = $pdo->prepare(
-            'SELECT id FROM employees WHERE role_id = ? AND is_active = 1 ORDER BY id LIMIT 1'
+            'SELECT e.id, COUNT(a.id) AS workload
+            FROM employees e
+            LEFT JOIN approvals a
+            ON a.approver_id = e.id AND a.status = \'pending\'
+            WHERE e.role_id = ? AND e.is_active = 1
+            GROUP BY e.id
+            ORDER BY workload ASC, e.id ASC
+            LIMIT 1'
         );
         $stmt->execute([$roleId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);

@@ -165,10 +165,23 @@
                     $newStatus = 'rejected';
                 } else {
                     $pending = $pdo->prepare(
-                        'SELECT COUNT(*) FROM approvals WHERE form_id = ? AND status = \'pending\''
+                        'SELECT sequence FROM approvals WHERE id = ?'
                     );
-                    $pending->execute([$formId]);
-                    $newStatus = (int)$pending->fetchColumn() === 0 ? 'approved' : 'in_approval';
+                    $seqStmt->execute([$approval['id']]);
+                    $approvedSeq = (int)$seqStmt->fetchColumn();
+
+                    if ($approvedSeq >= 6) {
+                        $newStatus = 'completed';
+                    } elseif ($approvedSeq === 5) {
+                        $newStatus = 'final_approved';
+                    } else {
+                        $seqStatus = [
+                            2 => 'supervisor_reviewed',
+                            3 => 'department_checked',
+                            4 => 'checker_approved',
+                        ];
+                        $newStatus = $seqStatus[$approvedSeq] ?? 'submitted';
+                    }
                 }
 
                 $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')->execute([$newStatus, $formId]);
