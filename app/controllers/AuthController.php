@@ -26,7 +26,7 @@
                 exit;
             }
 
-            $email    = trim($_POST['email'] ?? '');
+            $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
 
             $stmt = db()->prepare(
@@ -192,13 +192,13 @@
 
             if ($password !== $confirm) {
                 $_SESSION['error'] = 'Passwords do not match.';
-                header("Location: /processing-system/public/reset-password?token={$token}");
+                header("Location: /processing-system/public/reset-password?token=" . urlencode($token));
                 exit;
             }
 
             if (strlen($password) < 8) {
                 $_SESSION['error'] = 'Password must be at least 8 characters.';
-                header("Location: /processing-system/public/reset-password?token={$token}");
+                header("Location: /processing-system/public/reset-password?token=" . urlencode($token));
                 exit;
             }
 
