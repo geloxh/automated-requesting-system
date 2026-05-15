@@ -133,7 +133,7 @@
         </div>
         <?php if (empty($forms)): ?>
             <div class="empty-state">
-                <i class="ti ti-inbox" style="font-size:2.5rem;color:var(--border);display:block;margin-bottom:.5rem"></i>
+                <i class="ti ti-inbox empty-state-icon"></i>
                 No activity yet.
             </div>
         <?php else: ?>
@@ -144,16 +144,16 @@
                     ? date('M d', strtotime($form['created_at']))
                     : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
             ?>
-            <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="activity-item" style="text-decoration:none">
-                <div class="activity-icon" style="background:<?= $ic['bg'] ?>;color:<?= $ic['color'] ?>">
+            <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="activity-item activity-link">
+                <div class="activity-icon activity-icon-dynamic" style="--icon-bg:<?= $ic['bg'] ?>;--icon-color:<?= $ic['color'] ?>">
                     <i class="ti <?= $ic['icon'] ?>"></i>
                 </div>
-                <div style="flex:1;min-width:0">
+                <div class="activity-text-wrap">
                     <div class="activity-text"><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></div>
                     <div class="activity-sub"><?= htmlspecialchars($form['full_name']) ?></div>
                 </div>
                 <div class="activity-time">
-                    <div style="margin-bottom:4px;text-align:right"><?= $timeStr ?></div>
+                    <div class="activity-time"><?= $timeStr ?></div>
                     <span class="badge badge-<?= $badgeMap[$form['status']] ?? 'secondary' ?>">
                         <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
                     </span>
@@ -164,20 +164,18 @@
     </div>
 
     <!-- Right column -->
-    <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="dashboard-cols">
 
         <!-- Quick new request -->
         <div class="card-panel">
             <div class="card-panel-header">
                 <span class="card-panel-title">New Request</span>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(2,1fr)">
+            <div class="quick-form-grid">
                 <?php foreach ($quickForms as $i => $qf): ?>
                 <a href="/processing-system/public/forms/<?= $qf['slug'] ?>/create"
-                   class="quick-form-btn"
-                   style="border-right:<?= ($i % 2 === 0) ? '1px solid var(--border)' : 'none' ?>;
-                          border-bottom:<?= ($i < 4) ? '1px solid var(--border)' : 'none' ?>">
-                    <span class="qf-icon" style="color:<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
+                   class="quick-form-btn <?= ($i % 2 === 0) ? 'border-right' : '' ?> <?= ($i < 4) ? 'border-bottom' : '' ?>">
+                    <span class="qf-icon" style="--qf-color:<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
                     <span class="qf-label"><?= $qf['label'] ?></span>
                     <span class="qf-desc"><?= $qf['desc'] ?></span>
                 </a>
@@ -192,7 +190,7 @@
                 <span class="card-panel-link">This period</span>
             </div>
             <?php if (empty($typeCounts)): ?>
-                <div class="empty-state" style="padding:1.5rem">No data yet.</div>
+                <div class="empty-state empty-state-padded">No data yet.</div>
             <?php else:
                 $barColors = ['#0ea5e9','#10b981','#f59e0b','#8b5cf6','#f97316','#ec4899','#0284c7','#ca8a04'];
                 $i = 0;
@@ -203,7 +201,7 @@
             <div class="vol-row">
                 <span class="vol-label"><?= $formLabel[$type] ?? $type ?></span>
                 <div class="vol-bar">
-                    <div class="vol-fill" style="width:<?= $pct ?>%;background:<?= $barColors[$i % count($barColors)] ?>"></div>
+                    <div class="vol-fill" data-color="<?= $i % count($barColors) ?>" style="width:<?= $pct ?>%"></div>
                 </div>
                 <span class="vol-count"><?= $count ?></span>
             </div>

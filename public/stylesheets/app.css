@@ -437,3 +437,90 @@ textarea { resize: vertical; }
 .vol-bar { flex: 2; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
 .vol-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
 .vol-count { font-size: 13px; font-weight: 600; color: var(--text-main); min-width: 24px; text-align: right; }
+/* ── Google Fonts + Tabler Icons (moved from base.php <link> tags) ── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css');
+
+/* ── Replaces: style="display:none" on #sidebarToggle ── */
+#sidebarToggle {
+    display: none;
+}
+
+/* ── Replaces: style="background:var(--warning)" on .notif-dot-sm.notif-dot-warning ── */
+.notif-dot-sm.notif-dot-warning {
+    background: var(--warning);
+}
+
+/* ── Replaces: inline style on empty-state icon in show.php / inbox.php ── */
+.empty-state-icon {
+    font-size: 2.5rem;
+    color: var(--border);
+    display: block;
+    margin-bottom: .5rem;
+}
+
+/* ── Replaces: inline style="text-decoration:none" on activity links ── */
+.activity-link {
+    text-decoration: none;
+}
+
+/* ── Replaces: inline style on activity-icon with dynamic bg/color ── */
+/* Dynamic colors are set via CSS custom properties on the element */
+.activity-icon-dynamic {
+    background: var(--icon-bg, var(--surface));
+    color: var(--icon-color, var(--text-main));
+}
+
+/* ── Replaces: inline style="flex:1;min-width:0" on activity text wrapper ── */
+.activity-text-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Replaces: inline style="margin-bottom:4px;text-align:right" on activity time ── */
+.activity-time {
+    margin-bottom: 4px;
+    text-align: right;
+}
+
+/* ── Replaces: inline style on dashboard column wrappers ── */
+.dashboard-cols {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.quick-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* ── Replaces: inline border-right on quick form buttons ── */
+.quick-form-btn.border-right {
+    border-right: 1px solid var(--border);
+}
+
+/* ── Replaces: inline style="padding:1.5rem" on empty-state inside card ── */
+.empty-state-padded {
+    padding: 1.5rem;
+}
+
+/* ── Vol fill colors — replaces inline style="background: <hex>" ── */
+.vol-fill[data-color="0"] { background: #6366f1; }
+.vol-fill[data-color="1"] { background: #10b981; }
+.vol-fill[data-color="2"] { background: #f59e0b; }
+.vol-fill[data-color="3"] { background: #ec4899; }
+.vol-fill[data-color="4"] { background: #0ea5e9; }
+.vol-fill[data-color="5"] { background: #f97316; }
+.vol-fill[data-color="6"] { background: #8b5cf6; }
+.vol-fill[data-color="7"] { background: #ca8a04; }
+
+/* ── Replaces: inline border-bottom on quick form buttons ── */
+.quick-form-btn.border-bottom {
+    border-bottom: 1px solid var(--border);
+}
+
+/* ── Replaces: inline style="color:<?= $qf['color'] ?>" on .qf-icon ── */
+.qf-icon {
+    color: var(--qf-color, var(--text-main));
+}

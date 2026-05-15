@@ -11,8 +11,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($pageTitle ?? 'Processing System') ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/processing-system/public/stylesheets/app.css">
 </head>
 <body>
@@ -141,7 +139,7 @@
     <div class="notif-panel" id="notifPanel">
         <div class="notif-panel-header">
             <span class="notif-panel-title">Notifications</span>
-            <span class="notif-mark-read" onclick="clearNotifDot()">Mark all read</span>
+            <span class="notif-mark-read">Mark all read</span>
         </div>
         <div class="notif-item">
             <div class="notif-dot-sm"></div>
@@ -158,7 +156,7 @@
             </div>
         </div>
         <div class="notif-item">
-            <div class="notif-dot-sm" style="background:var(--warning)"></div>
+            <div class="notif-dot-sm notif-dot-warning"></div>
             <div>
                 <div class="notif-text"><strong>Reimbursement</strong> was returned for revision</div>
                 <div class="notif-ago">Yesterday</div>
@@ -171,7 +169,7 @@
 
         <div id="topbar">
             <!-- Mobile hamburger -->
-            <button class="icon-btn" id="sidebarToggle" style="display:none">
+            <button class="icon-btn" id="sidebarToggle">
                 <i class="ti ti-menu-2"></i>
             </button>
 
@@ -188,7 +186,7 @@
                 </div>
 
                 <!-- Notification bell -->
-                <button class="icon-btn" id="notifBtn" onclick="toggleNotif()" title="Notifications">
+                <button class="icon-btn" id="notifBtn" title="Notifications">
                     <i class="ti ti-bell"></i>
                     <span class="notif-dot" id="notifDot"></span>
                 </button>
@@ -214,37 +212,6 @@
 </div>
 
 <script src="/processing-system/public/scripts/form_table.js"></script>
-<script>
-    // Notification toggle
-    function toggleNotif() {
-        document.getElementById('notifPanel').classList.toggle('open');
-    }
-    function clearNotifDot() {
-        document.getElementById('notifDot').style.display = 'none';
-        document.querySelectorAll('.notif-dot-sm').forEach(d => d.style.background = '#cbd5e1');
-    }
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) {
-            document.getElementById('notifPanel').classList.remove('open');
-        }
-    });
-
-    // Mobile sidebar toggle
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar       = document.getElementById('sidebar');
-    sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#sidebar') && !e.target.closest('#sidebarToggle')) {
-            sidebar.classList.remove('open');
-        }
-    });
-
-    // Show hamburger only on mobile
-    function checkMobile() {
-        sidebarToggle.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
-    }
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-</script>
+<script src="/processing-system/public/scripts/app.js"></script>
 </body>
 </html>
