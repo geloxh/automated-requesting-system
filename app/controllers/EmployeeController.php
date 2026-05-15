@@ -89,17 +89,67 @@
                 exit;
             }
 
-            $stmt = db()->prepare('SELECT id FROM employees WHERE id = ?');
+            $pdo = db();
+            $stmt = $pdo->prepare('SELECT id, role_id FROM employees WHERE id = ?');
             $stmt->execute([$id]);
-            if (!$stmt->fetch()) {
+            $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$employee) {
                 $_SESSION['error'] = 'Employee not found.';
                 header('Location: /processing-system/public/employees');
                 exit;
             }
 
-            db()->prepare('DELETE FROM employees WHERE id = ?')->execute([$id]);
+            $pdo->beginTransaction();
+            try {
+                // Soft-delete: deactivate instead of hard delete so audit logs & FKs remain intact
+                $pdo->prepare('UPDATE employees SET is_active = 0 WHERE id = ?')->execute([$id]);
 
-            $_SESSION['success'] = 'Employee deleted.';
+                // Reassign any pending approval steps to the next least-loaded
+                // active colleague in the same role
+                $pendingApprovals = $pdo->prepare(
+                    'SELECT id FROM approvals WHERE approver_id = ? AND status = \'pending\''
+                );
+                $pendingApprovals->execute([$id]);
+                $rows = $pendingApprovals->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($rows)) {
+                    // Find replacement: least-loaded active employee in same role (excluding deleted)
+                    $replacement = $pdo->prepare(
+                        'SELECT e.id, COUNT(a.id) AS workload
+                         FROM employees e
+                         LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = \'pending\'
+                         WHERE e.role_id = ? AND e.is_active = 1 AND e.id != ?
+                         GROUP BY e.id
+                         ORDER BY workload ASC, e.id ASC
+                         LIMIT 1'
+                    );
+                    $replacement->execute([$employee['role_id'], $id]);
+                    $replacementEmployee = $replacement->fetch(PDO::FETCH_ASSOC);
+
+                    if ($replacementEmployee) {
+                        $reassign = $pdo->prepare(
+                            'UPDATE approvals SET approver_id = ? WHERE approver_id = ? AND status = \'pending\''
+                        );
+                        $reassign->execute([$replacementEmployee['id'], $id]);
+                        $_SESSION['success'] = sprintf(
+                            'Employee deactivated. %d pending approval(s) reassigned.',
+                            count($rows)
+                        );
+                    } else {
+                        // No replacement available — flag them so admins can see
+                        $_SESSION['success'] = 'Employee deactivated. Warning: no replacement approver found for their ' . count($rows) . ' pending step(s). Please reassign manually.';
+                    }
+                } else {
+                    $_SESSION['success'] = 'Employee deactivated.';
+                }
+
+                $pdo->commit();
+            } catch (\Throwable $e) {
+                $pdo->rollBack();
+                $_SESSION['error'] = 'Failed to deactivate employee.';
+            }
+
             header('Location: /processing-system/public/employees');
             exit;
         }
@@ -163,25 +213,24 @@
 
                 if ($action === 'rejected') {
                     $newStatus = 'rejected';
-                } else {
-                    $pending = $pdo->prepare(
-                        'SELECT sequence FROM approvals WHERE id = ?'
-                    );
-                    $seqStmt->execute([$approval['id']]);
-                    $approvedSeq = (int)$seqStmt->fetchColumn();
 
-                    if ($approvedSeq >= 6) {
-                        $newStatus = 'completed';
-                    } elseif ($approvedSeq === 5) {
-                        $newStatus = 'final_approved';
-                    } else {
-                        $seqStatus = [
-                            2 => 'supervisor_reviewed',
-                            3 => 'department_checked',
-                            4 => 'checker_approved',
-                        ];
-                        $newStatus = $seqStatus[$approvedSeq] ?? 'submitted';
-                    }
+                    // Mark ALL remaining pending steps as rejected too
+                    $pdo->prepare(
+                        "UPDATE approvals SET status = 'rejected', remarks = ?, approved_at = NOW()
+                         WHERE form_id = ? AND status = 'pending' AND id != ?"
+                    )->execute([$remarks, $formId, $approval['id']]);
+
+                } else {
+                    // Derive correct pipeline status from the sequence just approved
+                    $seqToStatus = [
+                        2 => 'supervisor_reviewed',
+                        3 => 'department_checked',
+                        4 => 'checker_approved',
+                        5 => 'final_approved',
+                        6 => 'completed',
+                    ];
+                    $seq = (int) ($approval['sequence'] ?? 0);
+                    $newStatus = $seqToStatus[$seq] ?? 'submitted';
                 }
 
                 $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')->execute([$newStatus, $formId]);
