@@ -23,7 +23,7 @@ class FormController {
     ];
 
     /**
-     ** === Role map (align with the employees table) ===
+     *     * Role map (align with the employees table):
      *   1 = Admin
      *   2 = Approver / Manager
      *   3 = Regular Employee
@@ -96,15 +96,14 @@ class FormController {
             $stmt = db()->prepare(
                 'SELECT DISTINCT f.id, f.status, f.created_at, e.full_name
                 FROM forms f JOIN employees e ON e.id = f.submitted_by
-                JOIN approvals a ON a.form_id = f.id
-                WHERE f.form_type = ? 
-                    AND (
-                        f.submitted_by = ?
-                        OR EXISTS (
-                            SELECT 1 FROM approvals a
-                            WHERE a.form_id = f.id AND a.approver_id = ?
-                        )
+                WHERE f.form_type = ?
+                  AND (
+                    f.submitted_by = ?
+                    OR EXISTS (
+                        SELECT 1 FROM approvals a
+                        WHERE a.form_id = f.id AND a.approver_id = ?
                     )
+                  )
                 ORDER BY f.created_at DESC LIMIT 50'
             );
             $stmt->execute([$type, $userId, $userId]);
@@ -194,7 +193,7 @@ class FormController {
     // ----------------------------------------------------------------
     // POST /forms/{id}/approve/{action}
     // Route passes $action from: submit | supervisor-review |
-    // department-check | checker-supervisor | final-approval | complete
+    //   department-check | checker-supervisor | final-approval | complete
     // ----------------------------------------------------------------
     public function approve(int $id, string $action): void {
         $this->processApproval($id, $action);
@@ -211,7 +210,7 @@ class FormController {
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
-        // Rejection is allowed by admin or the approver who is specially
+        // Rejection is allowed by admin, or the approver who is specifically
         // assigned to the current pending step. Any other role is blocked.
         $allowedRoles = [1, 2, 4, 5, 6];
         if (!in_array($roleId, $allowedRoles, true)) {
@@ -309,13 +308,6 @@ class FormController {
         require __DIR__ . '/../../views/forms/my_submissions.php';
         $content = ob_get_clean();
         require __DIR__ . '/../../views/layouts/base.php';
-
-        $pageTitle = 'My Submissions';
-        define('BASE_LOADED', true);
-        ob_start();
-        require __DIR__ . '/../../views/forms/my_submissions.php';
-        $content = ob_get_clean();
-        require __DIR__ . '/../../views/layouts/base.php';
     }
 
     // GET /requests — admin: all forms
@@ -329,16 +321,7 @@ class FormController {
         $stmt->execute();
         $forms = $stmt->fetchAll();
 
-        $formLabel = [
-            'advance_payment' => 'Advance Payment',
-            'overtime_authorization' => 'Overtime Authorization',
-            'request_for_payment' => 'Request for Payment',
-            'work_permit' => 'Work Permit',
-            'leave_application' => 'Leave Application',
-            'reimbursement' => 'Reimbursement',
-            'liquidation' => 'Liquidation',
-            'vehicle_request' => 'Vehicle Request',
-        ];
+        $formLabel = \App\Helpers\FormLabels::all();
 
         $pageTitle = 'All Requests';
         define('BASE_LOADED', true);
@@ -427,6 +410,44 @@ class FormController {
             }
         }
 
+        // ── Handle optional file upload ─────────────────────────────
+        $uploadedFilePath = null;
+        if (!empty($_FILES['approval_file']['tmp_name'])) {
+            $file = $_FILES['approval_file'];
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            $maxBytes = 5 * 1024 * 1024; // 5 MB
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($file['tmp_name']);
+
+            if (!in_array($mimeType, $allowed, true)) {
+                $_SESSION['error'] = 'Only images and PDF files are allowed.';
+                header("Location: /processing-system/public/forms/view/{$id}");
+                exit;
+            }
+
+            if ($file['size'] > $maxBytes) {
+                $_SESSION['error'] = 'File must be under 5 MB.';
+                header("Location: /processing-system/public/forms/view/{$id}");
+                exit;
+            }
+
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $destDir = __DIR__ . '/../../storage/approvals/';
+            if (!is_dir($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
+            $fileName = sprintf('%d_%d_%s.%s', $id, time(), bin2hex(random_bytes(4)), $ext);
+            $destPath = $destDir . $fileName;
+
+            if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+                $_SESSION['error'] = 'File upload failed. Please try again.';
+                header("Location: /processing-system/public/forms/view/{$id}");
+                exit;
+            }
+            $uploadedFilePath = 'storage/approvals/' . $fileName;
+        }
+
         $pdo = db();
         $pdo->beginTransaction();
 
@@ -435,10 +456,11 @@ class FormController {
             if ($approval) {
                 $pdo->prepare(
                     "UPDATE approvals
-                     SET status = 'approved', remarks = ?, approved_at = NOW()
+                     SET status = 'approved', remarks = ?, file_path = ?, approved_at = NOW()
                      WHERE id = ?"
                 )->execute([
                     $remarks ?: ($isAdmin ? '(Admin override)' : $step['label']),
+                    $uploadedFilePath,
                     $approval['id'],
                 ]);
             }
@@ -557,19 +579,21 @@ class FormController {
     }
 
     /**
-     * Find the first active employee with the given role_id.
-     * Swap in department-filtering or a lookup table as needed.
+     * Pick the active employee in $roleId with the fewest pending approval
+     * assignments (least-loaded). Ties are broken by id ASC so the result
+     * is deterministic. This distributes new forms evenly across everyone
+     * in the same role instead of always assigning the lowest-id employee.
      */
     private function resolveApproverByRole(\PDO $pdo, int $roleId, array $data): ?int {
         $stmt = $pdo->prepare(
             'SELECT e.id, COUNT(a.id) AS workload
-            FROM employees e
-            LEFT JOIN approvals a
-            ON a.approver_id = e.id AND a.status = \'pending\'
-            WHERE e.role_id = ? AND e.is_active = 1
-            GROUP BY e.id
-            ORDER BY workload ASC, e.id ASC
-            LIMIT 1'
+             FROM employees e
+             LEFT JOIN approvals a
+               ON a.approver_id = e.id AND a.status = \'pending\'
+             WHERE e.role_id = ? AND e.is_active = 1
+             GROUP BY e.id
+             ORDER BY workload ASC, e.id ASC
+             LIMIT 1'
         );
         $stmt->execute([$roleId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
