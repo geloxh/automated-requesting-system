@@ -12,14 +12,14 @@ class FormController {
     ];
 
     private array $fields = [
-        'advance_payment' => ['purpose', 'payment_type', 'payee', 'date'],
+        'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
         'overtime_authorization' => ['employee_name', 'department', 'request_date'],
-        'request_for_payment' => ['payee', 'payment_type', 'purpose', 'date'],
-        'work_permit' => ['unit_owner', 'bearer_name', 'date', 'service_type'],
-        'leave_application' => ['leave_type', 'from_date', 'to_date', 'payment_term'],
-        'reimbursement' => ['employee_name', 'department', 'request_date'],
-        'liquidation' => ['employee_name', 'department', 'request_date'],
-        'vehicle_request' => ['car_available', 'employee_name', 'date', 'trip_type'],
+        'request_for_payment'    => ['payee', 'payment_type', 'purpose', 'date'],
+        'work_permit'            => ['unit_owner', 'bearer_name', 'date', 'service_type'],
+        'leave_application'      => ['leave_type', 'from_date', 'to_date', 'payment_term'],
+        'reimbursement'          => ['employee_name', 'department', 'request_date'],
+        'liquidation'            => ['employee_name', 'department', 'request_date'],
+        'vehicle_request'        => ['car_available', 'employee_name', 'date', 'trip_type'],
     ];
 
     /**
@@ -280,6 +280,9 @@ class FormController {
             $pdo->commit();
             $_SESSION['success'] = 'Form rejected successfully.';
 
+            // ── Notify submitter of rejection ──────────────────────────
+            $this->sendRejectionNotification($id, $remarks);
+
         } catch (\Throwable $e) {
             $pdo->rollBack();
             $_SESSION['error'] = 'Rejection failed. Please try again.';
@@ -413,11 +416,11 @@ class FormController {
         // ── Handle optional file upload ─────────────────────────────
         $uploadedFilePath = null;
         if (!empty($_FILES['approval_file']['tmp_name'])) {
-            $file = $_FILES['approval_file'];
-            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            $file     = $_FILES['approval_file'];
+            $allowed  = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
             $maxBytes = 5 * 1024 * 1024; // 5 MB
 
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $finfo    = new \finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if (!in_array($mimeType, $allowed, true)) {
@@ -432,8 +435,8 @@ class FormController {
                 exit;
             }
 
-            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $destDir = __DIR__ . '/../../storage/approvals/';
+            $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $destDir  = __DIR__ . '/../../storage/approvals/';
             if (!is_dir($destDir)) {
                 mkdir($destDir, 0755, true);
             }
@@ -479,6 +482,9 @@ class FormController {
 
             $pdo->commit();
             $_SESSION['success'] = $step['label'] . ' recorded successfully.';
+
+            // ── Email notifications (fire after commit so DB is consistent) ──
+            $this->sendPipelineNotifications($id, $action, $step, $remarks);
 
         } catch (\Throwable $e) {
             $pdo->rollBack();
@@ -644,19 +650,155 @@ class FormController {
         $form = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$form) {
-            http_response_code(404);
-            echo '<h3>Form not found.</h3>';
-            exit;
+            return $this->renderError(404, 'Not Found', 'The form you are looking for does not exist.');
         }
 
         // Regular employees (role 3) may only see their own forms
         if ($_SESSION['role_id'] == 3 && $form['submitted_by'] != $_SESSION['user_id']) {
-            http_response_code(403);
-            echo '<h3>Access denied.</h3>';
-            exit;
+            return $this->renderError(403, 'Access Denied', 'You do not have permission to view this form.');
         }
 
         return $form;
+    }
+
+    // ----------------------------------------------------------------
+    // Send pipeline emails after a successful approval step
+    // ----------------------------------------------------------------
+    private function sendPipelineNotifications(int $formId, string $action, array $step, string $remarks): void {
+        try {
+            $pdo = db();
+
+            // Fetch form + submitter details
+            $formRow = $pdo->prepare(
+                'SELECT f.form_type, f.status, e.full_name AS submitter_name, e.email AS submitter_email
+                 FROM forms f JOIN employees e ON e.id = f.submitted_by
+                 WHERE f.id = ?'
+            );
+            $formRow->execute([$formId]);
+            $form = $formRow->fetch(\PDO::FETCH_ASSOC);
+            if (!$form) return;
+
+            $formLabel   = \App\Helpers\FormLabels::get($form['form_type']);
+            $stageName   = $step['label'];
+            $newStatus   = $step['to'];
+
+            // 1. Notify submitter of every completed stage
+            $outcome = match($newStatus) {
+                'completed'     => 'completed',
+                'final_approved'=> 'final_approved',
+                'rejected'      => 'rejected',
+                default         => 'approved_step',
+            };
+            \App\Services\NotificationService::notifySubmitter(
+                $form['submitter_email'],
+                $form['submitter_name'],
+                $formLabel,
+                $formId,
+                $outcome,
+                $stageName,
+                $remarks
+            );
+
+            // 2. Notify the NEXT approver (if form is still in-progress)
+            if (!in_array($newStatus, ['completed', 'rejected'], true)) {
+                $nextApprovalRow = $pdo->prepare(
+                    'SELECT a.approver_id, e.email, e.full_name,
+                            a.sequence
+                     FROM approvals a
+                     JOIN employees e ON e.id = a.approver_id
+                     WHERE a.form_id = ? AND a.status = \'pending\'
+                     ORDER BY a.sequence ASC LIMIT 1'
+                );
+                $nextApprovalRow->execute([$formId]);
+                $nextApprover = $nextApprovalRow->fetch(\PDO::FETCH_ASSOC);
+
+                if ($nextApprover) {
+                    $nextStageLabels = [
+                        2 => 'Supervisor Review',
+                        3 => 'Department Check',
+                        4 => 'Checker Approval',
+                        5 => 'Final Approval',
+                        6 => 'Completion',
+                    ];
+                    $nextStageName = $nextStageLabels[(int)$nextApprover['sequence']] ?? 'Next Stage';
+                    \App\Services\NotificationService::notifyNextApprover(
+                        $formId,
+                        $nextApprover['email'],
+                        $nextApprover['full_name'],
+                        $formLabel,
+                        $form['submitter_name'],
+                        $nextStageName
+                    );
+                }
+            }
+        } catch (\Throwable $e) {
+            // Never let a mail error affect the user action
+            error_log('[FormController] Notification error: ' . $e->getMessage());
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // Notify submitter when their form is rejected
+    // ----------------------------------------------------------------
+    private function sendRejectionNotification(int $formId, string $remarks): void {
+        try {
+            $pdo = db();
+            $row = $pdo->prepare(
+                'SELECT f.form_type, f.status,
+                        e.full_name AS submitter_name, e.email AS submitter_email
+                 FROM forms f JOIN employees e ON e.id = f.submitted_by
+                 WHERE f.id = ?'
+            );
+            $row->execute([$formId]);
+            $form = $row->fetch(\PDO::FETCH_ASSOC);
+            if (!$form) return;
+
+            // Find which stage it was rejected at
+            $stageRow = $pdo->prepare(
+                'SELECT sequence FROM approvals
+                 WHERE form_id = ? AND status = \'rejected\'
+                 ORDER BY sequence DESC LIMIT 1'
+            );
+            $stageRow->execute([$formId]);
+            $stageData = $stageRow->fetch(\PDO::FETCH_ASSOC);
+            $stageLabels = [
+                2 => 'Supervisor Review',
+                3 => 'Department Check',
+                4 => 'Checker Approval',
+                5 => 'Final Approval',
+                6 => 'Completion',
+            ];
+            $stageName = $stageLabels[(int)($stageData['sequence'] ?? 0)] ?? 'Approval';
+
+            \App\Services\NotificationService::notifySubmitter(
+                $form['submitter_email'],
+                $form['submitter_name'],
+                \App\Helpers\FormLabels::get($form['form_type']),
+                $formId,
+                'rejected',
+                $stageName,
+                $remarks
+            );
+        } catch (\Throwable $e) {
+            error_log('[FormController] Rejection notification error: ' . $e->getMessage());
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // Render a styled error page through the base layout
+    // ----------------------------------------------------------------
+    private function renderError(int $code, string $title, string $message): never {
+        http_response_code($code);
+        $errorCode    = $code;
+        $errorTitle   = $title;
+        $errorMessage = $message;
+        $pageTitle    = "{$code} — {$title}";
+        define('BASE_LOADED', true);
+        ob_start();
+        require __DIR__ . '/../../views/errors/error.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../../views/layouts/base.php';
+        exit;
     }
 
     private function audit(string $action, string $entity, int $entityId, ?array $old, ?array $new): void {
@@ -679,9 +821,7 @@ class FormController {
     // ----------------------------------------------------------------
     private function resolveType(string $slug): string {
         if (!isset($this->typeMap[$slug])) {
-            http_response_code(404);
-            echo '<h3>Unknown form type.</h3>';
-            exit;
+            return $this->renderError(404, 'Not Found', 'Unknown form type.');
         }
         return $this->typeMap[$slug];
     }
@@ -704,18 +844,14 @@ class FormController {
         ];
 
         if (!in_array($view, $allowed, true)) {
-            http_response_code(404);
-            echo '<h3>View not found.</h3>';
-            exit;
+            return $this->renderError(404, 'Not Found', 'The requested view does not exist.');
         }
 
         $basePath = realpath(__DIR__ . '/../../views');
         $fullPath = realpath($basePath . '/' . $view . '.php');
 
         if ($fullPath === false || strpos($fullPath, $basePath) !== 0) {
-            http_response_code(403);
-            echo '<h3>Access denied.</h3>';
-            exit;
+            return $this->renderError(403, 'Access Denied', 'You do not have permission to perform this action.');
         }
 
         define('BASE_LOADED', true);

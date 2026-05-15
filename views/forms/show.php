@@ -47,8 +47,31 @@
         <div class="card-header">Form Details</div>
         <div class="card-body">
             <div class="dl-grid">
-                <?php foreach ($data ?? [] as $key => $value): ?>
-                    <span class="dl-label"><?= htmlspecialchars(str_replace('_', ' ', $key)) ?></span>
+            <?php
+        // Human-readable field labels — avoids "from date", "payee", etc.
+        $fieldLabels = [
+            'purpose' => 'Purpose',
+            'payment_type' => 'Payment Type',
+            'payee' => 'Payee',
+            'date' => 'Date',
+            'employee_name' => 'Employee Name',
+            'department' => 'Department',
+            'request_date' => 'Request Date',
+            'unit_owner' => 'Unit Owner',
+            'bearer_name' => 'Bearer Name',
+            'service_type' => 'Service Type',
+            'leave_type' => 'Leave Type',
+            'from_date' => 'From Date',
+            'to_date' => 'To Date',
+            'payment_term' => 'Payment Term',
+            'car_available' => 'Car Available',
+            'trip_type' => 'Trip Type',
+        ];
+        foreach ($data ?? [] as $key => $value):
+            if ($key === 'csrf_token') continue;
+            $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
+        ?>
+                    <span class="dl-label"><?= htmlspecialchars($label) ?></span>
                     <span class="dl-value">
                         <?php if (is_array($value)): ?>
                             <?= htmlspecialchars(implode(', ', $value)) ?>
