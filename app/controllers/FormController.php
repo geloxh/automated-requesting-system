@@ -12,18 +12,18 @@ class FormController {
     ];
 
     private array $fields = [
-        'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
+        'advance_payment' => ['purpose', 'payment_type', 'payee', 'date'],
         'overtime_authorization' => ['employee_name', 'department', 'request_date'],
-        'request_for_payment'    => ['payee', 'payment_type', 'purpose', 'date'],
-        'work_permit'            => ['unit_owner', 'bearer_name', 'date', 'service_type'],
-        'leave_application'      => ['leave_type', 'from_date', 'to_date', 'payment_term'],
-        'reimbursement'          => ['employee_name', 'department', 'request_date'],
-        'liquidation'            => ['employee_name', 'department', 'request_date'],
-        'vehicle_request'        => ['car_available', 'employee_name', 'date', 'trip_type'],
+        'request_for_payment' => ['payee', 'payment_type', 'purpose', 'date'],
+        'work_permit' => ['unit_owner', 'bearer_name', 'date', 'service_type'],
+        'leave_application' => ['leave_type', 'from_date', 'to_date', 'payment_term'],
+        'reimbursement' => ['employee_name', 'department', 'request_date'],
+        'liquidation' => ['employee_name', 'department', 'request_date'],
+        'vehicle_request' => ['car_available', 'employee_name', 'date', 'trip_type'],
     ];
 
     /**
-     *     * Role map (align with the employees table):
+     ** === Role map (align with the employees table) ===
      *   1 = Admin
      *   2 = Approver / Manager
      *   3 = Regular Employee
@@ -92,14 +92,22 @@ class FormController {
             );
             $stmt->execute([$type]);
         } elseif ($roleId == 2) {
+            // Role 2 sees: forms assigned to them for approval UNION forms they submitted
             $stmt = db()->prepare(
                 'SELECT DISTINCT f.id, f.status, f.created_at, e.full_name
                 FROM forms f JOIN employees e ON e.id = f.submitted_by
                 JOIN approvals a ON a.form_id = f.id
-                WHERE f.form_type = ? AND a.approver_id = ?
+                WHERE f.form_type = ? 
+                    AND (
+                        f.submitted_by = ?
+                        OR EXISTS (
+                            SELECT 1 FROM approvals a
+                            WHERE a.form_id = f.id AND a.approver_id = ?
+                        )
+                    )
                 ORDER BY f.created_at DESC LIMIT 50'
             );
-            $stmt->execute([$type, $userId]);
+            $stmt->execute([$type, $userId, $userId]);
         } else {
             $stmt = db()->prepare(
                 'SELECT f.id, f.status, f.created_at, e.full_name
@@ -170,17 +178,8 @@ class FormController {
         $canAct = $this->canActOnForm($form, $approvalSteps);
         $data = json_decode($form['data'], true) ?? [];
 
-        $formLabel = [
-            'advance_payment' => 'Advance Payment',
-            'overtime_authorization' => 'Overtime Authorization',
-            'request_for_payment' => 'Request for Payment',
-            'work_permit' => 'Work Permit',
-            'leave_application' => 'Leave Application',
-            'reimbursement' => 'Reimbursement',
-            'liquidation' => 'Liquidation',
-            'vehicle_request' => 'Vehicle Request',
-        ];
-        $pageTitle = ($formLabel[$form['form_type']] ?? $form['form_type']) . ' #' . $id;
+        $formLabel = \App\Helpers\FormLabels::all();
+        $pageTitle = \App\Helpers\FormLabels::get($form['form_type']) . ' #' . $id;
 
         $this->render('forms/show', compact(
             'form',
@@ -195,7 +194,7 @@ class FormController {
     // ----------------------------------------------------------------
     // POST /forms/{id}/approve/{action}
     // Route passes $action from: submit | supervisor-review |
-    //   department-check | checker-supervisor | final-approval | complete
+    // department-check | checker-supervisor | final-approval | complete
     // ----------------------------------------------------------------
     public function approve(int $id, string $action): void {
         $this->processApproval($id, $action);
@@ -212,12 +211,40 @@ class FormController {
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
-        // Rejection is allowed by admin or any role that has a pending step
+        // Rejection is allowed by admin or the approver who is specially
+        // assigned to the current pending step. Any other role is blocked.
         $allowedRoles = [1, 2, 4, 5, 6];
         if (!in_array($roleId, $allowedRoles, true)) {
             $_SESSION['error'] = 'You are not authorised to reject this form.';
             header("Location: /processing-system/public/forms/view/{$id}");
             exit;
+        }
+
+        // Non-admins must own the current pending step
+        if ($roleId !== 1) {
+            $pendingStep = db()->prepare(
+                'SELECT id FROM approvals WHERE form_id = ? AND status = \'pending\' ORDER BY sequence LIMIT 1'
+            );
+            $pendingStep->execute([$id]);
+            $step = $pendingStep->fetch(PDO::FETCH_ASSOC);
+
+            if (!$step) {
+                $_SESSION['error'] = 'No pending approval step found for this form.';
+                header("Location: /processing-system/public/forms/view/{$id}");
+                exit;
+            }
+
+            $assigned = db()->prepare(
+                'SELECT approver_id FROM approvals WHERE id = ?'
+            );
+            $assigned->execute([$step['id']]);
+            $assignedRow = $assigned->fetch(PDO::FETCH_ASSOC);
+
+            if (!$assignedRow || (int)$assignedRow['approver_id'] !== $userId) {
+                $_SESSION['error'] = 'You are not the assigned approver for the current stage.';
+                header("Location: /processing-system/public/forms/view/{$id}");
+                exit;
+            }
         }
 
         if (in_array($form['status'], ['completed', 'rejected'], true)) {
@@ -276,16 +303,12 @@ class FormController {
         $stmt->execute([$userId]);
         $forms = $stmt->fetchAll();
 
-        $formLabel = [
-            'advance_payment' => 'Advance Payment',
-            'overtime_authorization' => 'Overtime Authorization',
-            'request_for_payment' => 'Request for Payment',
-            'work_permit' => 'Work Permit',
-            'leave_application' => 'Leave Application',
-            'reimbursement' => 'Reimbursement',
-            'liquidation' => 'Liquidation',
-            'vehicle_request' => 'Vehicle Request',
-        ];
+        $formLabel = \App\Helpers\FormLabels::all();
+        define('BASE_LOADED', true);
+        ob_start();
+        require __DIR__ . '/../../views/forms/my_submissions.php';
+        $content = ob_get_clean();
+        require __DIR__ . '/../../views/layouts/base.php';
 
         $pageTitle = 'My Submissions';
         define('BASE_LOADED', true);

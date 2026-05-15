@@ -1,6 +1,6 @@
 /**
  * app.js
- * Global UI behaviour — extracted from base.php inline <script>.
+ * Global UI behaviour —
  * Loaded at the bottom of every page via base.php.
  */
 
