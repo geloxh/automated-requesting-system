@@ -1,19 +1,23 @@
 <?php
-    $formLabel = [
-        'advance_payment' => 'Advance Payment',
-        'overtime_authorization' => 'Overtime Authorization',
-        'request_for_payment' => 'Request for Payment',
-        'work_permit' => 'Work Permit',
-        'leave_application' => 'Leave Application',
-        'reimbursement' => 'Reimbursement',
-        'liquidation' => 'Liquidation',
-        'vehicle_request' => 'Vehicle Request',
+    $formLabel = \App\Helpers\FormLabels::all();
+
+    $statusBadge = [
+        'draft' => 'secondary',
+        'submitted' => 'primary',
+        'supervisor_reviewed' => 'info',
+        'department_checked' => 'info',
+        'checker_approved' => 'warning',
+        'final_approved' => 'success',
+        'completed' => 'success',
+        'rejected' => 'danger',
+        'cancelled' => 'dark',
+        // legacy / admin-path values kept for safety
+        'in_approval' => 'warning',
+        'approved' => 'success',
     ];
+    $stepBadge = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
 
-    $statusBadge = ['draft' => 'secondary', 'submitted' => 'primary', 'in_approval' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'dark'];
-    $stepBadge   = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
-
-    $type  = $form['form_type'] ?? $form['type'] ?? 'unknown';
+    $type = $form['form_type'] ?? $form['type'] ?? 'unknown';
     $title = $formLabel[$type] ?? ucwords(str_replace('_', ' ', $type));
     $roleId = $_SESSION['role_id'];
     $formId = $form['id'];
@@ -71,37 +75,50 @@
         <div class="card card-action">
             <div class="card-header">Your Action</div>
             <div class="card-body">
-                <form method="POST" id="approvalForm">
+                <?php
+                    // Map $nextAction to the human-readable step label for the button
+                    $actionLabels = [
+                        'submit' => 'Submit for Approval',
+                        'supervisor-review' => 'Approve — Supervisor Review',
+                        'department-check' => 'Approve — Department Check',
+                        'checker-supervisor' => 'Approve — Checker Supervisor',
+                        'final-approval' => 'Approve — Final Approval',
+                        'complete' => 'Mark as Completed',
+                    ];
+                    $approveLabel = $actionLabels[$nextAction] ?? 'Approve';
+                ?>
+                <form method="POST" id="approvalForm" enctype="multipart/form-data">
                     <?= \App\Helpers\Csrf::field(); ?>
                     <div class="form-group form-group--spaced">
                         <label>
-                            Approval
+                            Remarks
+                            <?php if ($nextAction !== 'submit'): ?>
+                                <span class="muted" id="remarks-hint">(required if rejecting)</span>
+                            <?php endif; ?>
                         </label>
+                        <textarea name="remarks" rows="2" id="remarksField"></textarea>
 
-                        <textarea name="text" rows="2" placeholder="(Attach your name and signature)"></textarea>
-
+                        <label>Attach File <span class="muted">(optional — image or PDF)</span></label>
                         <input type="file" name="approval_file" accept="image/*,.pdf">
-
-                        <label>
-                            Remarks <span class="muted">(optional)</span>
-                        </label>
-                        <textarea name="remarks" rows="2"></textarea>
                     </div>
 
                     <div class="action-btns">
+                        <?php if ($nextAction): ?>
                         <button type="submit"
                             name="action"
                             value="approve"
-                            formaction="/processing-system/public/forms/<?= $formId ?>/approve"
+                            formaction="/processing-system/public/forms/<?= $formId ?>/approve/<?= htmlspecialchars($nextAction) ?>"
                             class="btn btn-success btn-block">
-                            Approve
+                            <?= htmlspecialchars($approveLabel) ?>
                         </button>
+                        <?php endif; ?>
 
                         <button type="submit"
                             name="action"
                             value="reject"
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
-                            class="btn btn-danger btn-block">
+                            class="btn btn-danger btn-block"
+                            id="btn-reject">
                             Reject
                         </button>
                     </div>
