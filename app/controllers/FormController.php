@@ -12,14 +12,14 @@ class FormController {
     ];
 
     private array $fields = [
-        'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
+        'advance_payment' => ['purpose', 'payment_type', 'payee', 'date'],
         'overtime_authorization' => ['employee_name', 'department', 'request_date'],
-        'request_for_payment'    => ['payee', 'payment_type', 'purpose', 'date'],
-        'work_permit'            => ['unit_owner', 'bearer_name', 'date', 'service_type'],
-        'leave_application'      => ['leave_type', 'from_date', 'to_date', 'payment_term'],
-        'reimbursement'          => ['employee_name', 'department', 'request_date'],
-        'liquidation'            => ['employee_name', 'department', 'request_date'],
-        'vehicle_request'        => ['car_available', 'employee_name', 'date', 'trip_type'],
+        'request_for_payment' => ['payee', 'payment_type', 'purpose', 'date'],
+        'work_permit' => ['unit_owner', 'bearer_name', 'date', 'service_type'],
+        'leave_application' => ['leave_type', 'from_date', 'to_date', 'payment_term'],
+        'reimbursement' => ['employee_name', 'department', 'request_date'],
+        'liquidation' => ['employee_name', 'department', 'request_date'],
+        'vehicle_request' => ['car_available', 'employee_name', 'date', 'trip_type'],
     ];
 
     /**
@@ -642,7 +642,7 @@ class FormController {
     // ----------------------------------------------------------------
     private function findForm(int $id): array {
         $stmt = db()->prepare(
-            'SELECT id, form_type, status, data, submitted_by FROM forms WHERE id = ?'
+            'SELECT id, form_type, status, data, submitted_by, created_at, updated_at FROM forms WHERE id = ?'
         );
         $stmt->execute([$id]);
 
@@ -678,9 +678,9 @@ class FormController {
             $form = $formRow->fetch(\PDO::FETCH_ASSOC);
             if (!$form) return;
 
-            $formLabel   = \App\Helpers\FormLabels::get($form['form_type']);
-            $stageName   = $step['label'];
-            $newStatus   = $step['to'];
+            $formLabel  = \App\Helpers\FormLabels::get($form['form_type']);
+            $stageName  = $step['label'];
+            $newStatus  = $step['to'];
 
             // 1. Notify submitter of every completed stage
             $outcome = match($newStatus) {
@@ -821,7 +821,7 @@ class FormController {
     // ----------------------------------------------------------------
     private function resolveType(string $slug): string {
         if (!isset($this->typeMap[$slug])) {
-            $this->renderError(404, 'Not Found', 'Unknown form type.');
+            return $this->renderError(404, 'Not Found', 'Unknown form type.');
         }
         return $this->typeMap[$slug];
     }
