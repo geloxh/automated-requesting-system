@@ -821,7 +821,7 @@ class FormController {
     // ----------------------------------------------------------------
     private function resolveType(string $slug): string {
         if (!isset($this->typeMap[$slug])) {
-            return $this->renderError(404, 'Not Found', 'Unknown form type.');
+            $this->renderError(404, 'Not Found', 'Unknown form type.');
         }
         return $this->typeMap[$slug];
     }
@@ -844,14 +844,14 @@ class FormController {
         ];
 
         if (!in_array($view, $allowed, true)) {
-            return $this->renderError(404, 'Not Found', 'The requested view does not exist.');
+            $this->renderError(404, 'Not Found', 'The requested view does not exist.');
         }
 
         $basePath = realpath(__DIR__ . '/../../views');
         $fullPath = realpath($basePath . '/' . $view . '.php');
 
         if ($fullPath === false || strpos($fullPath, $basePath) !== 0) {
-            return $this->renderError(403, 'Access Denied', 'You do not have permission to perform this action.');
+            $this->renderError(403, 'Access Denied', 'You do not have permission to perform this action.');
         }
 
         define('BASE_LOADED', true);
