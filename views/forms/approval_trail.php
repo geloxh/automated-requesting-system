@@ -57,7 +57,18 @@ foreach ($stepsBySeq as $seq => $s) {
             : 'Rejected';
     } elseif ($status === 'pending') {
         $dotClass = ($seq === $activeSec) ? 'current' : 'pending';
-        $timeText = ($seq === $activeSec) ? 'Awaiting approval' : 'Pending';
+        if ($seq === $activeSec) {
+            // Show how long this step has been waiting
+            $since = $step['updated_at'] ?? step['created_at'] ?? null;
+            if ($since) {
+                $diff = (new DateTime())->diff(new DateTime($since));
+                $elapsed = $diff->days > 0
+                    ? 'Waiting ' . $diff->days . ' day' . ($diff->days > 1 ? 's' : '') : ($diff->h > 0 ? 'Waiting ' . $diff->h . 'h' : 'Just assigned');
+            } else {
+                $elapsed = 'Awaiting approval';
+            }
+            $timeText = 'Pending';
+        }
     } else {
         // No DB row yet for this sequence
         $dotClass = 'pending';
@@ -75,7 +86,14 @@ foreach ($stepsBySeq as $seq => $s) {
         <div class="step-info">
             <div class="step-name"><?= htmlspecialchars($name) ?></div>
             <div class="step-role"><?= htmlspecialchars($role) ?></div>
-            <div class="step-time"><?= htmlspecialchars($timeText) ?></div>
+            <?php if ($dotClass === 'current'): ?>
+                <div class="step-time" style="color:var(--warning); font-weight:600">
+                    <i class="ti ti-clock" style="font-size:11px"></i>    
+                    <?= htmlspecialchars($timeText) ?> — waiting on <?= htmlspecialchars($step['full_name'] ?? 'assignee') ?>
+                </div>
+            <?php else: ?>
+                <div class="step-time"><?= htmlspecialchars($timeText) ?></div>
+            <?php endif; ?>
             <?php if ($remarks): ?>
                 <div class="step-time" style="font-style:italic">"<?= htmlspecialchars($remarks) ?>"</div>
             <?php endif; ?>
