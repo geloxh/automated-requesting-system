@@ -524,3 +524,38 @@ textarea { resize: vertical; }
 .qf-icon {
     color: var(--qf-color, var(--text-main));
 }
+
+/* ── Table filter bar ──────────────────────────────────────────── */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+.filter-bar input[type="search"],
+.filter-bar select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--background);
+    color: var(--text-main);
+    min-width: 160px;
+}
+.filter-bar input[type="search"] {
+    flex: 1;
+    min-width: 200px;
+}
+.filter-bar .filter-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+.input-error {
+    border: 2px solid var(--danger) !important;
+    background: #fff5f5 !important;
+}
