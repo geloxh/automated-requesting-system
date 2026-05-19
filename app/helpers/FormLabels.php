@@ -103,4 +103,24 @@
         public static function all(): array {
             return self::LABELS;
         }
+
+        /**
+         * Resolve the human-readable pipeline stage.
+         * 
+         * @param string $status The raw form status
+         * @param int|null $currentStep The earliest pending sequence number
+         */
+        public static function currentStage(string $status, ?int $currentStep): string {
+            if ($status === 'draft') return 'Draft';
+            if ($status === 'rejected') return 'Rejected';
+            if ($status === 'completed') return 'Completed';
+            if ($status === 'cancelled') return 'Cancelled';
+
+            // Use the pending sequence label if available
+            if ($currentStep) {
+                return self::stepLabel((int)$currentStep);
+            }
+
+            return ucwords(str_replace('_', ' ', $status));
+        }
     }
