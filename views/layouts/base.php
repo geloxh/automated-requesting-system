@@ -69,8 +69,11 @@
                 <i class="ti ti-car"></i> Vehicle Request
             </a>
 
-            <!-- Approval — visible to roles 1,2,4,5,6 -->
-            <?php if ($_SESSION['role_id'] != 3):
+            <div class="sidebar-label">Approval</div>
+
+            <!-- Approval Inbox — restricted to roles 1,2,4,5,6 -->
+            <?php 
+            if ($_SESSION['role_id'] != 3):
                 $pendingCount = (function() {
                     if ($_SESSION['role_id'] == 1) {
                         // Admin sees all pending approvals across the system
@@ -94,7 +97,6 @@
                     return (int) $stmt->fetchColumn();
                 })();
             ?>
-            <div class="sidebar-label">Approval</div>
             <a href="/processing-system/public/approvals"
             class="<?= $uri === '/approvals' ? 'active' : '' ?>">
                 <i class="ti ti-inbox"></i> Approval Inbox
@@ -102,11 +104,12 @@
                     <span class="badge-count"><?= $pendingCount ?></span>
                 <?php endif; ?>
             </a>
+            <?php endif; ?>
+
             <a href="/processing-system/public/my-submissions"
             class="<?= $uri === '/my-submissions' ? 'active' : '' ?>">
                 <i class="ti ti-send"></i> My Submissions
             </a>
-            <?php endif; ?>
 
             <!-- Records -->
             <div class="sidebar-label">Records</div>
