@@ -35,22 +35,31 @@
 
     $forms = $stmt->fetchAll();
 
-    $formLabel = [
-        'advance_payment' => 'Advance Payment',
-        'overtime_authorization' => 'Overtime Authorization',
-        'request_for_payment' => 'Request for Payment',
-        'work_permit' => 'Work Permit',
-        'leave_application' => 'Leave Application',
-        'reimbursement' => 'Reimbursement',
-        'liquidation' => 'Liquidation',
-        'vehicle_request' => 'Vehicle Request',
-    ];
+    $formLabel = \App\Helpers\FormLabels::all();
 
     ob_start();
 
-    // KPI counts
-    $counts = ['draft' => 0, 'submitted' => 0, 'in_approval' => 0, 'approved' => 0, 'rejected' => 0];
-    foreach ($forms as $f) if (isset($counts[$f['status']])) $counts[$f['status']]++;
+    // Pipeline statuses that count as "In Approval" (any mid-pipeline stage)
+    $inApprovalStatuses = [
+        'submitted', 'supervisor_reviewed', 'department_checked', 'checker_approved'
+    ];
+    // Pipeline statuses that count as "Approved / Completed"
+    $approvedStatuses = ['final_approved', 'completed'];
+
+    // KPI counts — map all real pipeline statuses to the 4 dashboard buckets
+    $counts = ['draft' => 0, 'in_approval' => 0, 'approved' => 0, 'rejected' => 0];
+    foreach ($forms as $f) {
+        $s = $f['status'];
+        if ($s === 'draft') {
+            $counts['draft']++;
+        } elseif (in_array($s, $inApprovalStatuses, true)) {
+            $counts['in_approval']++;
+        } elseif (in_array($s, $approvedStatuses, true)) {
+            $counts['approved']++;
+        } elseif ($s === 'rejected') {
+            $counts['rejected']++;
+        }
+    }
 
     // Form volume counts per type
     $typeCounts = [];
@@ -74,8 +83,11 @@
     $badgeMap = [
         'draft' => 'secondary',
         'submitted' => 'primary',
-        'in_approval' => 'warning',
-        'approved' => 'success',
+        'supervisor_reviewed' => 'info',
+        'department_checked' => 'info',
+        'checker_approved' => 'warning',
+        'final_approved' => 'success',
+        'completed' => 'success',
         'rejected' => 'danger',
         'cancelled' => 'dark',
     ];
@@ -97,22 +109,22 @@
 <!-- ── KPI Cards ── -->
 <div class="kpi-grid">
     <div class="kpi-card blue">
-        <div class="kpi-icon blue"><i class="ti ti-send"></i></div>
-        <div class="kpi-label">Submitted</div>
-        <div class="kpi-value"><?= $counts['submitted'] ?></div>
-        <div class="kpi-delta">Awaiting review</div>
-    </div>
-    <div class="kpi-card amber">
-        <div class="kpi-icon amber"><i class="ti ti-hourglass"></i></div>
+        <div class="kpi-icon blue"><i class="ti ti-hourglass"></i></div>
         <div class="kpi-label">In Approval</div>
         <div class="kpi-value"><?= $counts['in_approval'] ?></div>
-        <div class="kpi-delta">Pending decisions</div>
+        <div class="kpi-delta">Submitted &amp; pending decisions</div>
     </div>
     <div class="kpi-card green">
         <div class="kpi-icon green"><i class="ti ti-circle-check"></i></div>
         <div class="kpi-label">Approved</div>
         <div class="kpi-value"><?= $counts['approved'] ?></div>
-        <div class="kpi-delta">Completed requests</div>
+        <div class="kpi-delta">Final approved &amp; completed</div>
+    </div>
+    <div class="kpi-card amber">
+        <div class="kpi-icon amber"><i class="ti ti-file-pencil"></i></div>
+        <div class="kpi-label">Drafts</div>
+        <div class="kpi-value"><?= $counts['draft'] ?></div>
+        <div class="kpi-delta">Not yet submitted</div>
     </div>
     <div class="kpi-card purple">
         <div class="kpi-icon purple"><i class="ti ti-circle-x"></i></div>
@@ -212,6 +224,6 @@
 </div>
 
 <?php
-$content   = ob_get_clean();
+$content = ob_get_clean();
 $pageTitle = 'Dashboard';
 require __DIR__ . '/base.php';
