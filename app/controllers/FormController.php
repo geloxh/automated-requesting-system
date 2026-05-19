@@ -297,10 +297,11 @@ class FormController {
         $userId = $_SESSION['user_id'];
 
         $stmt = db()->prepare(
-            'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name
+            "SELECT f.id, f.form_type, f.status, f.created_at, e.full_name,
+                    (SELECT MIN(sequence) FROM approvals WHERE form_id = f.id AND status = 'pending') AS current_step
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             WHERE f.submitted_by = ?
-            ORDER BY f.created_at DESC LIMIT 50'
+            ORDER BY f.created_at DESC LIMIT 50"
         );
         $stmt->execute([$userId]);
         $forms = $stmt->fetchAll();
