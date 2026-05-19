@@ -93,7 +93,7 @@
             $pageTitle = "{$code} — {$title}";
             define('BASE_LOADED', true);
             ob_start();
-            require __DIR__ . '/../../views/errors/error.php';
+            require __DIR__ . '/../../views/error/error.php';
             $content = ob_get_clean();
             require __DIR__ . '/../../views/layouts/base.php';
             exit;
