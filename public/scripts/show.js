@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 remarksField.reportValidity();
                 return;
             }
+            // If remarks are present, then ask for confirmation
             if (!confirm('Are you sure you want to reject this form? This cannot be undone.')) {
                 e.preventDefault();
             }
@@ -34,12 +35,13 @@ document.addEventListener('DOMContentLoaded', function () {
             remarksField.setCustomValidity('');
         });
 
-        // Update hint text on hover
-        rejectBtn.addEventListener('mouseenter', function () {
-            if (remarksHint) remarksHint.textContent = '(required for rejection)';
-        });
-        rejectBtn.addEventListener('mouseleave', function () {
-            if (remarksHint) remarksHint.textContent = '(required if rejecting)';
-        });
+        if (remarksHint) {
+            rejectBtn.addEventListener('mouseenter', function () {
+                remarksHint.textContent = '(required for rejection)';
+            });
+            rejectBtn.addEventListener('mouseleave', function () {
+                remarksHint.textContent = '(required if rejecting)';
+            });
+        }
     }
 });

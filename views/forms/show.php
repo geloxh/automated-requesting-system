@@ -25,7 +25,7 @@
             <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
         </span>
     </div>
-    <button id="btn-back" class="btn btn-ghost btn-sm">← Back</button>
+    <button id="btn-back" class="btn btn-ghost btn-sm" data-fallback-url="/processing-system/public/approvals">← Back</button>
 </div>
 
 <div class="two-col">
