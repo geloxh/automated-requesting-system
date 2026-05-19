@@ -10,7 +10,8 @@
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
-            WHERE f.status NOT IN ("draft","cancelled")
+            WHERE f.status NOT IN ("draft", "cancelled")
+            AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
@@ -19,15 +20,17 @@
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
-            WHERE a.approver_id = ? AND a.status = "pending"
-            ORDER BY f.created_at ASC'
+            WHERE (a.approver_id = ? OR f.submitted_by = ?)
+            AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY f.created_at DESC'
         );
-        $stmt->execute([$userId]);
+        $stmt->execute([$userId, $userId]);
     } else {
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             WHERE f.submitted_by = ?
+            AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC LIMIT 30'
         );
         $stmt->execute([$userId]);
@@ -85,10 +88,12 @@
     $quickForms = [
         ['slug' => 'advance-payment', 'label' => 'Advance',   'desc' => 'Cash advance',    'color' => '#10b981', 'icon' => 'ti-cash'],
         ['slug' => 'overtime', 'label' => 'Overtime',  'desc' => 'OT authorization','color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-        ['slug' => 'leave', 'label' => 'Leave', 'desc' => 'File absence',    'color' => '#0ea5e9', 'icon' => 'ti-beach'],
-        ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#f59e0b', 'icon' => 'ti-car'],
         ['slug' => 'request-payment', 'label' => 'Payment', 'desc' => 'Request payment', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        ['slug' => 'work-permit', 'label' => 'Work Permit', 'desc' => 'Authorize work', 'color' => '#f59e0b', 'icon' => 'ti-clipboard-list'],
+        ['slug' => 'leave', 'label' => 'Leave', 'desc' => 'File absence',    'color' => '#0ea5e9', 'icon' => 'ti-beach'],
         ['slug' => 'reimbursement', 'label' => 'Reimburse', 'desc' => 'Claim expenses',  'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
+        ['slug' => 'liquidation', 'label' => 'Liquidation', 'desc' => 'Clear advance', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
+        ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#ca8a04', 'icon' => 'ti-car'],
     ];
 ?>
 
@@ -176,7 +181,7 @@
             <div class="quick-form-grid">
                 <?php foreach ($quickForms as $i => $qf): ?>
                 <a href="/processing-system/public/forms/<?= $qf['slug'] ?>/create"
-                   class="quick-form-btn <?= ($i % 2 === 0) ? 'border-right' : '' ?> <?= ($i < 4) ? 'border-bottom' : '' ?>">
+                   class="quick-form-btn <?= ($i % 2 === 0) ? 'border-right' : '' ?> <?= ($i < 6) ? 'border-bottom' : '' ?>">
                     <span class="qf-icon" style="--qf-color:<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
                     <span class="qf-label"><?= $qf['label'] ?></span>
                     <span class="qf-desc"><?= $qf['desc'] ?></span>
