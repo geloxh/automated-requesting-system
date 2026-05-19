@@ -80,17 +80,7 @@
         'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
     ];
 
-    $badgeMap = [
-        'draft' => 'secondary',
-        'submitted' => 'primary',
-        'supervisor_reviewed' => 'info',
-        'department_checked' => 'info',
-        'checker_approved' => 'warning',
-        'final_approved' => 'success',
-        'completed' => 'success',
-        'rejected' => 'danger',
-        'cancelled' => 'dark',
-    ];
+    $badgeMap = \App\Helpers\FormLabels::allBadges();
 
     $quickForms = [
         ['slug' => 'advance-payment', 'label' => 'Advance',   'desc' => 'Cash advance',    'color' => '#10b981', 'icon' => 'ti-cash'],
@@ -224,6 +214,6 @@
 </div>
 
 <?php
-$content = ob_get_clean();
+$content   = ob_get_clean();
 $pageTitle = 'Dashboard';
 require __DIR__ . '/base.php';
