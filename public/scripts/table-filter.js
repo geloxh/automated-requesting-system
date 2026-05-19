@@ -3,9 +3,9 @@
  * Client-side search + filter for all data tables.
  *
  * Usage: add data attributes to the <table>:
- *   data-filterable          — enables this script
+ *   data-filterable — enables this script
  *   data-search-col="0,1,2" — comma-separated column indices to search
- *   data-filter-col="2"     — column index for the type/status dropdown
+ *   data-filter-col="2" — column index for the type/status dropdown
  *
  * Then add inside .table-wrap, before <table>:
  *   <div class="filter-bar" data-filter-bar>
@@ -23,22 +23,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const wrap        = table.closest('.table-wrap');
         if (!wrap) return;
 
-        const searchInput  = wrap.querySelector('[data-search-input]');
+        const searchInput = wrap.querySelector('[data-search-input]');
         const filterSelect = wrap.querySelector('[data-filter-select]');
-        const countEl      = wrap.querySelector('[data-filter-count]');
-        const rows         = Array.from(table.querySelectorAll('tbody tr'));
+        const countEl = wrap.querySelector('[data-filter-count]');
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
 
         const searchCols = (table.dataset.searchCol || '0').split(',').map(Number);
-        const filterCol  = table.dataset.filterCol !== undefined ? parseInt(table.dataset.filterCol) : null;
+        const filterCol = table.dataset.filterCol !== undefined ? parseInt(table.dataset.filterCol) : null;
 
         function getCell(row, colIndex) {
             return (row.cells[colIndex]?.textContent || '').toLowerCase().trim();
         }
 
         function applyFilter() {
-            const query      = (searchInput?.value || '').toLowerCase().trim();
-            const filterVal  = (filterSelect?.value || '').toLowerCase().trim();
-            let   visible    = 0;
+            const query = (searchInput?.value || '').toLowerCase().trim();
+            const filterVal = (filterSelect?.value || '').toLowerCase().trim();
+            let visible = 0;
 
             rows.forEach(function (row) {
                 const matchesSearch = !query || searchCols.some(function (col) {

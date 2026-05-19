@@ -24,7 +24,7 @@ document.addEventListener('click', function (e) {
 
 // ── Mobile sidebar toggle ───────────────────────────────────────
 var sidebarToggle = document.getElementById('sidebarToggle');
-var sidebar       = document.getElementById('sidebar');
+var sidebar = document.getElementById('sidebar');
 
 if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener('click', function () {

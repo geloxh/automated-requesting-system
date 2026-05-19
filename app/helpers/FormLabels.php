@@ -17,6 +17,23 @@ namespace App\Helpers;
  */
 class FormLabels
 {
+    /**
+     * Sequence number → human label for every approval pipeline step.
+     * Single source of truth — used by inbox.php, approval_trail.php,
+     * NotificationService, and FormController.
+     *
+     * Sequence 1 = submission (no approver row)
+     * Sequences 2–6 = the five approval stages
+     */
+    private const STEP_LABELS = [
+        1 => 'Submitted',
+        2 => 'Supervisor Review',
+        3 => 'Department Check',
+        4 => 'Checker Approval',
+        5 => 'Final Approval',
+        6 => 'Completion',
+    ];
+
     private const LABELS = [
         'advance_payment' => 'Advance Payment',
         'overtime_authorization' => 'Overtime Authorization',
@@ -27,6 +44,23 @@ class FormLabels
         'liquidation' => 'Liquidation',
         'vehicle_request' => 'Vehicle Request',
     ];
+
+    /**
+     * Return the label for a pipeline step sequence number.
+     * Falls back to "Step N" if the sequence isn't in the map.
+     */
+    public static function stepLabel(int $sequence): string
+    {
+        return self::STEP_LABELS[$sequence] ?? 'Step ' . $sequence;
+    }
+
+    /**
+     * Return the full step-label map (for views that loop over it).
+     */
+    public static function allStepLabels(): array
+    {
+        return self::STEP_LABELS;
+    }
 
     /**
      * Return the label for a single form type, falling back to a

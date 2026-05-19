@@ -4,9 +4,9 @@
  * for all form tables in the processing system.
  *
  * Usage: add data attributes to the table:
- *   data-table-id   — the table's id
- *   data-recalc     — "items" | "amount-only" | "ot" | none
- *   data-total-id   — id of the total input to update
+ *   data-table-id — the table's id
+ *   data-recalc — "items" | "amount-only" | "ot" | none
+ *   data-total-id — id of the total input to update
  */
 
 function recalcItems(tableId, totalId) {
@@ -46,9 +46,9 @@ function initTable(config) {
     const { tableId, addBtnId, recalc, totalId, balanceId, advanceId } = config;
 
     const runRecalc = () => {
-        if (recalc === 'items')       recalcItems(tableId, totalId);
+        if (recalc === 'items') recalcItems(tableId, totalId);
         if (recalc === 'amount-only') recalcAmounts(tableId, totalId, balanceId, advanceId);
-        if (recalc === 'ot')          recalcOT(tableId, totalId);
+        if (recalc === 'ot') recalcOT(tableId, totalId);
     };
 
     document.getElementById(addBtnId)?.addEventListener('click', () => {

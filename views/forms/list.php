@@ -1,22 +1,22 @@
 <?php
 $formLabel = [
-    'advance_payment'        => 'Advance Payment',
+    'advance_payment' => 'Advance Payment',
     'overtime_authorization' => 'Overtime Authorization',
-    'request_for_payment'    => 'Request for Payment',
-    'work_permit'            => 'Work Permit',
-    'leave_application'      => 'Leave Application',
-    'reimbursement'          => 'Reimbursement',
-    'liquidation'            => 'Liquidation',
-    'vehicle_request'        => 'Vehicle Request',
+    'request_for_payment' => 'Request for Payment',
+    'work_permit' => 'Work Permit',
+    'leave_application' => 'Leave Application',
+    'reimbursement' => 'Reimbursement',
+    'liquidation' => 'Liquidation',
+    'vehicle_request' => 'Vehicle Request',
 ];
 
 $statusBadge = [
-    'draft'       => 'secondary',
-    'submitted'   => 'primary',
+    'draft' => 'secondary',
+    'submitted' => 'primary',
     'in_approval' => 'warning',
-    'approved'    => 'success',
-    'rejected'    => 'danger',
-    'cancelled'   => 'dark',
+    'approved' => 'success',
+    'rejected' => 'danger',
+    'cancelled' => 'dark',
 ];
 
 $roleId = $_SESSION['role_id'];
