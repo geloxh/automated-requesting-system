@@ -3,6 +3,7 @@
     require_once __DIR__ . '/../app/controllers/FormController.php';
     require_once __DIR__ . '/../app/controllers/ApprovalController.php';
     require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+    require_once __DIR__ . '/../app/controllers/NotificationController.php';
     require_once __DIR__ . '/../app/Helpers/EmployeeCode.php';
 
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -163,6 +164,24 @@
     if ($uri === '/requests') {
         \App\Middleware\RoleMiddleware::requireRole(1);
         (new FormController)->allRequests();
+        exit;
+    }
+
+    // ---------------------------------------------------------------
+    // Notifications
+    // ---------------------------------------------------------------
+    if ($uri === '/notifications/unread' && $method === 'GET') {
+        (new \App\Controllers\NotificationController)->unread();
+        exit;
+    }
+
+    if ($uri === '/notifications/read-all' && $method === 'POST') {
+        (new \App\Controllers\NotificationController)->markAllRead();
+        exit;
+    }
+
+    if (preg_match('#^/notifications/(\d+)/read$#', $uri, $m) && $method === 'POST') {
+        (new \App\Controllers\NotificationController)->markRead((int)$m[1]);
         exit;
     }
 
