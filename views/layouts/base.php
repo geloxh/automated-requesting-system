@@ -78,7 +78,7 @@
                             'SELECT COUNT(*) FROM approvals a
                             JOIN forms f ON f.id = a.form_id
                             WHERE a.status = "pending"
-                            AND f.status NOT IN ("draft","cancelled","completed","rejected")'
+                            AND f.status NOT IN ("draft", "cancelled", "completed", "rejected")'
                         );
                         $stmt->execute();
                     } else {
@@ -136,31 +136,71 @@
     </nav>
 
     <!-- ── NOTIFICATION PANEL ── -->
+    <?php
+        // Load up to most recent notifications for use current user
+        $notifUserId = (int)($_SESSION['user_id'] ?? 0);
+        $notifItems = [];
+        $notifUnread = 0;
+        if ($notfUserId) {
+            try {
+                $ns = db()->prepare(
+                    'SELECT id, form_id, type, message, link, is_read, created_at
+                    FROM notifications
+                    WHERE user_id = ?
+                    ORDER BY created_at DESC LIMIT 10'
+                );
+                $ns->execute([$notifUserId]);
+                $notifItems = $ns->fetchAll(PDO::FETCH_ASSOC);
+                $notifUnread = array_reduce($notifItems, fn($c, $r) => $c + (int)!$r['is_read'], 0);
+            } catch (\Throwable $e) {
+                // DB not ready yet (migration not run) - fail silently
+            }
+        }
+        $typeIcon = [
+            'success' => ['dot' => '', 'color' => 'var(--success)'],
+            'warning' => ['dot' => 'notif-dot-warning', 'color' => 'var(--warning)'],
+            'danger' => ['dot' => 'notif-dot-danger', 'color' => 'var(--danger)'],
+            'info' => ['dot' => '', 'color' => 'var(--primary)'],
+        ]
+    ?>
+
     <div class="notif-panel" id="notifPanel">
         <div class="notif-panel-header">
-            <span class="notif-panel-title">Notifications</span>
-            <span class="notif-mark-read">Mark all read</span>
+            <span class="notif-panel-title">
+                Notifications
+                <?php if ($notifUnread > 0): ?>
+                    <span class="badge badge-danger" style="font-size:10px;padding:1px 6px"><?= $notifUnread ?></span>
+                <?php endif; ?>
+            </span>
+            <span class="notif-mark-read" id="markAllReadBtn">Mark all read</span>
         </div>
-        <div class="notif-item">
-            <div class="notif-dot-sm"></div>
-            <div>
-                <div class="notif-text">Your <strong>Leave Application</strong> is pending approval</div>
-                <div class="notif-ago">Just now</div>
+
+        <div id="notifList">
+        <?php if (empty($notifItems)): ?>
+            <div class="notif-empty">
+                <i class="ti ti-bell-off" style="font-size:1.5rem;color:var(--border);display:block;margin-bottom:.25rem"></i>
+                No notifications yet.
             </div>
-        </div>
-        <div class="notif-item">
-            <div class="notif-dot-sm"></div>
-            <div>
-                <div class="notif-text"><strong>Advance Payment</strong> has been approved</div>
-                <div class="notif-ago">1 hour ago</div>
+        <?php else: ?>
+            <?php foreach ($notifItems as $n):
+                $tc = $typeIcon[$n['type']] ?? $typeIcon['info'];
+                $ago = (new DateTime())->diff(new DateTime($n['created_at']));
+                $agoStr  = $ago->days > 0 ? $ago->days . 'd ago'
+                         : ($ago->h > 0 ? $ago->h . 'h ago'
+                         : ($ago->i > 0 ? $ago->i . 'm ago' : 'Just now'));
+                $isUnread = !(bool)$n['is_read'];
+            ?>
+            <div class="notif-item <?= $isUnread ? 'notif-item--unread' : '' ?>"
+                 data-notif-id="<?= $n['id'] ?>"
+                 <?= $n['link'] ? 'data-href="' . htmlspecialchars($n['link']) . '"' : '' ?>>
+                <div class="notif-dot-sm <?= $tc['dot'] ?>"></div>
+                <div>
+                    <div class="notif-text"><?= htmlspecialchars($n['message']) ?></div>
+                    <div class="notif-ago"><?= $agoStr ?></div>
+                </div>
             </div>
-        </div>
-        <div class="notif-item">
-            <div class="notif-dot-sm notif-dot-warning"></div>
-            <div>
-                <div class="notif-text"><strong>Reimbursement</strong> was returned for revision</div>
-                <div class="notif-ago">Yesterday</div>
-            </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
         </div>
     </div>
 
@@ -188,7 +228,7 @@
                 <!-- Notification bell -->
                 <button class="icon-btn" id="notifBtn" title="Notifications">
                     <i class="ti ti-bell"></i>
-                    <span class="notif-dot" id="notifDot"></span>
+                    <span class="notif-dot" id="notifDot" <?= $notifUnread === 0 ? 'style="display:none"' : '' ?>></span>
                 </button>
 
                 <!-- New Request -->

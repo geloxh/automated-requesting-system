@@ -670,7 +670,8 @@ class FormController {
 
             // Fetch form + submitter details
             $formRow = $pdo->prepare(
-                'SELECT f.form_type, f.status, e.full_name AS submitter_name, e.email AS submitter_email
+                'SELECT f.form_type, f.status, f.submitted_by,
+                        e.full_name AS submitter_name, e.email AS submitter_email
                  FROM forms f JOIN employees e ON e.id = f.submitted_by
                  WHERE f.id = ?'
             );
@@ -678,17 +679,38 @@ class FormController {
             $form = $formRow->fetch(\PDO::FETCH_ASSOC);
             if (!$form) return;
 
+            $submittedBy = (int) $form['submitted_by'];
             $formLabel = \App\Helpers\FormLabels::get($form['form_type']);
             $stageName = $step['label'];
             $newStatus = $step['to'];
 
             // 1. Notify submitter of every completed stage
             $outcome = match($newStatus) {
-                'completed' => 'completed',
-                'final_approved' => 'final_approved',
+                'completed'     => 'completed',
+                'final_approved'=> 'final_approved',
                 'rejected' => 'rejected',
-                default => 'approved_step',
+                default  => 'approved_step',
             };
+
+            // In-app notification for submitter
+            $submitterMsg = match($outcome) {
+                'completed' => "Your {$formLabel} #{$formId} has been fully completed.",
+                'final_approved' => "Your {$formLabel} #{$formId} reached final approval.",
+                'rejected' => "Your {$formLabel} #{$formId} was rejected at {$stageName}.",
+                default => "Your {$formLabel} #{$formId} passed {$stageName}.",
+            };
+            $submitterType = match($outcome) {
+                'completed' => 'success',
+                'final_approved' => 'success',
+                'rejected' => 'danger',
+                default => 'info',
+            };
+            \App\Controllers\NotificationController::create(
+                (int) $submittedBy,
+                $submitterMsg,
+                $submitterType,
+                $formId
+            );
             \App\Services\NotificationService::notifySubmitter(
                 $form['submitter_email'],
                 $form['submitter_name'],
@@ -714,6 +736,16 @@ class FormController {
 
                 if ($nextApprover) {
                     $nextStageName = \App\Helpers\FormLabels::stepLabel((int)$nextApprover['sequence']);
+
+                    // In-app notification for next approver
+                    \App\Controllers\NotificationController::create(
+                        (int) $nextApprover['approver_id'],
+                        "{$formLabel} #{$formId} from {$form['submitter_name']} requires your approval at {$nextStageName}.",
+                        'warning',
+                        $formId
+                    );
+
+                    // Email notification for next approver
                     \App\Services\NotificationService::notifyNextApprover(
                         $formId,
                         $nextApprover['email'],
@@ -737,7 +769,7 @@ class FormController {
         try {
             $pdo = db();
             $row = $pdo->prepare(
-                'SELECT f.form_type, f.status,
+                'SELECT f.form_type, f.status, f.submitted_by,
                         e.full_name AS submitter_name, e.email AS submitter_email
                  FROM forms f JOIN employees e ON e.id = f.submitted_by
                  WHERE f.id = ?'
@@ -755,6 +787,17 @@ class FormController {
             $stageRow->execute([$formId]);
             $stageData = $stageRow->fetch(\PDO::FETCH_ASSOC);
             $stageName = \App\Helpers\FormLabels::stepLabel((int)($stageData['sequence'] ?? 0));
+
+            // In-app notification for submitter
+            $rejectMsg = "Your " . \App\Helpers\FormLabels::get($form['form_type'])
+                       . " #{$formId} was rejected at {$stageName}"
+                       . ($remarks ? ": \"{$remarks}\"" : '.');
+            \App\Controllers\NotificationController::create(
+                (int) $form['submitted_by'],
+                $rejectMsg,
+                'danger',
+                $formId
+            );
 
             \App\Services\NotificationService::notifySubmitter(
                 $form['submitter_email'],
@@ -797,7 +840,7 @@ class FormController {
             $entity,
             $entityId,
             $old ? json_encode($old) : null,
-            $new ? json_encode($new) : null,
+            $new ? json_encode($new)  : null,
             $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
     }
