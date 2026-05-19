@@ -559,3 +559,24 @@ textarea { resize: vertical; }
     border: 2px solid var(--danger) !important;
     background: #fff5f5 !important;
 }
+
+/* ── Notification panel — real data styles ─────────────────────── */
+.notif-item--unread {
+    background: var(--surface-raised, #f8fafc);
+    border-left: 3px solid var(--primary);
+}
+.notif-item[data-href] {
+    cursor: pointer;
+}
+.notif-item[data-href]:hover {
+    background: var(--surface-raised, #f0f4ff);
+}
+.notif-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+.notif-dot-danger {
+    background: var(--danger);
+}
