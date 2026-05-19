@@ -678,16 +678,16 @@ class FormController {
             $form = $formRow->fetch(\PDO::FETCH_ASSOC);
             if (!$form) return;
 
-            $formLabel  = \App\Helpers\FormLabels::get($form['form_type']);
-            $stageName  = $step['label'];
-            $newStatus  = $step['to'];
+            $formLabel = \App\Helpers\FormLabels::get($form['form_type']);
+            $stageName = $step['label'];
+            $newStatus = $step['to'];
 
             // 1. Notify submitter of every completed stage
             $outcome = match($newStatus) {
-                'completed'     => 'completed',
-                'final_approved'=> 'final_approved',
-                'rejected'      => 'rejected',
-                default         => 'approved_step',
+                'completed' => 'completed',
+                'final_approved' => 'final_approved',
+                'rejected' => 'rejected',
+                default => 'approved_step',
             };
             \App\Services\NotificationService::notifySubmitter(
                 $form['submitter_email'],
@@ -713,14 +713,7 @@ class FormController {
                 $nextApprover = $nextApprovalRow->fetch(\PDO::FETCH_ASSOC);
 
                 if ($nextApprover) {
-                    $nextStageLabels = [
-                        2 => 'Supervisor Review',
-                        3 => 'Department Check',
-                        4 => 'Checker Approval',
-                        5 => 'Final Approval',
-                        6 => 'Completion',
-                    ];
-                    $nextStageName = $nextStageLabels[(int)$nextApprover['sequence']] ?? 'Next Stage';
+                    $nextStageName = \App\Helpers\FormLabels::stepLabel((int)$nextApprover['sequence']);
                     \App\Services\NotificationService::notifyNextApprover(
                         $formId,
                         $nextApprover['email'],
@@ -761,14 +754,7 @@ class FormController {
             );
             $stageRow->execute([$formId]);
             $stageData = $stageRow->fetch(\PDO::FETCH_ASSOC);
-            $stageLabels = [
-                2 => 'Supervisor Review',
-                3 => 'Department Check',
-                4 => 'Checker Approval',
-                5 => 'Final Approval',
-                6 => 'Completion',
-            ];
-            $stageName = $stageLabels[(int)($stageData['sequence'] ?? 0)] ?? 'Approval';
+            $stageName = \App\Helpers\FormLabels::stepLabel((int)($stageData['sequence'] ?? 0));
 
             \App\Services\NotificationService::notifySubmitter(
                 $form['submitter_email'],
@@ -811,7 +797,7 @@ class FormController {
             $entity,
             $entityId,
             $old ? json_encode($old) : null,
-            $new ? json_encode($new)  : null,
+            $new ? json_encode($new) : null,
             $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
     }

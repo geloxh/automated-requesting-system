@@ -1,7 +1,7 @@
 <?php
 /**
  * Approval Trail partial
- * Expects: $approvalSteps  — rows from approvals JOIN employees (full_name, sequence, status, remarks, approved_at)
+ * Expects: $approvalSteps — rows from approvals JOIN employees (full_name, sequence, status, remarks, approved_at)
  *          $form['status'] — current form status
  */
 
@@ -15,12 +15,12 @@ $icons = [
 ];
 
 $labels = [
-    1 => ['name' => 'Submitted', 'role' => 'Requestor'],
-    2 => ['name' => 'Immediate Supervisor', 'role' => 'Level 1 Approval'],
-    3 => ['name' => 'Department Head', 'role' => 'Level 2 Approval'],
-    4 => ['name' => 'Checker', 'role' => 'Level 3 Approval'],
-    5 => ['name' => 'Final Approver', 'role' => 'Final Approval'],
-    6 => ['name' => 'Completed', 'role' => 'Final Approval'],
+    1 => ['name' => \App\Helpers\FormLabels::stepLabel(1), 'role' => 'Requestor'],
+    2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2)],
+    3 => ['name' => 'Department Head', 'role' => \App\Helpers\FormLabels::stepLabel(3)],
+    4 => ['name' => 'Checker', 'role' => \App\Helpers\FormLabels::stepLabel(4)],
+    5 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(5)],
+    6 => ['name' => \App\Helpers\FormLabels::stepLabel(6), 'role' => \App\Helpers\FormLabels::stepLabel(6)],
 ];
 
 // Index by sequence (DB column), not level
@@ -63,10 +63,13 @@ foreach ($stepsBySeq as $seq => $s) {
             if ($since) {
                 $diff = (new DateTime())->diff(new DateTime($since));
                 $elapsed = $diff->days > 0
-                    ? 'Waiting ' . $diff->days . ' day' . ($diff->days > 1 ? 's' : '') : ($diff->h > 0 ? 'Waiting ' . $diff->h . 'h' : 'Just assigned');
+                    ? 'Waiting ' . $diff->days . ' day' . ($diff->days > 1 ? 's' : '')
+                    : ($diff->h > 0 ? 'Waiting ' . $diff->h . 'h' : 'Just assigned');
             } else {
                 $elapsed = 'Awaiting approval';
             }
+            $timeText = $elapsed;
+        } else {
             $timeText = 'Pending';
         }
     } else {
@@ -87,8 +90,8 @@ foreach ($stepsBySeq as $seq => $s) {
             <div class="step-name"><?= htmlspecialchars($name) ?></div>
             <div class="step-role"><?= htmlspecialchars($role) ?></div>
             <?php if ($dotClass === 'current'): ?>
-                <div class="step-time" style="color:var(--warning); font-weight:600">
-                    <i class="ti ti-clock" style="font-size:11px"></i>    
+                <div class="step-time" style="color:var(--warning);font-weight:600">
+                    <i class="ti ti-clock" style="font-size:11px"></i>
                     <?= htmlspecialchars($timeText) ?> — waiting on <?= htmlspecialchars($step['full_name'] ?? 'assignee') ?>
                 </div>
             <?php else: ?>
