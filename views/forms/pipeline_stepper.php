@@ -135,7 +135,6 @@ $statusOrder = [
 ];
 
 $isRejected = $form['status'] === 'rejected';
-$form = 
 $statusKeys = array_keys($statusOrder);
 $formStatus = $form['status'] ?? $form['form_status'] ?? 'draft';
 $isRejected = $formStatus === 'rejected';

@@ -416,11 +416,11 @@ class FormController {
         // ── Handle optional file upload ─────────────────────────────
         $uploadedFilePath = null;
         if (!empty($_FILES['approval_file']['tmp_name'])) {
-            $file     = $_FILES['approval_file'];
-            $allowed  = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            $file = $_FILES['approval_file'];
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
             $maxBytes = 5 * 1024 * 1024; // 5 MB
 
-            $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if (!in_array($mimeType, $allowed, true)) {
@@ -789,10 +789,10 @@ class FormController {
     // ----------------------------------------------------------------
     private function renderError(int $code, string $title, string $message): never {
         http_response_code($code);
-        $errorCode    = $code;
-        $errorTitle   = $title;
+        $errorCode = $code;
+        $errorTitle = $title;
         $errorMessage = $message;
-        $pageTitle    = "{$code} — {$title}";
+        $pageTitle = "{$code} — {$title}";
         define('BASE_LOADED', true);
         ob_start();
         require __DIR__ . '/../../views/errors/error.php';

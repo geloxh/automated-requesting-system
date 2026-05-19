@@ -13,13 +13,7 @@ $iconMap = [
     'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
     'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
 ];
-$stepLabel = [
-    2 => 'Supervisor Review',
-    3 => 'Department Check',
-    4 => 'Checker Approval',
-    5 => 'Final Approval',
-    6 => 'Completion',
-];
+$stepLabel = \App\Helpers\FormLabels::allStepLabels();
 $uniqueTypes = array_unique(array_column($approvals ?? [], 'form_type'));
 sort($uniqueTypes);
 ?>

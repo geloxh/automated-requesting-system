@@ -59,7 +59,7 @@ foreach ($stepsBySeq as $seq => $s) {
         $dotClass = ($seq === $activeSec) ? 'current' : 'pending';
         if ($seq === $activeSec) {
             // Show how long this step has been waiting
-            $since = $step['updated_at'] ?? step['created_at'] ?? null;
+            $since = $step['updated_at'] ?? $step['created_at'] ?? null;
             if ($since) {
                 $diff = (new DateTime())->diff(new DateTime($since));
                 $elapsed = $diff->days > 0
