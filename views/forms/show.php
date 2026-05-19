@@ -1,20 +1,7 @@
 <?php
     $formLabel = \App\Helpers\FormLabels::all();
 
-    $statusBadge = [
-        'draft' => 'secondary',
-        'submitted' => 'primary',
-        'supervisor_reviewed' => 'info',
-        'department_checked' => 'info',
-        'checker_approved' => 'warning',
-        'final_approved' => 'success',
-        'completed' => 'success',
-        'rejected' => 'danger',
-        'cancelled' => 'dark',
-        // legacy / admin-path values kept for safety
-        'in_approval' => 'warning',
-        'approved' => 'success',
-    ];
+    $statusBadge = \App\Helpers\FormLabels::allBadges();
     $stepBadge = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
 
     $type = $form['form_type'] ?? $form['type'] ?? 'unknown';
@@ -47,30 +34,30 @@
         <div class="card-header">Form Details</div>
         <div class="card-body">
             <div class="dl-grid">
-                <?php
-                    // Human-readable field labels — avoids "from date", "payee", etc.
-                    $fieldLabels = [
-                        'purpose' => 'Purpose',
-                        'payment_type' => 'Payment Type',
-                        'payee' => 'Payee',
-                        'date' => 'Date',
-                        'employee_name' => 'Employee Name',
-                        'department' => 'Department',
-                        'request_date' => 'Request Date',
-                        'unit_owner' => 'Unit Owner',
-                        'bearer_name' => 'Bearer Name',
-                        'service_type' => 'Service Type',
-                        'leave_type' => 'Leave Type',
-                        'from_date' => 'From Date',
-                        'to_date' => 'To Date',
-                        'payment_term' => 'Payment Term',
-                        'car_available' => 'Car Available',
-                        'trip_type' => 'Trip Type',
-                    ];
-                    foreach ($data ?? [] as $key => $value):
-                        if ($key === 'csrf_token') continue;
-                        $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
-                ?>
+            <?php
+        // Human-readable field labels — avoids "from date", "payee", etc.
+        $fieldLabels = [
+            'purpose' => 'Purpose',
+            'payment_type' => 'Payment Type',
+            'payee' => 'Payee',
+            'date' => 'Date',
+            'employee_name' => 'Employee Name',
+            'department' => 'Department',
+            'request_date' => 'Request Date',
+            'unit_owner' => 'Unit Owner',
+            'bearer_name' => 'Bearer Name',
+            'service_type' => 'Service Type',
+            'leave_type' => 'Leave Type',
+            'from_date' => 'From Date',
+            'to_date' => 'To Date',
+            'payment_term' => 'Payment Term',
+            'car_available' => 'Car Available',
+            'trip_type' => 'Trip Type',
+        ];
+        foreach ($data ?? [] as $key => $value):
+            if ($key === 'csrf_token') continue;
+            $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
+        ?>
                     <span class="dl-label"><?= htmlspecialchars($label) ?></span>
                     <span class="dl-value">
                         <?php if (is_array($value)): ?>
