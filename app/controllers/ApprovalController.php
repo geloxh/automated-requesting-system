@@ -21,8 +21,10 @@
             // Status 'checker_approved' -> next is sequence 5 (Final Approver)
             // Status 'final_approved' -> next is sequence 6 (Final Approver completion)
 
-            $sql = "SELECT f.id, f.form_type, f.created_at, e.full_name as owner_name, e.department,
-                        a.sequence, a.status as step_status
+            $sql = "SELECT f.id, f.form_type, f.created_at, 
+                           e.full_name as owner_name, e.department,
+                           a.sequence, a.status as step_status,
+                           DATEDIFF(NOW(), f.created_at) as days_pending
                     FROM approvals a
                     JOIN forms f ON f.id = a.form_id
                     JOIN employees e ON e.id = f.submitted_by
@@ -43,7 +45,13 @@
                 )";
             }
 
+        // Priority sort toggle: overdue items (3+ days) float to top by default
+        $currentSort = $_GET['sort'] ?? 'priority';
+        if ($currentSort === 'priority') {
+            $sql .= " ORDER BY (DATEDIFF(NOW(), f.created_at) >= 3) DESC, f.created_at ASC";
+        } else {
             $sql .= " ORDER BY f.created_at ASC";
+        }
 
             $stmt = db()->prepare($sql);
             if ($roleId !== 1) {
@@ -55,7 +63,7 @@
             $formLabel = \App\Helpers\FormLabels::all();
 
             $pageTitle = 'Approval Inbox';
-            $this->render('approvals/inbox', compact('approvals', 'formLabel', 'pageTitle'));
+        $this->render('approvals/inbox', compact('approvals', 'formLabel', 'pageTitle', 'currentSort'));
         }
 
         private function render(string $view, array $vars = []): void {
