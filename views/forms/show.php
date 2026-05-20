@@ -89,10 +89,11 @@
                     // Map $nextAction to the human-readable step label for the button
                     $actionLabels = [
                         'submit' => 'Submit for Approval',
-                        'supervisor-review' => 'Approve — Supervisor Review',
-                        'department-check' => 'Approve — Department Check',
-                        'checker-supervisor' => 'Approve — Checker Supervisor',
-                        'final-approval' => 'Approve — Final Approval',
+                        'checker-approval' => 'Approve — Checker Approval',
+                        'review-approval' => 'Approve — Review Approval',
+                        'process-approval' => 'Approve — Process Approval',
+                        'evaluation-approval' => 'Approve — Evaluation Approval',
+                        'grant-approval' => 'Grant Approval Request',
                         'complete' => 'Mark as Completed',
                     ];
                     $approveLabel = $actionLabels[$nextAction] ?? 'Approve';

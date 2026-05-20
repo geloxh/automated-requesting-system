@@ -32,16 +32,14 @@
         private const BADGE_MAP = [
             'draft' => 'secondary',
             'submitted' => 'primary',
-            'supervisor_reviewed' => 'info',
-            'department_checked' => 'info',
-            'checker_approved' => 'warning',
+            'checker_approved' => 'info',
+            'department_reviewed' => 'info',
+            'process_approved' => 'info',
+            'finance_reviewed' => 'warning',
             'final_approved' => 'success',
             'completed' => 'success',
             'rejected' => 'danger',
             'cancelled' => 'dark',
-            // legacy fallbacks kept for any old rows still in DB
-            'in_approval' => 'warning',
-            'approved' => 'success',
         ];
 
         /** Badge class for a single status string. Defaults to 'secondary'. */
