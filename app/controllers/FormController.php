@@ -365,13 +365,14 @@ class FormController {
         $isAdmin = $roleId === 1;
 
         // ── Guard: valid pipeline action ──────────────────────────────
-        if (!isset(self::PIPELINE[$action])) {
+        $pipeline = $this->getPipeline($form['form_type']);
+        if (!isset($pipeline[$action])) {
             $_SESSION['error'] = "Unknown approval action: '{$action}'.";
             header("Location: /processing-system/public/forms/view/{$id}");
             exit;
         }
 
-        $step = self::PIPELINE[$action];
+        $step = $pipeline[$action];
 
         // ── form must be in the expected status ─────────────────
         if ($step['from'] !== '*' && $form['status'] !== $step['from']) {
@@ -577,11 +578,8 @@ class FormController {
      * lookup logic as your business rules require.
      */
     private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data): void {
-        // Stages that need a real approver row (sequence ≥ 2)
-        $stagesNeedingApprover = array_filter(
-            self::PIPELINE,
-            fn($step) => $step['sequence'] >= 2
-        );
+        $pipeline = $this->getPipeline($type);
+        $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
 
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
@@ -589,11 +587,9 @@ class FormController {
 
         foreach ($stagesNeedingApprover as $action => $step) {
             $approver = $this->resolveApproverByRole($pdo, $step['role_id'], $data);
-
             if (!$approver) {
                 throw new \RuntimeException("No active approver found for role ID {$step['role_id']}.");
             }
-
             $insert->execute([$formId, $approver, $step['sequence']]);
         }
     }
