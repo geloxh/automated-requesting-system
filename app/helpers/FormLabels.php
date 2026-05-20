@@ -54,14 +54,24 @@
             return self::BADGE_MAP;
         }
 
-        private const STEP_LABELS = [
+        private const STEP_LABELS_ADMIN = [
             1 => 'Submitted',
-            2 => 'Supervisor Review',
-            3 => 'Department Check',
-            4 => 'Checker Approval',
-            5 => 'Final Approval',
-            6 => 'Completion',
+            2 => 'Checker Approval',
+            3 => 'Review Approval',
+            4 => 'Grant Approval Request',
+            5 => 'Completed',
         ];
+
+        private const STEP_LABELS_FINANCE = [
+            1 => 'Submitted',
+            2 => 'Checker Approval',
+            3 => 'Process Approval',
+            4 => 'Evaluation Approval',
+            5 => 'Grant Approval Request',
+            6 => 'Completed',
+        ];
+
+        private const ADMIN_FORMS = ['overtime_authorization', 'leave_application', 'vehicle_request'];
 
         private const LABELS = [
             'advance_payment' => 'Advance Payment',
@@ -73,12 +83,11 @@
             'vehicle_request' => 'Vehicle Request',
         ];
 
-        /**
-         * Return the label for a pipeline step sequence number.
-         * Falls back to "Step N" if the sequence isn't in the map.
-         */
-        public static function stepLabel(int $sequence): string {
-            return self::STEP_LABELS[$sequence] ?? 'Step ' . $sequence;
+        public static function stepLabel(int $sequence, string $formType = ''): string {
+            $map = in_array($formType, self::ADMIN_FORMS, true)
+                ? self::STEP_LABELS_ADMIN
+                : self::STEP_LABELS_FINANCE;
+            return $map[$sequence] ?? 'Step ' . $sequence;
         }
 
         /**
