@@ -89,13 +89,6 @@
         }
 
         /**
-         * Return the full step-label map (for views that loop over it).
-         */
-        public static function allStepLabels(): array {
-            return self::STEP_LABELS;
-        }
-
-        /**
          * Return the label for a single form type, falling back to a
          * humanised version of the raw type string if not found.
          */
