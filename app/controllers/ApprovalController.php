@@ -21,8 +21,6 @@
                     JOIN employees e ON e.id = f.submitted_by
                     WHERE a.status = 'pending' ";
 
-            // Admins (Role 1) see everything pending. 
-            // Others only see steps specifically assigned to them that are active.
             if ($roleId !== 1) {
                 $sql .= 
                 " 

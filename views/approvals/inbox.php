@@ -12,7 +12,6 @@ $iconMap = [
     'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
     'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
 ];
-$stepLabel = \App\Helpers\FormLabels::allStepLabels();
 $uniqueTypes = array_unique(array_column($approvals ?? [], 'form_type'));
 sort($uniqueTypes);
 ?>
@@ -70,7 +69,11 @@ sort($uniqueTypes);
                 </td>
                 <td><?= htmlspecialchars($row['owner_name']) ?></td>
                 <td class="muted"><?= htmlspecialchars($row['department'] ?? '—') ?></td>
-                <td><span class="badge badge-primary"><?= htmlspecialchars($stepLabel[$row['sequence']] ?? 'Step ' . $row['sequence']) ?></span></td>
+                <td>
+                    <span class="badge badge-primary">
+                        <?= htmlspecialchars(\App\Helpers\FormLabels::stepLabel((int)$row['sequence'], $row['form_type'])) ?>
+                    </span>
+                </td>
                 <td class="muted"><?= date('M d, Y', strtotime($row['created_at'])) ?></td>
                 <td>
                     <span style="font-size:12px;font-weight:600;color:<?= $isOverdue ? 'var(--danger)' : 'var(--text-muted)' ?>">
