@@ -60,7 +60,6 @@ CREATE TABLE forms (
         'advance_payment',
         'overtime_authorization',
         'request_for_payment',
-        'work_permit',
         'leave_application',
         'reimbursement',
         'liquidation',

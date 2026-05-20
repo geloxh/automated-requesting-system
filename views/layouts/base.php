@@ -48,10 +48,6 @@
             class="<?= str_contains($uri, 'request-payment') ? 'active' : '' ?>">
                 <i class="ti ti-receipt"></i> Request for Payment
             </a>
-            <a href="/processing-system/public/forms/work-permit"
-            class="<?= str_contains($uri, 'work-permit') ? 'active' : '' ?>">
-                <i class="ti ti-clipboard-list"></i> Work Permit
-            </a>
             <a href="/processing-system/public/forms/leave"
             class="<?= str_contains($uri, '/leave') ? 'active' : '' ?>">
                 <i class="ti ti-beach"></i> Leave Application
