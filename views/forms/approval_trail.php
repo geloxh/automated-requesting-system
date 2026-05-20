@@ -41,11 +41,23 @@ foreach ($stepsBySeq as $seq => $s) {
 
 <div class="form-section-title">Approval Trail</div>
 <div class="approval-trail">
-<?php for ($seq = 1; $seq <= 6; $seq++):
+<?php 
+$isSubmitted = !in_array($form['status'], ['draft'], true);
+for ($seq = 1; $seq <= 6; $seq++):
     $step = $stepsBySeq[$seq] ?? null;
     $status = $step['status'] ?? null;
 
-    if ($status === 'approved') {
+    if ($seq === 1) {
+        $dotClass = $isSubmitted ? 'done' : 'current';
+        $timeText = $isSubmitted
+            ? date('M d, Y h:i A', strtotime($form['created_at']))
+            : 'Not yet submitted';
+
+        if ($dotClass === 'current') {
+            $elapsed = $timeText;
+            $diff = (object)['days' => 0];
+        }
+    } elseif ($status === 'approved') {
         $dotClass = 'done';
         $timeText = $step['approved_at']
             ? date('M d, Y h:i A', strtotime($step['approved_at']))
@@ -84,7 +96,7 @@ foreach ($stepsBySeq as $seq => $s) {
     $icon = $icons[$seq] ?? 'ti-circle';
     $remarks = $step['remarks'] ?? '';
 ?>
-    <div class="approval-step">
+    <div class="approval-step <?= $dotClass === 'done' ? 'is-done' : ($dotClass === 'rejected' ? 'is-rejected' : '') ?>">
         <div class="step-dot <?= $dotClass ?>"><i class="ti <?= $icon ?>"></i></div>
         <div class="step-info">
             <div class="step-name"><?= htmlspecialchars($name) ?></div>
