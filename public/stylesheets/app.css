@@ -320,6 +320,24 @@ td.text-end { text-align: right; }
 .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .75rem; }
 label { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
 
+.approval-trail { position: relative; }
+
+.approval-step {
+    display: flex; gap: 12px; padding: 10px 0;
+    position: relative;
+}
+/* vertical connector */
+.approval-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px; top: 36px; bottom: -10px;
+    width: 2px;
+    background: var(--border);
+}
+.approval-step.is-done:not(:last-child)::before {
+    background: var(--success);
+}
+
 input[type="text"], input[type="email"], input[type="password"],
 input[type="number"], input[type="date"], input[type="time"],
 select, textarea {
@@ -372,8 +390,28 @@ textarea { resize: vertical; }
 .step-name { font-weight: 500; font-size: .85rem; }
 .step-meta { font-size: .75rem; color: var(--text-muted); margin-top: .15rem; }
 
-.step-dot.rejected { background: #fee2e2; color: var(--danger); border-color: var(--danger); }
-.step-dot.current { animation: pulse-ring 1.8s ease-in-out infinite; }
+.step-elapsed {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600;
+    background: #fef3c7; color: #92400e;
+    padding: 2px 7px; border-radius: 99px;
+}
+.step-elapsed--overdue {
+    background: #fee2e2; color: #7f1d1d;
+}
+
+/* app.css */
+.step-dot {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; border: 2px solid var(--border);
+    background: var(--card-bg); color: var(--text-soft);
+}
+.step-dot.done     { background: var(--success); border-color: var(--success); color: #fff; }
+.step-dot.current  { background: #fff; border-color: var(--warning); color: var(--warning); }
+.step-dot.rejected { background: #fee2e2; border-color: var(--danger); color: var(--danger); }
+.step-dot.pending  { background: var(--surface); border-color: var(--border); color: var(--text-soft); }
+
 .step-remark {
     font-size: 12px; font-style: italic;
     color: var(--text-muted);

@@ -16,8 +16,8 @@
 
             // Sequence mapping (matches FormController::PIPELINE):
             // Status 'submitted' -> next is sequence 2 (Supervisor)
-            // Status 'supervisor_reviewed' -> next is sequence 3 (Dept Head)
             // Status 'department_checked' -> next is sequence 4 (Checker)
+            // Status 'supervisor_reviewed' -> next is sequence 3 (Finance Head)
             // Status 'checker_approved' -> next is sequence 5 (Final Approver)
             // Status 'final_approved' -> next is sequence 6 (Final Approver completion)
 
