@@ -104,12 +104,20 @@
         }
 
         /**
+         * Check if a form type belongs to the Administrative category.
+         */
+        public static function isAdminForm(string $type): bool {
+            return in_array($type, self::ADMIN_FORMS, true);
+        }
+
+        /**
          * Resolve the human-readable pipeline stage.
          * 
          * @param string $status The raw form status
          * @param int|null $currentStep The earliest pending sequence number
+         * @param string $formType The type of form to resolve correct labels
          */
-        public static function currentStage(string $status, ?int $currentStep): string {
+        public static function currentStage(string $status, ?int $currentStep, string $formType = ''): string {
             if ($status === 'draft') return 'Draft';
             if ($status === 'rejected') return 'Rejected';
             if ($status === 'completed') return 'Completed';
@@ -117,7 +125,7 @@
 
             // Use the pending sequence label if available
             if ($currentStep) {
-                return self::stepLabel((int)$currentStep);
+                return self::stepLabel((int)$currentStep, $formType);
             }
 
             return ucwords(str_replace('_', ' ', $status));
