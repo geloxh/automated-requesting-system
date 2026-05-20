@@ -90,15 +90,19 @@ foreach ($stepsBySeq as $seq => $s) {
             <div class="step-name"><?= htmlspecialchars($name) ?></div>
             <div class="step-role"><?= htmlspecialchars($role) ?></div>
             <?php if ($dotClass === 'current'): ?>
-                <div class="step-time" style="color:var(--warning);font-weight:600">
-                    <i class="ti ti-clock" style="font-size:11px"></i>
-                    <?= htmlspecialchars($timeText) ?> — waiting on <?= htmlspecialchars($step['full_name'] ?? 'assignee') ?>
+                <div class="step-time">
+                    <span class="step-elapsed <?= $diff->days >= 3 ? 'step-elapsed--overdue' : '' ?>">
+                        <i class="ti ti-clock" style="font-size:10px"></i>
+                        <?= htmlspecialchars($elapsed) ?>
+                    </span>
                 </div>
             <?php else: ?>
                 <div class="step-time"><?= htmlspecialchars($timeText) ?></div>
             <?php endif; ?>
             <?php if ($remarks): ?>
-                <div class="step-time" style="font-style:italic">"<?= htmlspecialchars($remarks) ?>"</div>
+                <div class="step-remark">
+                    <i class="ti ti-quote"></i><?= htmlspecialchars($remarks) ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>
