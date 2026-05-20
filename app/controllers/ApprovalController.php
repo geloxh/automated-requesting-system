@@ -12,15 +12,6 @@
             $userId = (int) $_SESSION['user_id'];
             $roleId = (int) $_SESSION['role_id'];
 
-            // Shows "pending" steps that match the current form status.
-
-            // Sequence mapping (matches FormController::PIPELINE):
-            // Status 'submitted' -> next is sequence 2 (Supervisor)
-            // Status 'department_checked' -> next is sequence 4 (Checker)
-            // Status 'supervisor_reviewed' -> next is sequence 3 (Finance Head)
-            // Status 'checker_approved' -> next is sequence 5 (Final Approver)
-            // Status 'final_approved' -> next is sequence 6 (Final Approver completion)
-
             $sql = "SELECT f.id, f.form_type, f.created_at, 
                            e.full_name as owner_name, e.department,
                            a.sequence, a.status as step_status,
@@ -36,13 +27,9 @@
                 $sql .= 
                 " 
                 AND a.approver_id = :userId 
-                AND (
-                    (f.status = 'submitted' AND a.sequence = 2) OR
-                    (f.status = 'supervisor_reviewed' AND a.sequence = 3) OR
-                    (f.status = 'department_checked' AND a.sequence = 4) OR
-                    (f.status = 'checker_approved' AND a.sequence = 5) OR
-                    (f.status = 'final_approved' AND a.sequence = 6)
-                )";
+                AND a.status = 'pending'
+                AND f.status NOT IN ('draft', 'completed', 'rejected', 'cancelled')
+                ";
             }
 
         // Priority sort toggle: overdue items (3+ days) float to top by default
