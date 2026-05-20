@@ -68,8 +68,11 @@ CREATE TABLE forms (
     status VARCHAR(30) NOT NULL DEFAULT 'draft'
         CHECK (status IN (
             'draft', 'submitted',
-            'supervisor_reviewed', 'department_checked',
-            'checker_approved', 'final_approved',
+            'checker_approved',
+            'department_reviewed',
+            'process_approved',
+            'finance_reviewed',
+            'final_approved',
             'completed', 'rejected', 'cancelled'
         )),
     submitted_by INT NOT NULL,
