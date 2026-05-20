@@ -29,50 +29,71 @@ class FormController {
      *   5 = Checker / 
      *   6 = Final Approver
      */
-    private const PIPELINE = [
+
+    // Constants
+    private const FORM_CATEGORIES = [
+        'admin' => ['overtime_authorization', 'leave_application', 'vehicle_request'],
+        'finance' => ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'],
+    ];
+
+    private const PIPELINE_ADMIN = [
         'submit' => [
-            'sequence' => 1,
-            'from' => 'draft',
-            'to' => 'submitted',
-            'role_id' => 3,   // the employee who owns the form
-            'label' => 'Submitted',
+            'sequence' => 1, 'from' => 'draft', 'to' => 'submitted',
+            'role_id' => 3, 'label' => 'Submitted',
         ],
-        'supervisor-review' => [
-            'sequence' => 2,
-            'from' => 'submitted',
-            'to' => 'supervisor_reviewed',
-            'role_id' => 2,   // supervisor / manager
-            'label' => 'Supervisor Reviewed',
+        'checker-approval' => [
+            'sequence' => 2, 'from' => 'submitted', 'to' => 'checker_approved',
+            'role_id' => 2, 'label' => 'Checker Approval',        // Immediate Supervisor
         ],
-        'department-check' => [
-            'sequence' => 3,
-            'from' => 'supervisor_reviewed',
-            'to' => 'department_checked',
-            'role_id' => 4,   // department head
-            'label' => 'Department Checked',
+        'review-approval' => [
+            'sequence' => 3, 'from' => 'checker_approved', 'to' => 'department_reviewed',
+            'role_id' => 4, 'label' => 'Review Approval',         // Department Head
         ],
-        'checker-supervisor' => [
-            'sequence' => 4,
-            'from' => 'department_checked',
-            'to' => 'checker_approved',
-            'role_id' => 5,   // checker
-            'label' => 'Checker Supervisor Approved',
-        ],
-        'final-approval' => [
-            'sequence' => 5,
-            'from' => 'checker_approved',
-            'to' => 'final_approved',
-            'role_id' => 6,   // final approver
-            'label' => 'Final Approval Granted',
+        'grant-approval' => [
+            'sequence' => 4, 'from' => 'department_reviewed', 'to' => 'final_approved',
+            'role_id' => 6, 'label' => 'Grant Approval Request',  // Final Approver
         ],
         'complete' => [
-            'sequence' => 6,
-            'from' => 'final_approved',
-            'to' => 'completed',
-            'role_id' => 6,   // final approver completes the request
-            'label' => 'Completed',
+            'sequence' => 5, 'from' => 'final_approved', 'to' => 'completed',
+            'role_id' => 6, 'label' => 'Completed',
         ],
     ];
+
+    private const PIPELINE_FINANCE = [
+        'submit' => [
+            'sequence' => 1, 'from' => 'draft', 'to' => 'submitted',
+            'role_id' => 3, 'label' => 'Submitted',
+        ],
+        'checker-approval' => [
+            'sequence' => 2, 'from' => 'submitted', 'to' => 'checker_approved',
+            'role_id' => 2, 'label' => 'Checker Approval',        // Immediate Supervisor
+        ],
+        'process-approval' => [
+            'sequence' => 3, 'from' => 'checker_approved', 'to' => 'process_approved',
+            'role_id' => 5, 'label' => 'Process Approval',        // Approval Acquisition
+        ],
+        'evaluation-approval' => [
+            'sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed',
+            'role_id' => 4, 'label' => 'Evaluation Approval',     // Finance Head
+        ],
+        'grant-approval' => [
+            'sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'final_approved',
+            'role_id' => 6, 'label' => 'Grant Approval Request',  // Final Approver
+        ],
+        'complete' => [
+            'sequence' => 6, 'from' => 'final_approved', 'to' => 'completed',
+            'role_id' => 6, 'label' => 'Completed',
+        ],
+    ];
+
+    // ----------------------------------------------------------------
+    // helper
+    // ----------------------------------------------------------------
+    private function getPipeline(string $formType): array {
+        return in_array($formType, self::FORM_CATEGORIES['finance'], true)
+            ? self::PIPELINE_FINANCE
+            : self::PIPELINE_ADMIN;
+    }
 
     // ----------------------------------------------------------------
     // GET /forms/{slug}
@@ -150,7 +171,7 @@ class FormController {
     // ----------------------------------------------------------------
     // GET /forms/view/{id}
     // ----------------------------------------------------------------
-    public function show(int $id): void {
+    public function show(int $id) {
         $form = $this->findForm($id);
 
         $approvals = db()->prepare(
@@ -161,15 +182,14 @@ class FormController {
         $approvals->execute([$id]);
         $approvalSteps = $approvals->fetchAll();
 
-        // What action button to show next based on current status
-        $statusToAction = [
-            'draft' => 'submit',
-            'submitted' => 'supervisor-review',
-            'supervisor_reviewed' => 'department-check',
-            'department_checked' => 'checker-supervisor',
-            'checker_approved' => 'final-approval',
-            'final_approved' => 'complete',
-        ];
+        // Build statusToAction dynamically from the correct pipeline
+        $pipeline = $this->getPipeline($form['form_type']);
+        $statusToAction = [];
+        foreach ($pipeline as $action => $step) {
+            if ($step['from'] !== '*') {
+                $statusToAction[$step['from']] = $action;
+            }
+        }
         $nextAction = $statusToAction[$form['status']] ?? null;
 
         $canAct = $this->canActOnForm($form, $approvalSteps);
@@ -179,12 +199,7 @@ class FormController {
         $pageTitle = \App\Helpers\FormLabels::get($form['form_type']) . ' #' . $id;
 
         $this->render('forms/show', compact(
-            'form',
-            'approvalSteps',
-            'canAct',
-            'data',
-            'pageTitle',
-            'nextAction'
+            'form', 'approvalSteps', 'canAct', 'data', 'pageTitle', 'nextAction'
         ));
     }
 
