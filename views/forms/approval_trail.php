@@ -14,14 +14,28 @@ $icons = [
     6 => 'ti-circle-check',
 ];
 
-$labels = [
-    1 => ['name' => \App\Helpers\FormLabels::stepLabel(1), 'role' => 'Requestor'],
-    2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2)],
-    3 => ['name' => 'Department Head', 'role' => \App\Helpers\FormLabels::stepLabel(3)],
-    4 => ['name' => 'Checker', 'role' => \App\Helpers\FormLabels::stepLabel(4)],
-    5 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(5)],
-    6 => ['name' => \App\Helpers\FormLabels::stepLabel(6), 'role' => \App\Helpers\FormLabels::stepLabel(6)],
-];
+$formType = $form['form_type'] ?? '';
+$isAdmin = \App\Helpers\FormLabels::isAdminForm($formType);
+$maxSeq = $isAdmin ? 5 : 6;
+
+if ($isAdmin) {
+    $labels = [
+        1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
+        2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
+        3 => ['name' => 'Department Head', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
+        4 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
+        5 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
+    ];
+} else {
+    $labels = [
+        1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
+        2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
+        3 => ['name' => 'Checker', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
+        4 => ['name' => 'Finance Head', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
+        5 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
+        6 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(6, $formType)],
+    ];
+}
 
 // Index by sequence (DB column), not level
 $stepsBySeq = [];
@@ -43,7 +57,7 @@ foreach ($stepsBySeq as $seq => $s) {
 <div class="approval-trail">
 <?php 
 $isSubmitted = !in_array($form['status'], ['draft'], true);
-for ($seq = 1; $seq <= 6; $seq++):
+for ($seq = 1; $seq <= $maxSeq; $seq++):
     $step = $stepsBySeq[$seq] ?? null;
     $status = $step['status'] ?? null;
 
