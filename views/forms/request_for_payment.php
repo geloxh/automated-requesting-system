@@ -1,4 +1,6 @@
 <form method="POST" action="/processing-system/public/forms/leave/create" class="card p-4 bg-white shadow-sm">
+    <div class="page-heading">Request for Payment</div>
+    <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
     <?= \App\Helpers\Csrf::field(); ?>
 
     <div class="form-card">
