@@ -39,6 +39,10 @@
     <div class="card">
         <div class="card-header">Form Details</div>
         <div class="card-body">
+            <div class="show-form-type-tag">
+                <i class="ti <?= $iconMap[$type] ?? 'ti-file' ?>"></i>
+                <?= htmlspecialchars($title) ?>
+            </div>
             <div class="dl-grid">
             <?php
         // Human-readable field labels — avoids "from date", "payee", etc.
@@ -64,6 +68,12 @@
             if ($key === 'csrf_token') continue;
             $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
         ?>
+        <?php if (empty($data)): ?>
+            <div class="empty-state" style="padding:1rem">
+                <i class="ti ti-file-off empty-state-icon"></i>
+                No form data available.
+            </div
+        <?php endif; ?>
                     <span class="dl-label"><?= htmlspecialchars($label) ?></span>
                     <span class="dl-value">
                         <?php if (is_array($value)): ?>
