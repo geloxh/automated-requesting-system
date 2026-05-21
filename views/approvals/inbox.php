@@ -57,8 +57,20 @@ $topType      = key($byType) ?? null;
                 <option value="<?= htmlspecialchars($formLabel[$ft] ?? $ft) ?>"><?= htmlspecialchars($formLabel[$ft] ?? $ft) ?></option>
             <?php endforeach; ?>
         </select>
+        
         <span class="badge badge-warning"><?= count($approvals) ?> pending</span>
         <span class="filter-count" data-filter-count></span>
+
+        <div class="sort-toggle">
+            <a href="?sort=priority"
+               class="sort-btn <?= ($currentSort === 'priority') ? 'active' : '' ?>">
+                <i class="ti ti-alert-triangle"></i> Priority
+            </a>
+            <a href="?sort=date"
+               class="sort-btn <?= ($currentSort === 'date') ? 'active' : '' ?>">
+                <i class="ti ti-calendar"></i> Date
+            </a>
+        </div>
     </div>
     <table data-filterable data-search-col="0,1,2,3" data-filter-col="0">
         <thead>
