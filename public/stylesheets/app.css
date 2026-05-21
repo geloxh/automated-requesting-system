@@ -724,3 +724,12 @@ textarea { resize: vertical; }
 }
 .pipeline-step i { font-size: 20px; color: var(--text-soft); }
 .pipeline-arrow { color: var(--border); font-size: 16px; }
+
+.sort-toggle { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+.sort-btn {
+    padding: 4px 10px; border-radius: 6px; font-size: 12px;
+    font-weight: 500; color: var(--text-muted); display: flex;
+    align-items: center; gap: 4px; text-decoration: none; transition: all .15s;
+}
+.sort-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.sort-btn i { font-size: 13px; }
