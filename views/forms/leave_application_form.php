@@ -73,15 +73,6 @@
     </div>
 
     <div class="form-card">
-        <div class="form-section-title">Approval</div>
-        <div class="form-grid g-3">
-            <div class="form-group"><label>Applicant</label><input type="text" name="prepared_by"></div>
-            <div class="form-group"><label>Checked By</label><input type="text" name="checked_by"></div>
-            <div class="form-group"><label>Approved By</label><input type="text" name="approved_by"></div>
-        </div>
-    </div>
-
-    <div class="form-card">
         <div class="form-section-title">Approval Pipeline</div>
         <div class="pipeline-preview">
             <div class="pipeline-step"><i class="ti ti-send"></i><span>You submit</span></div>
