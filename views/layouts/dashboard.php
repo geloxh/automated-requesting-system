@@ -102,12 +102,12 @@
 
 <!-- ── KPI Cards ── -->
 <div class="kpi-grid">
-    <div class="kpi-card blue">
+    <a href="/processing-system/public/my-submissions" class="kpi-card blue kpi-card--link">
         <div class="kpi-icon blue"><i class="ti ti-hourglass"></i></div>
         <div class="kpi-label">In Approval</div>
         <div class="kpi-value"><?= $counts['in_approval'] ?></div>
-        <div class="kpi-delta">Submitted &amp; pending decisions</div>
-    </div>
+        <div class="kpi-delta">Submitted & pending decisions</div>
+    </a>
     <div class="kpi-card green">
         <div class="kpi-icon green"><i class="ti ti-circle-check"></i></div>
         <div class="kpi-label">Approved</div>
