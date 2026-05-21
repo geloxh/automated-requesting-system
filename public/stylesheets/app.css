@@ -295,6 +295,10 @@ a { text-decoration: none; color: inherit; }
 .th-first, .td-first { padding-left: 1.25rem; }
 .td-last { padding-right: 1rem; }
 
+.row-overdue { background: #fff8f8; }
+.row-overdue:hover { background: #fff0f0; }
+.row-overdue td:first-child { border-left: 3px solid var(--danger); }
+
 .inbox-kpi {
     display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
 }
@@ -733,3 +737,17 @@ textarea { resize: vertical; }
 }
 .sort-btn.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .sort-btn i { font-size: 13px; }
+
+.inbox-form-cell { display: flex; align-items: center; gap: 10px; }
+.inbox-form-name { font-weight: 600; font-size: 13.5px; }
+.inbox-form-id   { font-size: 11.5px; color: var(--text-muted); }
+
+.wait-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; color: var(--text-muted); background: var(--surface);
+    border: 1px solid var(--border);
+}
+.wait-pill--overdue {
+    color: var(--danger); background: #fff1f2; border-color: #fecaca;
+}
