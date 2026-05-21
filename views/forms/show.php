@@ -45,35 +45,36 @@
             </div>
             <div class="dl-grid">
             <?php
-        // Human-readable field labels — avoids "from date", "payee", etc.
-        $fieldLabels = [
-            'purpose' => 'Purpose',
-            'payment_type' => 'Payment Type',
-            'payee' => 'Payee',
-            'date' => 'Date',
-            'employee_name' => 'Employee Name',
-            'department' => 'Department',
-            'request_date' => 'Request Date',
-            'unit_owner' => 'Unit Owner',
-            'bearer_name' => 'Bearer Name',
-            'service_type' => 'Service Type',
-            'leave_type' => 'Leave Type',
-            'from_date' => 'From Date',
-            'to_date' => 'To Date',
-            'payment_term' => 'Payment Term',
-            'car_available' => 'Car Available',
-            'trip_type' => 'Trip Type',
-        ];
-        foreach ($data ?? [] as $key => $value):
-            if ($key === 'csrf_token') continue;
-            $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
-        ?>
-        <?php if (empty($data)): ?>
-            <div class="empty-state" style="padding:1rem">
-                <i class="ti ti-file-off empty-state-icon"></i>
-                No form data available.
-            </div
-        <?php endif; ?>
+                // Human-readable field labels — avoids "from date", "payee", etc.
+                $fieldLabels = [
+                    'purpose' => 'Purpose',
+                    'payment_type' => 'Payment Type',
+                    'payee' => 'Payee',
+                    'date' => 'Date',
+                    'employee_name' => 'Employee Name',
+                    'department' => 'Department',
+                    'request_date' => 'Request Date',
+                    'unit_owner' => 'Unit Owner',
+                    'bearer_name' => 'Bearer Name',
+                    'service_type' => 'Service Type',
+                    'leave_type' => 'Leave Type',
+                    'from_date' => 'From Date',
+                    'to_date' => 'To Date',
+                    'payment_term' => 'Payment Term',
+                    'car_available' => 'Car Available',
+                    'trip_type' => 'Trip Type',
+                ];
+            ?>
+            <?php if (empty($data)): ?>
+                <div class="empty-state" style="padding:1rem">
+                    <i class="ti ti-file-off empty-state-icon"></i>
+                    No form data available.
+                </div
+            <?php else: ?>
+                <?php foreach ($data as $key => $value):
+                    if ($key === 'csrf_token') continue;
+                    $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
+                ?>
                     <span class="dl-label"><?= htmlspecialchars($label) ?></span>
                     <span class="dl-value">
                         <?php if (is_array($value)): ?>
@@ -85,6 +86,7 @@
                 <?php endforeach; ?>
                 <span class="dl-label">Submitted</span>
                 <span class="dl-value"><?= date('M d, Y h:i A', strtotime($form['created_at'])) ?></span>
+            <?php endif; ?>
             </div>
         </div>
     </div>
@@ -130,15 +132,33 @@
                     </div>
 
                     <div class="action-btns">
+                        <?php
+                            $nextStepHints = [
+                                'check-approval' => 'Approving will forward this to the Department Head.',
+                                'review-approval' => 'Approving will forward this to the Final Approver.',
+                                'process-approval' => 'Approving will forward this to the Finance Head',
+                                'evaluation-approval' => 'Approving will forward this to the Final Approver.',
+                                'grant-approval' => 'Approving will mark this as Final Approved.',
+                                'complete' => 'This will close the request as fullly completed.',
+                                'submit' => 'Submitting will send this for Checker Approval.',
+                            ];
+                        ?>
+                        <?php if (isset($nextStepHints[$nextAction])): ?>
+                            <p class="action-hint">
+                                <i class="ti ti-info-circle"></i>
+                                <?= $nextStepHints[$nextAction] ?>
+                            </p>
+                        <?php endif; ?>
+                        
                         <?php if ($nextAction): ?>
-                        <button type="submit"
-                            name="action"
-                            value="approve"
-                            formaction="/processing-system/public/forms/<?= $formId ?>/approve/<?= htmlspecialchars($nextAction) ?>"
-                            class="btn btn-success btn-block">
-                            <i class="ti ti-circle-check"></i>
-                            <?= htmlspecialchars($approveLabel) ?>
-                        </button>
+                            <button type="submit"
+                                name="action"
+                                value="approve"
+                                formaction="/processing-system/public/forms/<?= $formId ?>/approve/<?= htmlspecialchars($nextAction) ?>"
+                                class="btn btn-success btn-block">
+                                <i class="ti ti-circle-check"></i>
+                                <?= htmlspecialchars($approveLabel) ?>
+                            </button>
                         <?php endif; ?>
 
                         <button type="submit"
@@ -153,7 +173,7 @@
                 </form>
             </div>
         </div>
-        <?php endif; ?>
+    <?php endif; ?>
     </div>
 
 </div>
