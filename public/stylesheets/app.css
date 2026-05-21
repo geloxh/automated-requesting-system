@@ -378,6 +378,10 @@ textarea { resize: vertical; }
 .page-heading { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
 .page-subheading { font-size: 13.5px; color: var(--text-muted); margin-bottom: 24px; }
 
+.show-identity { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.show-form-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text-main); }
+.show-form-id { font-weight: 400; color: var(--text-muted); font-size: 14px; margin-left: 4px; }
+
 /* ── Detail list ── */
 .dl-grid  { display: grid; grid-template-columns: 160px 1fr; gap: .5rem 1rem; align-items: start; }
 .dl-label { font-weight: 500; color: var(--text-muted); font-size: .8rem; text-transform: capitalize; }
