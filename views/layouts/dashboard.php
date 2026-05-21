@@ -100,6 +100,30 @@
 <div class="page-heading">Welcome back, <?= htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]) ?> 👋</div>
 <div class="page-subheading"><?= date('l, F j, Y') ?> — here's your current activity.</div>
 
+<?php
+// Only show for approver roles
+if (in_array($roleId, [2, 4, 5, 6], true)) {
+    $pendingCount = (int) db()->prepare(
+        'SELECT COUNT(*) FROM approvals a
+         JOIN forms f ON f.id = a.form_id
+         WHERE a.approver_id = ? AND a.status = "pending"
+         AND f.status NOT IN ("draft","cancelled","completed","rejected")'
+    )->execute([$userId]) ? db()->query(
+        "SELECT COUNT(*) FROM approvals a
+         JOIN forms f ON f.id = a.form_id
+         WHERE a.approver_id = {$userId} AND a.status = 'pending'
+         AND f.status NOT IN ('draft','cancelled','completed','rejected')"
+    )->fetchColumn() : 0;
+
+    if ($pendingCount > 0): ?>
+        <a href="/processing-system/public/approvals" class="dash-alert">
+            <i class="ti ti-bell-ringing"></i>
+            <span>You have <strong><?= $pendingCount ?> pending approval<?= $pendingCount > 1 ? 's' : '' ?></strong> waiting for your action.</span>
+            <span class="dash-alert-cta">Go to Inbox <i class="ti ti-arrow-right"></i></span>
+        </a>
+    <?php endif;
+}
+?>
 <!-- ── KPI Cards ── -->
 <div class="kpi-grid">
     <a href="/processing-system/public/my-submissions" class="kpi-card blue kpi-card--link">
@@ -135,7 +159,11 @@
     <div class="card-panel">
         <div class="card-panel-header">
             <span class="card-panel-title">Recent Activity</span>
-            <a href="/processing-system/public/forms/advance-payment" class="card-panel-link">View all →</a>
+            <?php $allLink = ($roleId == 1)
+                ? '/processing-system/public/requests'
+                : '/processing-system/public/my-submissions';
+            ?>
+            <a href="<?= $allLink ?>" class="card-panel-link">View all →</a>
         </div>
         <?php if (empty($forms)): ?>
             <div class="empty-state">
