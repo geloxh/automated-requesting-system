@@ -111,6 +111,20 @@
         }
 
         /**
+         * Returns a context-aware verb for approval action buttons based on the sequence.
+         */
+        public static function verb(int $sequence): string {
+            $verbs = [
+                2 => 'Check',
+                3 => 'Review',
+                4 => 'Process',
+                5 => 'Evaluate',
+                6 => 'Approve',
+            ];
+            return $verbs[$sequence] ?? 'Review';
+        }
+
+        /**
          * Resolve the human-readable pipeline stage.
          * 
          * @param string $status The raw form status
