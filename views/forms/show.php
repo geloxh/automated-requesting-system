@@ -174,6 +174,25 @@
             </div>
         </div>
     <?php endif; ?>
+
+    <?php if (!$canAct && in_array($form['status'], ['completed', 'rejected'], true)): ?>
+        <div class="card card-action">
+            <div class="card-header">Request Status</div>
+            <div class="card-body">
+                <?php if ($form['status'] === 'completed'): ?>
+                    <div class="status-final status-final--success">
+                        <i class="ti ti-circle-check"></i>
+                        This request has been fully approved and completed.
+                    </div>
+                <?php else: ?>
+                    <div class="status-final status-final--danger">
+                        <i class="ti ti-circle-x"></i>
+                        This request was rejected. Check the approval trail for the reason.
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
     </div>
 
 </div>
