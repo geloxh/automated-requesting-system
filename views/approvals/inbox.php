@@ -94,13 +94,14 @@ $topType      = key($byType) ?? null;
         ?>
             <tr>
                 <td class="td-first">
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <div class="activity-icon activity-icon-dynamic" style="--icon-bg:<?= $ic['bg'] ?>;--icon-color:<?= $ic['color'] ?>;width:32px;height:32px;font-size:15px">
+                    <div class="inbox-form-cell">
+                        <div class="activity-icon activity-icon-dynamic"
+                            style="--icon-bg:<?= $ic['bg'] ?>;--icon-color:<?= $ic['color'] ?>">
                             <i class="ti <?= $ic['icon'] ?>"></i>
                         </div>
                         <div>
-                            <div style="font-weight:600;font-size:13.5px"><?= htmlspecialchars($typeLabel) ?></div>
-                            <div style="font-size:11.5px;color:var(--text-muted)">#<?= $row['id'] ?></div>
+                            <div class="inbox-form-name"><?= htmlspecialchars($typeLabel) ?></div>
+                            <div class="inbox-form-id">#<?= $row['id'] ?></div>
                         </div>
                     </div>
                 </td>

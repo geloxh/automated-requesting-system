@@ -295,9 +295,9 @@ a { text-decoration: none; color: inherit; }
 .th-first, .td-first { padding-left: 1.25rem; }
 .td-last { padding-right: 1rem; }
 
-.row-overdue { background: #fff8f8; }
-.row-overdue:hover { background: #fff0f0; }
-.row-overdue td:first-child { border-left: 3px solid var(--danger); }
+.inbox-form-cell { display: flex; align-items: center; gap: 10px; }
+.inbox-form-name { font-weight: 600; font-size: 13.5px; }
+.inbox-form-id   { font-size: 11.5px; color: var(--text-muted); }
 
 .inbox-kpi {
     display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
