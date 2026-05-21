@@ -744,6 +744,14 @@ textarea { resize: vertical; }
 
 .wait-pill {
     display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+}
+.wait-pill--overdue {
+    color: var(--danger);
+}
+.wait-pill i { font-size: 12px; }
+.wait-pill {
+    display: inline-flex; align-items: center; gap: 4px;
     padding: 2px 8px; border-radius: 6px; font-size: 12px;
     font-weight: 600; color: var(--text-muted); background: var(--surface);
     border: 1px solid var(--border);
