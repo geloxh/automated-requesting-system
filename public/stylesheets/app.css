@@ -320,6 +320,9 @@ td.text-end { text-align: right; }
 
 /* ── Form controls ── */
 .form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.25rem; }
+
+.req { color: var(--danger); font-size: .75rem; }
+
 .form-section-title {
     font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
     color: var(--accent); margin-bottom: 1rem; padding-bottom: .5rem;
@@ -329,7 +332,9 @@ td.text-end { text-align: right; }
 .g-2 { grid-template-columns: repeat(2, 1fr); }
 .g-3 { grid-template-columns: repeat(3, 1fr); }
 .g-4 { grid-template-columns: repeat(4, 1fr); }
+
 .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .75rem; }
+
 label { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
 
 .form-action {

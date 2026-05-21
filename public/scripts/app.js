@@ -105,3 +105,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     setInterval(pollNotifications, 60000);
 });
+
+document.querySelectorAll('input[type="date"]:not([value])').forEach(el => {
+    if (!el.closest('[data-no-default]')) {
+        el.value = new Date().toISOString().split('T')[0];
+    }
+});
