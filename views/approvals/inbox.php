@@ -23,6 +23,31 @@ sort($uniqueTypes);
     </div>
 <?php else: ?>
 
+<?php
+$totalPending = count($approvals);
+$overdue      = count(array_filter($approvals, fn($r) => $r['days_pending'] >= 3));
+$byType       = array_count_values(array_column($approvals, 'form_type'));
+arsort($byType);
+$topType      = key($byType) ?? null;
+?>
+
+<div class="inbox-kpi">
+    <div class="inbox-kpi-card">
+        <div class="inbox-kpi-value"><?= $totalPending ?></div>
+        <div class="inbox-kpi-label">Pending</div>
+    </div>
+    <div class="inbox-kpi-card inbox-kpi-card--danger">
+        <div class="inbox-kpi-value"><?= $overdue ?></div>
+        <div class="inbox-kpi-label">Overdue (3+ days)</div>
+    </div>
+    <?php if ($topType): ?>
+    <div class="inbox-kpi-card">
+        <div class="inbox-kpi-value"><?= $byType[$topType] ?></div>
+        <div class="inbox-kpi-label">Most: <?= htmlspecialchars($formLabel[$topType] ?? $topType) ?></div>
+    </div>
+    <?php endif; ?>
+</div>
+
 <div class="table-wrap">
     <div class="filter-bar" data-filter-bar>
         <input type="search" placeholder="Search by name, department, form…" data-search-input aria-label="Search approvals">
