@@ -27,9 +27,14 @@
             </div>
             <div class="form-group"><label>Department</label><input type="text" name="department"></div>
         </div>
-        <div class="action-btns mt-1">
-            <button class="btn btn-primary">Save</button>
-            <a href="/processing-system/public/employees" class="btn btn-ghost">Cancel</a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="ti ti-send"></i> Submit for Approval
+            </button>
+            <button type="submit" name="save_draft" value="1" class="btn btn-ghost">
+                <i class="ti ti-device-floppy"></i> Save as Draft
+            </button>
+            <a href="javascript:history.back()" class="btn btn-ghost">Cancel</a>
         </div>
     </form>
 </div>
