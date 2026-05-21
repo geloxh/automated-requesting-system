@@ -20,12 +20,18 @@
 <?php endif; ?>
 
 <div class="page-header">
-    <div>    
+    <div class="show-identity">
+        <div class="show-form-title">
+            <?= htmlspecialchars($title) ?>
+            <span class="show-form-id">#<?= $formId ?></span>
+        </div>
         <span class="badge badge-<?= $statusBadge[$form['status']] ?? 'secondary' ?>">
             <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
         </span>
     </div>
-    <button id="btn-back" class="btn btn-ghost btn-sm" data-fallback-url="/processing-system/public/approvals">← Back</button>
+    <button id="btn-back" class="btn btn-ghost btn-sm" data-fallback-url="/processing-system/public/approvals">
+        <i class="ti ti-arrow-left"></i> Back
+    </button>
 </div>
 
 <div class="two-col">
