@@ -260,6 +260,8 @@ a { text-decoration: none; color: inherit; }
 .kpi-icon.amber { background: #fef3c7; color: var(--warning); }
 .kpi-icon.purple { background: #ede9fe; color: var(--info); }
 
+.kpi-card--link { text-decoration: none; cursor: pointer; transition: box-shadow .15s, transform .15s; display: block; }
+.kpi-card--link:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-2px); }
 /* ── Legacy stat-grid ── */
 .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1.5rem; }
 .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: .85rem 1rem; display: flex; align-items: center; gap: .85rem; }

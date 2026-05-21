@@ -35,20 +35,30 @@ arsort($byType);
 $topType      = key($byType) ?? null;
 ?>
 
-<div class="inbox-kpi">
-    <div class="inbox-kpi-card">
-        <div class="inbox-kpi-value"><?= $totalPending ?></div>
-        <div class="inbox-kpi-label">Pending</div>
-    </div>
-    <div class="inbox-kpi-card inbox-kpi-card--danger">
-        <div class="inbox-kpi-value"><?= $overdue ?></div>
-        <div class="inbox-kpi-label">Overdue (3+ days)</div>
-    </div>
-    <?php if ($topType): ?>
-    <div class="inbox-kpi-card">
-        <div class="inbox-kpi-value"><?= $byType[$topType] ?></div>
-        <div class="inbox-kpi-label">Most: <?= htmlspecialchars($formLabel[$topType] ?? $topType) ?></div>
-    </div>
+<div class="kpi-grid">
+    <a href="?" class="kpi-card blue kpi-card--link">
+        <div class="kpi-icon blue"><i class="ti ti-inbox"></i></div>
+        <div class="kpi-label">Pending</div>
+        <div class="kpi-value"><?= $totalPending ?></div>
+        <div class="kpi-delta">Forms waiting for your action</div>
+    </a>
+
+    <a href="?overdue=1" class="kpi-card amber kpi-card--link">
+        <div class="kpi-icon amber"><i class="ti ti-alert-triangle"></i></div>
+        <div class="kpi-label">Overdue (3+ days)</div>
+        <div class="kpi-value"><?= $overdue ?></div>
+        <div class="kpi-delta">Immediate decision required</div>
+    </a>
+
+    <?php if ($topType): 
+        $topIc = $iconMap[$topType] ?? ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-file'];
+    ?>
+    <a href="?type=<?= urlencode($topType) ?>" class="kpi-card purple kpi-card--link">
+        <div class="kpi-icon purple"><i class="ti <?= $topIc['icon'] ?>"></i></div>
+        <div class="kpi-label">Most Frequent</div>
+        <div class="kpi-value"><?= $byType[$topType] ?></div>
+        <div class="kpi-delta"><?= htmlspecialchars($formLabel[$topType] ?? $topType) ?></div>
+    </a>
     <?php endif; ?>
 </div>
 
