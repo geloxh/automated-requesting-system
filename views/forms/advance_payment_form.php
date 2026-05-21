@@ -1,3 +1,7 @@
+<?php if (!empty($_SESSION['error'])): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 <form method="POST" action="/processing-system/public/forms/advance-payment">
     <div class="page-heading">Advance Payment Request</div>
     <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
