@@ -6,7 +6,7 @@
     <div class="form-card">
         <div class="form-section-title">Applicant Details</div>
         <div class="form-grid g-4">
-            <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" required></div>
+            <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" value="<?= htmlspecialchars($currentUser ?? '') ?>" readonly required></div>
             <div class="form-group">
                 <label>Department</label>
                 <div class="input-select">
