@@ -6,11 +6,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Back button ─────────────────────────────────────────────
     const backBtn = document.getElementById('btn-back');
-    if (backBtn) backBtn.addEventListener('click', () => history.back());
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = backBtn.dataset.fallbackUrl || '/processing-system/public/approvals';
+            }
+        });
+    }
     
     const rejectBtn = document.getElementById('btn-reject');
     const remarksField = document.getElementById('remarksField');
     const remarksHint = document.getElementById('remarks-hint');
+
+    const successAlert = document.querySelector('.alert-success');
 
     if (rejectBtn && remarksField) {
         // Require remarks and confirm before rejecting
@@ -43,5 +53,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 remarksHint.textContent = '(required if rejecting)';
             });
         }
+    }
+
+    if (successAlert) {
+        setTimeout(() => {
+            successAlert.style.transition = 'opacity .4s ease';
+            successAlert.style.opacity = '0';
+            setTimeout(() => successAlert.remove(), 400);
+        }, 4000);
     }
 });
