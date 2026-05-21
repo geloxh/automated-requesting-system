@@ -136,6 +136,7 @@
                             value="approve"
                             formaction="/processing-system/public/forms/<?= $formId ?>/approve/<?= htmlspecialchars($nextAction) ?>"
                             class="btn btn-success btn-block">
+                            <i class="ti ti-circle-check"></i>
                             <?= htmlspecialchars($approveLabel) ?>
                         </button>
                         <?php endif; ?>
@@ -146,7 +147,7 @@
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
                             class="btn btn-danger btn-block"
                             id="btn-reject">
-                            Reject
+                            <i class="ti ti-x"></i>Reject
                         </button>
                     </div>
                 </form>
