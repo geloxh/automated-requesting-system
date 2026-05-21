@@ -92,15 +92,15 @@ $topType      = key($byType) ?? null;
             $isOverdue = $ago->days >= 3;
             $typeLabel = $formLabel[$row['form_type']] ?? $row['form_type'];
         ?>
-            <tr>
+            <tr class="<?= $isOverdue ? 'row-overdue' : '' ?>">
                 <td class="td-first">
-                    <div style="display:flex;align-items:center;gap:10px">
+                    <div class="inbox-form-cell">
                         <div class="activity-icon activity-icon-dynamic" style="--icon-bg:<?= $ic['bg'] ?>;--icon-color:<?= $ic['color'] ?>;width:32px;height:32px;font-size:15px">
                             <i class="ti <?= $ic['icon'] ?>"></i>
                         </div>
                         <div>
-                            <div style="font-weight:600;font-size:13.5px"><?= htmlspecialchars($typeLabel) ?></div>
-                            <div style="font-size:11.5px;color:var(--text-muted)">#<?= $row['id'] ?></div>
+                            <div class="inbox-form-name"><?= htmlspecialchars($typeLabel) ?></div>
+                            <div class="inbox-form-id">#<?= $row['id'] ?></div>
                         </div>
                     </div>
                 </td>
@@ -113,8 +113,10 @@ $topType      = key($byType) ?? null;
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($row['created_at'])) ?></td>
                 <td>
-                    <span style="font-size:12px;font-weight:600;color:<?= $isOverdue ? 'var(--danger)' : 'var(--text-muted)' ?>">
-                        <?php if ($isOverdue): ?><i class="ti ti-alert-triangle" style="font-size:13px"></i> <?php endif; ?>
+                    <span class="wait-pill <?= $isOverdue ? 'wait-pill--overdue' : '' ?>">
+                        <?php if ($isOverdue): ?>
+                            <i class="ti ti-alert-triangle"></i>
+                        <?php endif; ?>
                         <?= $waitStr ?>
                     </span>
                 </td>
