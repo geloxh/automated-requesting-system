@@ -16,10 +16,14 @@ $uniqueTypes = array_unique(array_column($approvals ?? [], 'form_type'));
 sort($uniqueTypes);
 ?>
 
-<?php if (empty($approvals)): ?>
+<?php if (empty($approvals)): ?> 
     <div class="empty-state">
-        <i class="ti ti-inbox empty-state-icon"></i>
-        No pending approvals. You're all caught up!
+        <i class="ti ti-inbox-off empty-state-icon"></i>
+        <div style="font-weight:600;margin-bottom:6px">You're all caught up!</div>
+        <div style="font-size:13px;color:var(--text-soft);margin-bottom:16px">No pending approvals at this time.</div>
+        <a href="/processing-system/public/my-submissions" class="btn btn-ghost btn-sm">
+            <i class="ti ti-send"></i> View My Submissions
+        </a>
     </div>
 <?php else: ?>
 
@@ -92,7 +96,8 @@ $topType      = key($byType) ?? null;
             $isOverdue = $ago->days >= 3;
             $typeLabel = $formLabel[$row['form_type']] ?? $row['form_type'];
         ?>
-            <tr>
+            <tr class="<?= $isOverdue ? 'row-overdue' : '' ?>"
+                data-days="<?= (int)$row['days_pending'] ?>">
                 <td class="td-first">
                     <div class="inbox-form-cell">
                         <div class="activity-icon activity-icon-dynamic"
@@ -122,7 +127,9 @@ $topType      = key($byType) ?? null;
                     </span>
                 </td>
                 <td class="td-last text-end">
-                    <a href="/processing-system/public/forms/view/<?= $row['id'] ?>" class="btn btn-primary btn-sm">Review</a>
+                    <a href="/processing-system/public/forms/view/<?= $row['id'] ?>" class="btn btn-primary btn-sm">
+                        <?= \App\Helpers\FormLabels::verb((int)$row['sequence']) ?> <i class="ti ti-arrow-right" style="font-size:11px"></i>
+                    </a>
                 </td>
             </tr>
         <?php endforeach; ?>
