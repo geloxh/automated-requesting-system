@@ -46,16 +46,6 @@
     </div>
 
     <div class="form-card">
-        <div class="form-section-title">Approval</div>
-        <div class="form-grid g-4">
-            <div class="form-group"><label>Prepared By</label><input type="text" name="prepared_by"></div>
-            <div class="form-group"><label>Confirmed By</label><input type="text" name="confirmed_by"></div>
-            <div class="form-group"><label>Checked By</label><input type="text" name="checked_by"></div>
-            <div class="form-group"><label>Driver</label><input type="text" name="driver"></div>
-        </div>
-    </div>
-    
-    <div class="form-card">
         <div class="form-section-title">Approval Pipeline</div>
         <div class="pipeline-preview">
             <div class="pipeline-step"><i class="ti ti-send"></i><span>You submit</span></div>
