@@ -88,11 +88,16 @@
     </div>
 
     <div class="form-card">
-        <?php
-        // Static preview — no real steps yet, show all as pending except level 1
-        $approvalSteps = [['level' => 1, 'status' => 'pending', 'approver_name' => null, 'remarks' => null, 'approved_at' => null]];
-        require __DIR__ . '/approval_trail.php';
-        ?>
+        <div class="form-section-title">Approval Pipeline</div>
+        <div class="pipeline-preview">
+            <div class="pipeline-step"><i class="ti ti-send"></i><span>You submit</span></div>
+            <i class="ti ti-chevron-right pipeline-arrow"></i>
+            <div class="pipeline-step"><i class="ti ti-user-check"></i><span>Checker Approval</span></div>
+            <i class="ti ti-chevron-right pipeline-arrow"></i>
+            <div class="pipeline-step"><i class="ti ti-building-bank"></i><span>Review Approval</span></div>
+            <i class="ti ti-chevron-right pipeline-arrow"></i>
+            <div class="pipeline-step"><i class="ti ti-circle-check"></i><span>Grant Approval</span></div>
+        </div>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
     <button type="draft" class="btn btn-light">Save as Draft</button>
