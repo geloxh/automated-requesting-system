@@ -516,21 +516,26 @@ class FormController {
     private function store(string $type, string $slug): void {
         \App\Helpers\Csrf::verify();
 
+        $isSavingDraft = isset($_POST['save_draft']);  // ← detect intent
+
         $required = $this->fields[$type];
         $data = [];
 
-        foreach ($required as $field) {
-            $val = $_POST[$field] ?? '';
-            if (is_string($val)) $val = trim($val);
-            if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
-                $_SESSION['error'] = "Field '{$field}' is required.";
-                header("Location: /processing-system/public/forms/{$slug}/create");
-                exit;
+        // Skip required field validation when saving as draft
+        if (!$isSavingDraft) {
+            foreach ($required as $field) {
+                $val = $_POST[$field] ?? '';
+                if (is_string($val)) $val = trim($val);
+                if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
+                    $_SESSION['error'] = "Field '{$field}' is required.";
+                    header("Location: /processing-system/public/forms/{$slug}/create");
+                    exit;
+                }
             }
         }
 
         foreach ($_POST as $key => $val) {
-            if ($key === 'csrf_token') continue;
+            if (in_array($key, ['csrf_token', 'save_draft'], true)) continue;
             if (is_array($val)) {
                 $data[$key] = array_map(fn($v) => htmlspecialchars(trim($v), ENT_QUOTES), $val);
             } else {
@@ -542,23 +547,27 @@ class FormController {
         $pdo->beginTransaction();
 
         try {
-            // Insert as 'draft' — employee must hit 'submit' to start the pipeline
             $stmt = $pdo->prepare(
                 "INSERT INTO forms (form_type, status, submitted_by, data)
-                 VALUES (?, 'draft', ?, ?)"
+                VALUES (?, 'draft', ?, ?)"
             );
             $stmt->execute([$type, $_SESSION['user_id'], json_encode($data)]);
             $formId = (int) $pdo->lastInsertId();
 
-            // Seed one approval row per pipeline stage (skipping 'submit' — that's the owner)
             $this->seedApprovalRows($pdo, $formId, $type, $data);
-
             $this->audit('form_created', 'form', $formId, null, ['type' => $type, 'status' => 'draft']);
 
             $pdo->commit();
 
-            $_SESSION['success'] = 'Form saved as draft. Review and submit it for approval.';
-            header("Location: /processing-system/public/forms/view/{$formId}");
+            if ($isSavingDraft) {
+                // ← stay on the draft view so user can review before submitting
+                $_SESSION['success'] = 'Draft saved. You can continue editing or submit when ready.';
+                header("Location: /processing-system/public/forms/view/{$formId}");
+            } else {
+                // ← normal submit: also save as draft, user hits Submit on the view page
+                $_SESSION['success'] = 'Form saved as draft. Review and submit it for approval.';
+                header("Location: /processing-system/public/forms/view/{$formId}");
+            }
             exit;
 
         } catch (\Throwable $e) {

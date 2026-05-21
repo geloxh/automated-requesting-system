@@ -332,6 +332,15 @@ td.text-end { text-align: right; }
 .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .75rem; }
 label { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
 
+.form-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1.25rem 0 .5rem;
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
 .approval-trail { position: relative; }
 
 .approval-step {
