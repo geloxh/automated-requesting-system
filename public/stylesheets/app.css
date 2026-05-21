@@ -458,6 +458,16 @@ textarea { resize: vertical; }
 .action-btns { display: flex; gap: .5rem; }
 .btn-block { flex: 1; justify-content: center; }
 
+.btn-outline-danger {
+    background: transparent;
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.btn-outline-danger:hover {
+    background: #fee2e2;
+}
+
 /* ── Empty state ── */
 .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
 .empty-icon  { font-size: 2rem; margin-bottom: .5rem; }
