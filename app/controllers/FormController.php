@@ -165,7 +165,10 @@ class FormController {
             'SELECT DISTINCT department FROM employees WHERE department IS NOT NULL ORDER BY department'
         )->fetchAll(PDO::FETCH_COLUMN);
 
-        $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle', 'departments'));
+        $currentUser = $_SESSION['user_name'] ?? '';
+        $currentDept = $_SESSION['department'] ?? '';
+
+        $this->render("forms/{$viewName}", compact('fields', 'formType', 'slug', 'pageTitle', 'departments', 'currentUser', 'currentDept'));
     }
 
     // ----------------------------------------------------------------

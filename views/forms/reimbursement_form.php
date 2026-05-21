@@ -1,10 +1,12 @@
 <form method="POST" action="/processing-system/public/forms/reimbursement">
+    <div class="page-heading">Reimbursement Request</div>
+    <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
     <?= \App\Helpers\Csrf::field(); ?>
-
+ 
     <div class="form-card">
         <div class="form-section-title">Applicant Details</div>
         <div class="form-grid g-4">
-            <div class="form-group"><label>Name</label><input type="text" name="employee_name" required></div>
+            <div class="form-group"><label>Name</label><input type="text" name="employee_name" value="<?= htmlspecialchars($currentUser ?? '') ?>" readonly required></div>
             <div class="form-group">
                 <label>Department</label>
                 <div class="input-select">
