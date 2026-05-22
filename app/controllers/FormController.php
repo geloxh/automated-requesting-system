@@ -583,16 +583,53 @@ class FormController {
         return $row ? (int) $row['id'] : null;
     }
 
+    /**
+     * Determine whether the current user may act on this form right now.
+     *
+     * FIX: The previous implementation returned true for ANY pending row
+     * belonging to the user, regardless of sequence position.  Because all
+     * future approval rows are seeded as 'pending' at form creation, a Role 6
+     * user always had a pending row — so canActOnForm returned true from the
+     * moment the form was submitted, causing the "Your Action" card to render
+     * on the form detail page even when it was not their turn.
+     *
+     * The fix: first find the MINIMUM pending sequence for this form (the
+     * active stage).  A user only qualifies if their pending row sits exactly
+     * at that minimum sequence.  Every other pending row is a future stage and
+     * must remain invisible to the user until it becomes the active one.
+     *
+     * The server-side status gate in processApproval() already blocks
+     * out-of-order submissions, but this fix removes the misleading UI state
+     * so approvers never see an action card they cannot legitimately use.
+     */
     private function canActOnForm(array $form, array $steps): bool {
         if (in_array($form['status'], ['completed', 'rejected'], true)) return false;
         if ($_SESSION['role_id'] == 1) return true;
 
         $userId = (int) $_SESSION['user_id'];
+
+        // Form owner may submit their own draft.
         if ($form['status'] === 'draft' && (int)$form['submitted_by'] === $userId) return true;
 
+        // Determine the lowest pending sequence — that is the only active stage.
+        $pendingSequences = array_column(
+            array_filter($steps, fn($s) => $s['status'] === 'pending'),
+            'sequence'
+        );
+        if (empty($pendingSequences)) return false;
+        $activeSequence = min($pendingSequences);
+
+        // The user may act only if they own the row AT the active sequence.
         foreach ($steps as $step) {
-            if ((int)$step['approver_id'] === $userId && $step['status'] === 'pending') return true;
+            if (
+                (int)$step['approver_id'] === $userId
+                && $step['status']         === 'pending'
+                && (int)$step['sequence']  === (int)$activeSequence
+            ) {
+                return true;
+            }
         }
+
         return false;
     }
 
