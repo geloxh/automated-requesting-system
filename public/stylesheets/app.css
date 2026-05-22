@@ -761,3 +761,94 @@ textarea { resize: vertical; }
 .wait-pill--overdue {
     color: var(--danger); background: #fff1f2; border-color: #fecaca;
 }
+/* ═══════════════════════════════════════════════════════════════════
+   ADDITIONS — fixes and UX improvements
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Sidebar badge pulse (shows when pending count > 0) ── */
+@keyframes badge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+    50%       { box-shadow: 0 0 0 5px rgba(239,68,68,0); }
+}
+.badge-count--pulse {
+    background: var(--danger);
+    color: #fff;
+    animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* ── KPI delta period label ── */
+.kpi-delta--period {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 2px;
+}
+
+/* ── Topbar breadcrumb ── */
+.topbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+}
+.bc-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .15s;
+}
+.bc-link:hover { color: var(--text-main); }
+.bc-sep {
+    color: var(--border);
+    font-size: 11px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+.bc-sep i { font-size: 11px; }
+.bc-current {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+/* ── Stepper: approver name + date under each step ── */
+.step-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+.step-approver {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+.step-date {
+    font-size: 10px;
+    color: var(--text-soft);
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ── Stepper rejected note ── */
+.stepper-rejected-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #b91c1c;
+    font-size: 13px;
+    margin-top: 6px;
+}
+.stepper-rejected-note i { font-size: 16px; }
+
+/* ── Vol-fill: inline colour via style attr (no data-color needed) ── */
+/* The dashboard now sets background directly via style="background:…" */
+/* This rule keeps the transition smooth */
+.vol-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .4s ease;
+}

@@ -1,22 +1,23 @@
 <div class="page-heading">All Requests</div>
 <div class="page-subheading">Complete record of all submitted forms across all departments.</div>
- 
+
 <?php
-$badgeMap = \App\Helpers\FormLabels::allBadges();
- 
+$badgeMap     = \App\Helpers\FormLabels::allBadges();
+$statusLabels = \App\Helpers\FormLabels::allStatusLabels();
+
 $uniqueTypes = array_unique(array_column($forms ?? [], 'form_type'));
 sort($uniqueTypes);
 $uniqueDepts = array_unique(array_filter(array_column($forms ?? [], 'department')));
 sort($uniqueDepts);
 ?>
- 
+
 <?php if (empty($forms)): ?>
     <div class="empty-state">
         <i class="ti ti-file-description empty-state-icon"></i>
         No requests found.
     </div>
 <?php else: ?>
- 
+
 <div class="table-wrap">
     <div class="filter-bar" data-filter-bar>
         <input type="search" placeholder="Search by name, department, form…" data-search-input aria-label="Search requests">
@@ -26,16 +27,16 @@ sort($uniqueDepts);
                 <option value="<?= htmlspecialchars($formLabel[$ft] ?? $ft) ?>"><?= htmlspecialchars($formLabel[$ft] ?? $ft) ?></option>
             <?php endforeach; ?>
         </select>
-        <select aria-label="Filter by department" onchange="filterByDept(this)">
+        <select aria-label="Filter by department" id="deptFilter">
             <option value="">All departments</option>
             <?php foreach ($uniqueDepts as $dept): ?>
                 <option value="<?= htmlspecialchars($dept) ?>"><?= htmlspecialchars($dept) ?></option>
             <?php endforeach; ?>
         </select>
-        <select aria-label="Filter by status" onchange="filterByStatusAll(this)">
+        <select aria-label="Filter by status" id="statusFilterAll">
             <option value="">All statuses</option>
             <option value="submitted">Submitted</option>
-            <option value="in_progress">In Progress</option>
+            <option value="in_approval">In Approval</option>
             <option value="completed">Completed</option>
             <option value="rejected">Rejected</option>
         </select>
@@ -54,7 +55,9 @@ sort($uniqueDepts);
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($forms as $form): ?>
+        <?php foreach ($forms as $form):
+            $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
+        ?>
             <tr data-status="<?= $form['status'] ?>" data-dept="<?= htmlspecialchars($form['department'] ?? '') ?>">
                 <td class="muted td-first"><?= $form['id'] ?></td>
                 <td><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></td>
@@ -62,7 +65,7 @@ sort($uniqueDepts);
                 <td class="muted"><?= htmlspecialchars($form['department'] ?? '—') ?></td>
                 <td>
                     <span class="badge badge-<?= $badgeMap[$form['status']] ?? 'secondary' ?>">
-                        <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
+                        <?= htmlspecialchars($humanStatus) ?>
                     </span>
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
@@ -76,4 +79,29 @@ sort($uniqueDepts);
 </div>
 
 <script src="/processing-system/public/scripts/all_requests.js"></script>
+<script>
+(function () {
+    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
+
+    function refilter() {
+        var deptVal   = (document.getElementById('deptFilter')?.value   || '').toLowerCase();
+        var statusVal = (document.getElementById('statusFilterAll')?.value || '').toLowerCase();
+        document.querySelectorAll('table[data-filterable] tbody tr').forEach(function (row) {
+            var dept   = (row.dataset.dept   || '').toLowerCase();
+            var status = (row.dataset.status || '');
+            var deptOk = !deptVal || dept === deptVal;
+            var statOk = !statusVal;
+            if (!statOk) {
+                if (statusVal === 'in_approval') statOk = inApproval.includes(status);
+                else if (statusVal === 'completed') statOk = (status === 'completed' || status === 'final_approved');
+                else statOk = status === statusVal;
+            }
+            row.style.display = (deptOk && statOk) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('deptFilter')?.addEventListener('change', refilter);
+    document.getElementById('statusFilterAll')?.addEventListener('change', refilter);
+})();
+</script>
 <?php endif; ?>

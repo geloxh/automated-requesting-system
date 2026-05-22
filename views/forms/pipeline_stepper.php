@@ -1,174 +1,114 @@
 <?php
-  $statusOrder = [
-      'draft' => 'Draft',
-      'submitted' => 'Submitted',
-      'supervisor_reviewed' => 'Supervisor',
-      'department_checked' => 'Dept. Check',
-      'checker_approved' => 'Checker',
-      'final_approved' => 'Final Approval',
-      'completed' => 'Approved',
-  ];
+/**
+ * pipeline_stepper.php
+ *
+ * Renders the horizontal approval-progress stepper on the form detail view.
+ *
+ * Expects:  $form  — the form row (requires 'form_type' and 'status')
+ * Optionally: $approvalSteps — array of approval rows (id, sequence,
+ *             approver_id, status, approved_at, remarks, full_name)
+ *             When present, each completed node shows the approver name + date.
+ *
+ * FIX: Previously this file contained two complete steppers rendered back-to-back
+ *      (an inline-style <table> version AND a CSS-class div version).  Both were
+ *      output on every page load.  The table version also used a hardcoded
+ *      admin-pipeline status list, breaking the display for finance forms.
+ *      This rewrite:
+ *        1. Removes the duplicate table stepper entirely.
+ *        2. Selects the correct pipeline (admin vs finance) based on form_type.
+ *        3. Surfaces approver name + timestamp per completed step when available.
+ */
 
-  $isRejected = $form['status'] === 'rejected';
-  $statusKeys = array_keys($statusOrder);
-  $currentIndex = array_search($form['status'], $statusKeys, true);
-  if ($currentIndex === false) $currentIndex = 0;
-  $total = count($statusOrder);
-?>
+use App\Helpers\FormLabels;
 
-<table border="0" cellpadding="0" cellspacing="0" width="100%"
-       style="border-collapse:collapse;margin:1.5rem 0;table-layout:fixed;">
-  <tr>
-    <?php foreach ($statusOrder as $statusKey => $label):
-        $i = array_search($statusKey, $statusKeys, true);
+// ── Choose the correct pipeline for this form type ──────────────────────────
+$financeTypes = ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'];
+$isFinance    = in_array($form['form_type'], $financeTypes, true);
 
-        if ($isRejected) {
-            $state = $i < $currentIndex ? 'done' : 'pending';
-        } elseif ($i < $currentIndex) {
-            $state = 'done';
-        } elseif ($i === $currentIndex) {
-            $state = 'active';
-        } else {
-            $state = 'pending';
-        }
+if ($isFinance) {
+    // Finance pipeline: submitted → checker → process → evaluation → final → completed
+    $statusOrder = [
+        'draft'            => 'Draft',
+        'submitted'        => 'Submitted',
+        'checker_approved' => 'Checker',
+        'process_approved' => 'Process',
+        'finance_reviewed' => 'Evaluation',
+        'final_approved'   => 'Final Approval',
+        'completed'        => 'Approved',
+    ];
+} else {
+    // Admin pipeline: submitted → checker → review → final → completed
+    $statusOrder = [
+        'draft'               => 'Draft',
+        'submitted'           => 'Submitted',
+        'checker_approved'    => 'Checker',
+        'department_reviewed' => 'Review',
+        'final_approved'      => 'Final Approval',
+        'completed'           => 'Approved',
+    ];
+}
 
-        // Previous step state 
-        $leftColor = '#d1d5db';
-        if ($i > 0) {
-            if ($isRejected) {
-                $ps = ($i - 1) < $currentIndex ? 'done' : 'pending';
-            } elseif (($i - 1) < $currentIndex) {
-                $ps = 'done';
-            } elseif (($i - 1) === $currentIndex) {
-                $ps = 'active';
-            } else {
-                $ps = 'pending';
-            }
-            $leftColor = ($ps === 'done') ? '#16a34a' : '#d1d5db';
-        }
-
-        $rightColor = ($state === 'done') ? '#16a34a' : '#d1d5db';
-
-        // Circle colours
-        $bg = $state === 'done' ? '#16a34a' : '#ffffff';
-        $border = $state === 'done' ? '#16a34a'
-                : ($state === 'active' ? '#2563eb' : '#d1d5db');
-        $color = $state === 'done' ? '#ffffff'
-                : ($state === 'active' ? '#2563eb' : '#9ca3af');
-
-        // Label
-        $lColor = $state === 'done' ? '#15803d'
-                 : ($state === 'active' ? '#1d4ed8' : '#6b7280');
-        $lWeight = $state === 'active' ? 'bold' : 'normal';
-    ?>
-    <td align="center" valign="top"
-        style="padding:0;vertical-align:top;text-align:center;">
-
-      <!-- Row: left-line | circle | right-line -->
-      <table border="0" cellpadding="0" cellspacing="0" width="100%"
-             style="border-collapse:collapse;">
-        <tr>
-
-          <!-- Left line -->
-          <td width="50%" style="padding:0;vertical-align:middle;">
-            <?php if ($i > 0): ?>
-              <div style="height:2px;background:<?= $leftColor ?>;
-                          font-size:0;line-height:0;overflow:hidden;">
-              </div>
-            <?php endif; ?>
-          </td>
-
-          <!-- Circle attribute of steps-->
-          <td width="34" style="padding:0;vertical-align:middle;text-align:center;">
-            <div style="width:34px;height:34px;border-radius:50%;
-                        background:<?= $bg ?>;
-                        border:2px solid <?= $border ?>;
-                        color:<?= $color ?>;
-                        font-size:13px;font-weight:bold;
-                        font-family:Arial,sans-serif;
-                        line-height:34px;text-align:center;
-                        box-sizing:border-box;margin:0 auto;">
-              <?= $state === 'done' ? '&#10003;' : ($i + 1) ?>
-            </div>
-          </td>
-
-          <!-- Right line -->
-          <td width="50%" style="padding:0;vertical-align:middle;">
-            <?php if ($i < $total - 1): ?>
-              <div style="height:2px;background:<?= $rightColor ?>;
-                          font-size:0;line-height:0;overflow:hidden;">
-              </div>
-            <?php endif; ?>
-          </td>
-
-        </tr>
-      </table>
-
-      <!-- Label -->
-      <div style="margin-top:6px;font-size:12px;font-family:Arial,sans-serif;
-                  color:<?= $lColor ?>;font-weight:<?= $lWeight ?>;
-                  text-align:center;white-space:nowrap;">
-        <?= htmlspecialchars($label) ?>
-      </div>
-
-    </td>
-    <?php endforeach; ?>
-  </tr>
-</table>
-
-<?php if ($isRejected): ?>
-  <p style="color:#b91c1c;font-family:Arial,sans-serif;font-size:13px;margin-top:4px;">
-    &#10005; This form was <strong>rejected</strong>.
-  </p>
-<?php endif; ?>
-<?php
-
-$statusOrder = [
-    'draft' => 'Draft',
-    'submitted' => 'Submitted',
-    'supervisor_reviewed' => 'Supervisor',
-    'department_checked' => 'Dept. Check',
-    'checker_approved' => 'Checker',
-    'final_approved' => 'Final Approval',
-    'completed' => 'Approved',
-];
-
-$isRejected = $form['status'] === 'rejected';
-$formStatus = $form['status'] ?? $form['form_status'] ?? 'draft';
-$isRejected = $formStatus === 'rejected';
+$formStatus   = $form['status'] ?? 'draft';
+$isRejected   = $formStatus === 'rejected';
+$statusKeys   = array_keys($statusOrder);
 $currentIndex = array_search($formStatus, $statusKeys, true);
 if ($currentIndex === false) $currentIndex = 0;
-$total = count($statusOrder);
+
+// Build a quick lookup: sequence → approval row (for name/date tooltips)
+$stepBySeq = [];
+if (!empty($approvalSteps) && is_array($approvalSteps)) {
+    foreach ($approvalSteps as $as) {
+        $stepBySeq[(int)$as['sequence']] = $as;
+    }
+}
+// sequence 1 = submission (no approval row); sequences 2+ map to pipeline steps
+// status index 0=draft, 1=submitted, 2=step2, 3=step3 ...
+// so pipeline sequence for index $i = $i  (index 1 = seq 1, index 2 = seq 2 …)
 ?>
 
 <div class="approval-trail">
     <?php foreach ($statusOrder as $statusKey => $label):
         $i = array_search($statusKey, $statusKeys, true);
-        $state = 'pending'; // Default state
 
+        // Determine visual state
         if ($isRejected) {
-            if ($i < $currentIndex) {
-                $state = 'done';
-            }
+            $state = ($i < $currentIndex) ? 'done' : 'pending';
         } elseif ($i < $currentIndex) {
             $state = 'done';
         } elseif ($i === $currentIndex) {
-            $state = 'current'; // Use 'current' for active step
+            $state = 'current';
+        } else {
+            $state = 'pending';
         }
+
+        // Look up approver info for completed steps (sequence = index)
+        $stepRow      = $stepBySeq[$i] ?? null;
+        $approverName = ($stepRow && $state === 'done') ? htmlspecialchars($stepRow['full_name'] ?? '') : '';
+        $approvedAt   = ($stepRow && $state === 'done' && !empty($stepRow['approved_at']))
+                        ? date('M d, Y', strtotime($stepRow['approved_at']))
+                        : '';
     ?>
-    <div class="approval-step <?= $state === 'done' ? 'is-done' : '' ?> <?= $state === 'current' ? 'is-current' : '' ?> <?= $isRejected && $state !== 'done' ? 'is-rejected' : '' ?>">
+    <div class="approval-step <?= $state === 'done'    ? 'is-done'     : '' ?>
+                               <?= $state === 'current' ? 'is-current'  : '' ?>
+                               <?= ($isRejected && $state !== 'done') ? 'is-rejected' : '' ?>">
         <div class="step-dot <?= $state ?>">
             <?= $state === 'done' ? '<i class="ti ti-check"></i>' : ($i + 1) ?>
         </div>
-        <div>
+        <div class="step-meta">
             <div class="step-name"><?= htmlspecialchars($label) ?></div>
+            <?php if ($approverName): ?>
+                <div class="step-approver"><?= $approverName ?></div>
+            <?php endif; ?>
+            <?php if ($approvedAt): ?>
+                <div class="step-date"><?= $approvedAt ?></div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endforeach; ?>
 </div>
 
 <?php if ($isRejected): ?>
-  <p style="color:#b91c1c;font-family:Arial,sans-serif;font-size:13px;margin-top:4px;">
-    &#10005; This form was <strong>rejected</strong>.
-  </p>
+    <p class="stepper-rejected-note">
+        <i class="ti ti-circle-x"></i> This form was <strong>rejected</strong>.
+    </p>
 <?php endif; ?>

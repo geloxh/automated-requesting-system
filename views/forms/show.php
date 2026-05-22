@@ -1,13 +1,14 @@
 <?php
-    $formLabel = \App\Helpers\FormLabels::all();
-
+    $formLabel   = \App\Helpers\FormLabels::all();
     $statusBadge = \App\Helpers\FormLabels::allBadges();
-    $stepBadge = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
+    $stepBadge   = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
 
-    $type = $form['form_type'] ?? $form['type'] ?? 'unknown';
-    $title = $formLabel[$type] ?? ucwords(str_replace('_', ' ', $type));
-    $roleId = $_SESSION['role_id'];
-    $formId = $form['id'];
+    $type    = $form['form_type'] ?? 'unknown';
+    $title   = \App\Helpers\FormLabels::get($type);
+    $roleId  = $_SESSION['role_id'];
+    $formId  = $form['id'];
+    // Human-readable status label
+    $humanStatus = \App\Helpers\FormLabels::statusLabel($form['status']);
 ?>
 
 <?php if (!empty($_SESSION['success'])): ?>
@@ -26,7 +27,7 @@
             <span class="show-form-id">#<?= $formId ?></span>
         </div>
         <span class="badge badge-<?= $statusBadge[$form['status']] ?? 'secondary' ?>">
-            <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
+            <?= htmlspecialchars($humanStatus) ?>
         </span>
     </div>
     <button id="btn-back" class="btn btn-ghost btn-sm" data-fallback-url="/processing-system/public/approvals">
@@ -39,37 +40,32 @@
     <div class="card">
         <div class="card-header">Form Details</div>
         <div class="card-body">
-            <div class="show-form-type-tag">
-                <i class="ti <?= $iconMap[$type] ?? 'ti-file' ?>"></i>
-                <?= htmlspecialchars($title) ?>
-            </div>
             <div class="dl-grid">
             <?php
-                // Human-readable field labels — avoids "from date", "payee", etc.
                 $fieldLabels = [
-                    'purpose' => 'Purpose',
-                    'payment_type' => 'Payment Type',
-                    'payee' => 'Payee',
-                    'date' => 'Date',
+                    'purpose'       => 'Purpose',
+                    'payment_type'  => 'Payment Type',
+                    'payee'         => 'Payee',
+                    'date'          => 'Date',
                     'employee_name' => 'Employee Name',
-                    'department' => 'Department',
-                    'request_date' => 'Request Date',
-                    'unit_owner' => 'Unit Owner',
-                    'bearer_name' => 'Bearer Name',
-                    'service_type' => 'Service Type',
-                    'leave_type' => 'Leave Type',
-                    'from_date' => 'From Date',
-                    'to_date' => 'To Date',
-                    'payment_term' => 'Payment Term',
+                    'department'    => 'Department',
+                    'request_date'  => 'Request Date',
+                    'unit_owner'    => 'Unit Owner',
+                    'bearer_name'   => 'Bearer Name',
+                    'service_type'  => 'Service Type',
+                    'leave_type'    => 'Leave Type',
+                    'from_date'     => 'From Date',
+                    'to_date'       => 'To Date',
+                    'payment_term'  => 'Payment Term',
                     'car_available' => 'Car Available',
-                    'trip_type' => 'Trip Type',
+                    'trip_type'     => 'Trip Type',
                 ];
             ?>
             <?php if (empty($data)): ?>
                 <div class="empty-state" style="padding:1rem">
                     <i class="ti ti-file-off empty-state-icon"></i>
                     No form data available.
-                </div
+                </div>
             <?php else: ?>
                 <?php foreach ($data as $key => $value):
                     if ($key === 'csrf_token') continue;
@@ -95,26 +91,35 @@
         <div class="card">
             <div class="card-header">Approval Trail</div>
             <div class="card-body">
-                <?php require __DIR__ . '/approval_trail.php'; ?>
+                <?php require __DIR__ . '/pipeline_stepper.php'; ?>
             </div>
         </div>
-        
+
         <?php if ($canAct): ?>
         <div class="card card-action">
             <div class="card-header">Your Action</div>
             <div class="card-body">
                 <?php
-                    // Map $nextAction to the human-readable step label for the button
                     $actionLabels = [
-                        'submit' => 'Submit for Approval',
-                        'checker-approval' => 'Approve — Checker Approval',
-                        'review-approval' => 'Approve — Review Approval',
-                        'process-approval' => 'Approve — Process Approval',
+                        'submit'              => 'Submit for Approval',
+                        'checker-approval'    => 'Approve — Checker Approval',
+                        'review-approval'     => 'Approve — Review Approval',
+                        'process-approval'    => 'Approve — Process Approval',
                         'evaluation-approval' => 'Approve — Evaluation Approval',
-                        'grant-approval' => 'Grant Approval Request',
-                        'complete' => 'Mark as Completed',
+                        'grant-approval'      => 'Grant Approval Request',
+                        'complete'            => 'Mark as Completed',
                     ];
                     $approveLabel = $actionLabels[$nextAction] ?? 'Approve';
+
+                    $nextStepHints = [
+                        'checker-approval'    => 'Approving will forward this to the Department Head.',
+                        'review-approval'     => 'Approving will forward this to the Final Approver.',
+                        'process-approval'    => 'Approving will forward this to the Finance Head.',
+                        'evaluation-approval' => 'Approving will forward this to the Final Approver.',
+                        'grant-approval'      => 'Approving will mark this as Final Approved.',
+                        'complete'            => 'This will close the request as fully completed.',
+                        'submit'              => 'Submitting will send this for Checker Approval.',
+                    ];
                 ?>
                 <form method="POST" id="approvalForm" enctype="multipart/form-data">
                     <?= \App\Helpers\Csrf::field(); ?>
@@ -132,24 +137,13 @@
                     </div>
 
                     <div class="action-btns">
-                        <?php
-                            $nextStepHints = [
-                                'check-approval' => 'Approving will forward this to the Department Head.',
-                                'review-approval' => 'Approving will forward this to the Final Approver.',
-                                'process-approval' => 'Approving will forward this to the Finance Head',
-                                'evaluation-approval' => 'Approving will forward this to the Final Approver.',
-                                'grant-approval' => 'Approving will mark this as Final Approved.',
-                                'complete' => 'This will close the request as fullly completed.',
-                                'submit' => 'Submitting will send this for Checker Approval.',
-                            ];
-                        ?>
                         <?php if (isset($nextStepHints[$nextAction])): ?>
                             <p class="action-hint">
                                 <i class="ti ti-info-circle"></i>
                                 <?= $nextStepHints[$nextAction] ?>
                             </p>
                         <?php endif; ?>
-                        
+
                         <?php if ($nextAction): ?>
                             <button type="submit"
                                 name="action"
@@ -161,38 +155,40 @@
                             </button>
                         <?php endif; ?>
 
+                        <?php if ($nextAction !== 'submit'): ?>
                         <button type="submit"
                             name="action"
                             value="reject"
                             formaction="/processing-system/public/forms/<?= $formId ?>/reject"
                             class="btn btn-danger btn-block"
                             id="btn-reject">
-                            <i class="ti ti-x"></i>Reject
+                            <i class="ti ti-x"></i> Reject
                         </button>
+                        <?php endif; ?>
                     </div>
                 </form>
             </div>
         </div>
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <?php if (!$canAct && in_array($form['status'], ['completed', 'rejected'], true)): ?>
-        <div class="card card-action">
-            <div class="card-header">Request Status</div>
-            <div class="card-body">
-                <?php if ($form['status'] === 'completed'): ?>
-                    <div class="status-final status-final--success">
-                        <i class="ti ti-circle-check"></i>
-                        This request has been fully approved and completed.
-                    </div>
-                <?php else: ?>
-                    <div class="status-final status-final--danger">
-                        <i class="ti ti-circle-x"></i>
-                        This request was rejected. Check the approval trail for the reason.
-                    </div>
-                <?php endif; ?>
+        <?php if (!$canAct && in_array($form['status'], ['completed', 'rejected'], true)): ?>
+            <div class="card card-action">
+                <div class="card-header">Request Status</div>
+                <div class="card-body">
+                    <?php if ($form['status'] === 'completed'): ?>
+                        <div class="status-final status-final--success">
+                            <i class="ti ti-circle-check"></i>
+                            This request has been fully approved and completed.
+                        </div>
+                    <?php else: ?>
+                        <div class="status-final status-final--danger">
+                            <i class="ti ti-circle-x"></i>
+                            This request was rejected. Check the approval trail for the reason.
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
-    <?php endif; ?>
+        <?php endif; ?>
     </div>
 
 </div>
