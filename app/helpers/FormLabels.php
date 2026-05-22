@@ -14,32 +14,60 @@
      *
      * Use: \App\Helpers\FormLabels::get($formType)
      *      \App\Helpers\FormLabels::all()
+     *      \App\Helpers\FormLabels::statusLabel($status)   ← NEW
      */
     class FormLabels
     {
         /**
-         * Sequence number → human label for every approval pipeline step.
-         * Single source of truth — used by inbox.php, approval_trail.php,
-         * NotificationService, and FormController.
+         * Status → human-readable display label.
          *
-         * Sequence 1 = submission (no approver row)
-         * Sequences 2–6 = the five approval stages
+         * FIX: Previously every view called ucfirst(str_replace('_', ' ', $status))
+         * which produced technical strings like "Checker approved" or "Finance reviewed".
+         * This map returns concise, user-facing labels instead.
+         * Use FormLabels::statusLabel($status) everywhere a status is displayed.
          */
+        private const STATUS_LABELS = [
+            'draft'               => 'Draft',
+            'submitted'           => 'Submitted',
+            'checker_approved'    => 'With Checker',
+            'process_approved'    => 'Processing',
+            'department_reviewed' => 'Dept. Review',
+            'finance_reviewed'    => 'Finance Review',
+            'supervisor_reviewed' => 'With Supervisor',
+            'department_checked'  => 'Dept. Check',
+            'final_approved'      => 'Final Approved',
+            'completed'           => 'Completed',
+            'rejected'            => 'Rejected',
+            'cancelled'           => 'Cancelled',
+        ];
+
+        /** Human-readable label for a status string. Falls back to ucwords transform. */
+        public static function statusLabel(string $status): string {
+            return self::STATUS_LABELS[$status] ?? ucwords(str_replace('_', ' ', $status));
+        }
+
+        /** Full status → label map (for views that pass it as a template variable). */
+        public static function allStatusLabels(): array {
+            return self::STATUS_LABELS;
+        }
+
         /**
          * Status → Bootstrap/app badge colour class.
          * Single source of truth — replaces the local $badgeMap in every view.
          */
         private const BADGE_MAP = [
-            'draft' => 'secondary',
-            'submitted' => 'primary',
-            'checker_approved' => 'info',
+            'draft'               => 'secondary',
+            'submitted'           => 'primary',
+            'checker_approved'    => 'info',
+            'process_approved'    => 'info',
             'department_reviewed' => 'info',
-            'process_approved' => 'info',
-            'finance_reviewed' => 'warning',
-            'final_approved' => 'success',
-            'completed' => 'success',
-            'rejected' => 'danger',
-            'cancelled' => 'dark',
+            'finance_reviewed'    => 'warning',
+            'supervisor_reviewed' => 'info',
+            'department_checked'  => 'info',
+            'final_approved'      => 'success',
+            'completed'           => 'success',
+            'rejected'            => 'danger',
+            'cancelled'           => 'dark',
         ];
 
         /** Badge class for a single status string. Defaults to 'secondary'. */
@@ -72,13 +100,13 @@
         private const ADMIN_FORMS = ['overtime_authorization', 'leave_application', 'vehicle_request'];
 
         private const LABELS = [
-            'advance_payment' => 'Advance Payment',
-            'overtime_authorization' => 'Overtime Authorization',
-            'request_for_payment' => 'Request for Payment',
-            'leave_application' => 'Leave Application',
-            'reimbursement' => 'Reimbursement',
-            'liquidation' => 'Liquidation',
-            'vehicle_request' => 'Vehicle Request',
+            'advance_payment'       => 'Advance Payment',
+            'overtime_authorization'=> 'Overtime Authorization',
+            'request_for_payment'   => 'Request for Payment',
+            'leave_application'     => 'Leave Application',
+            'reimbursement'         => 'Reimbursement',
+            'liquidation'           => 'Liquidation',
+            'vehicle_request'       => 'Vehicle Request',
         ];
 
         public static function stepLabel(int $sequence, string $formType = ''): string {
@@ -126,14 +154,14 @@
 
         /**
          * Resolve the human-readable pipeline stage.
-         * 
+         *
          * @param string $status The raw form status
          * @param int|null $currentStep The earliest pending sequence number
          * @param string $formType The type of form to resolve correct labels
          */
         public static function currentStage(string $status, ?int $currentStep, string $formType = ''): string {
-            if ($status === 'draft') return 'Draft';
-            if ($status === 'rejected') return 'Rejected';
+            if ($status === 'draft')     return 'Draft';
+            if ($status === 'rejected')  return 'Rejected';
             if ($status === 'completed') return 'Completed';
             if ($status === 'cancelled') return 'Cancelled';
 
@@ -142,6 +170,6 @@
                 return self::stepLabel((int)$currentStep, $formType);
             }
 
-            return ucwords(str_replace('_', ' ', $status));
+            return self::statusLabel($status);
         }
     }

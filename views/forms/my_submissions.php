@@ -2,7 +2,12 @@
 <div class="page-subheading">Track the approval status of all your submitted requests.</div>
 
 <?php
-$badgeMap = \App\Helpers\FormLabels::allBadges();
+$badgeMap     = \App\Helpers\FormLabels::allBadges();
+$statusLabels = \App\Helpers\FormLabels::allStatusLabels();
+
+// Support pre-filtering from KPI card links (?status=draft|approved|rejected|in_approval)
+$activeFilter = $_GET['status'] ?? '';
+$inApprovalStatuses = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed'];
 
 $drafts = array_filter($forms ?? [], fn($f) => $f['status'] === 'draft');
 $others = array_filter($forms ?? [], fn($f) => $f['status'] !== 'draft');
@@ -62,13 +67,13 @@ sort($uniqueTypes);
                 <option value="<?= htmlspecialchars($formLabel[$ft] ?? $ft) ?>"><?= htmlspecialchars($formLabel[$ft] ?? $ft) ?></option>
             <?php endforeach; ?>
         </select>
-        <select data-status-filter aria-label="Filter by status" onchange="filterByStatus(this)">
+        <select id="statusFilter" aria-label="Filter by status">
             <option value="">All statuses</option>
-            <option value="draft">Draft</option>
-            <option value="submitted">Submitted</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="rejected">Rejected</option>
+            <option value="draft"       <?= $activeFilter === 'draft'       ? 'selected' : '' ?>>Draft</option>
+            <option value="submitted"   <?= $activeFilter === 'submitted'   ? 'selected' : '' ?>>Submitted</option>
+            <option value="in_approval" <?= $activeFilter === 'in_approval' ? 'selected' : '' ?>>In Approval</option>
+            <option value="approved"    <?= $activeFilter === 'approved'    ? 'selected' : '' ?>>Approved</option>
+            <option value="rejected"    <?= $activeFilter === 'rejected'    ? 'selected' : '' ?>>Rejected</option>
         </select>
         <span class="filter-count" data-filter-count></span>
     </div>
@@ -78,20 +83,29 @@ sort($uniqueTypes);
                 <th class="th-first">#</th>
                 <th>Form Type</th>
                 <th>Status</th>
+                <th>Stage</th>
                 <th>Date</th>
                 <th class="td-last"></th>
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($forms as $form): ?>
+        <?php foreach ($forms as $form):
+            $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
+            $stageName   = \App\Helpers\FormLabels::currentStage(
+                $form['status'],
+                isset($form['current_step']) ? (int)$form['current_step'] : null,
+                $form['form_type']
+            );
+        ?>
             <tr data-status="<?= $form['status'] ?>">
                 <td class="muted td-first"><?= $form['id'] ?></td>
                 <td><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></td>
                 <td>
                     <span class="badge badge-<?= $badgeMap[$form['status']] ?? 'secondary' ?>">
-                        <?= ucfirst(str_replace('_', ' ', $form['status'])) ?>
+                        <?= htmlspecialchars($humanStatus) ?>
                     </span>
                 </td>
+                <td class="muted" style="font-size:12px"><?= htmlspecialchars($stageName) ?></td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
                     <?php if ($form['status'] === 'draft'): ?>
@@ -105,17 +119,32 @@ sort($uniqueTypes);
         </tbody>
     </table>
 </div>
+
 <script>
-function filterByStatus(sel) {
-    const val = sel.value.toLowerCase();
-    const rows = document.querySelectorAll('table[data-filterable] tbody tr');
-    const inProgress = ['submitted','supervisor_reviewed','department_checked','checker_approved','final_approved'];
-    rows.forEach(function(row) {
-        const status = row.dataset.status || '';
-        if (!val) { row.style.display = ''; return; }
-        if (val === 'in_progress') { row.style.display = inProgress.includes(status) ? '' : 'none'; return; }
-        row.style.display = status === val ? '' : 'none';
-    });
-}
+(function () {
+    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
+
+    function applyStatusFilter(val) {
+        var rows = document.querySelectorAll('table[data-filterable] tbody tr');
+        rows.forEach(function (row) {
+            if (!val) { row.style.display = ''; return; }
+            var s = row.dataset.status || '';
+            if (val === 'in_approval') {
+                row.style.display = inApproval.includes(s) ? '' : 'none';
+            } else if (val === 'approved') {
+                row.style.display = (s === 'final_approved' || s === 'completed') ? '' : 'none';
+            } else {
+                row.style.display = s === val ? '' : 'none';
+            }
+        });
+    }
+
+    var sel = document.getElementById('statusFilter');
+    if (sel) {
+        sel.addEventListener('change', function () { applyStatusFilter(sel.value); });
+        // Apply pre-filter from URL ?status= param on load
+        if (sel.value) applyStatusFilter(sel.value);
+    }
+})();
 </script>
 <?php endif; ?>

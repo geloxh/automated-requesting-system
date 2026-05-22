@@ -1,11 +1,12 @@
 /**
- * 
+ * table-filter.js
+ *
  * Client-side search + filter for all data tables.
  *
  * Usage: add data attributes to the <table>:
- *   data-filterable — enables this script
- *   data-search-col="0,1,2" — comma-separated column indices to search
- *   data-filter-col="2" — column index for the type/status dropdown
+ *   data-filterable              — enables this script
+ *   data-search-col="0,1,2"     — comma-separated column indices to search
+ *   data-filter-col="2"         — column index for the type/status dropdown
  *
  * Then add inside .table-wrap, before <table>:
  *   <div class="filter-bar" data-filter-bar>
@@ -16,41 +17,44 @@
  *     </select>
  *     <span class="filter-count" data-filter-count></span>
  *   </div>
+ *
+ * CHANGE: search input now debounced 200ms for smoother feel and
+ *         rows fade on filter change instead of snapping.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('table[data-filterable]').forEach(function (table) {
-        const wrap        = table.closest('.table-wrap');
+        var wrap        = table.closest('.table-wrap');
         if (!wrap) return;
 
-        const searchInput = wrap.querySelector('[data-search-input]');
-        const filterSelect = wrap.querySelector('[data-filter-select]');
-        const countEl = wrap.querySelector('[data-filter-count]');
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-        const searchCols = (table.dataset.searchCol || '0').split(',').map(Number);
-        const filterCol = table.dataset.filterCol !== undefined ? parseInt(table.dataset.filterCol) : null;
+        var searchInput  = wrap.querySelector('[data-search-input]');
+        var filterSelect = wrap.querySelector('[data-filter-select]');
+        var countEl      = wrap.querySelector('[data-filter-count]');
+        var rows         = Array.from(table.querySelectorAll('tbody tr'));
+        var searchCols   = (table.dataset.searchCol || '0').split(',').map(Number);
+        var filterCol    = table.dataset.filterCol !== undefined ? parseInt(table.dataset.filterCol) : null;
+        var debounceTimer;
 
         function getCell(row, colIndex) {
             return (row.cells[colIndex]?.textContent || '').toLowerCase().trim();
         }
 
         function applyFilter() {
-            const query = (searchInput?.value || '').toLowerCase().trim();
-            const filterVal = (filterSelect?.value || '').toLowerCase().trim();
-            let visible = 0;
+            var query     = (searchInput?.value    || '').toLowerCase().trim();
+            var filterVal = (filterSelect?.value   || '').toLowerCase().trim();
+            var visible   = 0;
 
             rows.forEach(function (row) {
-                const matchesSearch = !query || searchCols.some(function (col) {
+                var matchesSearch = !query || searchCols.some(function (col) {
                     return getCell(row, col).includes(query);
                 });
+                var matchesFilter = !filterVal || filterCol === null ||
+                    getCell(row, filterCol).includes(filterVal);
 
-                const matchesFilter = !filterVal || filterCol === null || (
-                    getCell(row, filterCol).includes(filterVal)
-                );
-
-                const show = matchesSearch && matchesFilter;
-                row.style.display = show ? '' : 'none';
+                var show = matchesSearch && matchesFilter;
+                // Fade instead of snap
+                row.style.opacity    = show ? '1' : '0';
+                row.style.display    = show ? '' : 'none';
                 if (show) visible++;
             });
 
@@ -59,10 +63,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        if (searchInput)  searchInput.addEventListener('input', applyFilter);
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(applyFilter, 200);
+            });
+        }
         if (filterSelect) filterSelect.addEventListener('change', applyFilter);
 
-        // Initial count
         applyFilter();
     });
 });
