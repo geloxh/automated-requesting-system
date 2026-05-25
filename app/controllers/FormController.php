@@ -534,7 +534,7 @@ class FormController {
             $stmt->execute([$type, $_SESSION['user_id'], json_encode($data)]);
             $formId = (int) $pdo->lastInsertId();
 
-            $this->seedApprovalRows($pdo, $formId, $type, $data);
+            $this->seedApprovalRows($pdo, $formId, $type, $data, (int)$_SESSION['user_id']);
             $this->audit('form_created', 'form', $formId, null, ['type' => $type, 'status' => 'draft']);
 
             $pdo->commit();
@@ -547,39 +547,55 @@ class FormController {
 
         } catch (\Throwable $e) {
             $pdo->rollBack();
-            $_SESSION['error'] = 'Submission failed. Please try again.';
+            $_SESSION['error'] = 'Submission failed: ' . $e->getMessage();
             header("Location: /processing-system/public/forms/{$slug}/create");
             exit;
         }
     }
 
-    private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data): void {
+    private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data, int $submitterId): void {
         $pipeline              = $this->getPipeline($type);
         $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
         );
         foreach ($stagesNeedingApprover as $action => $step) {
-            $approver = $this->resolveApproverByRole($pdo, $step['role_id'], $data);
+            $approver = $this->resolveApproverByRole($pdo, $step['role_id'], $data, $submitterId);
             if (!$approver) {
-                throw new \RuntimeException("No active approver found for role ID {$step['role_id']}.");
+                throw new \RuntimeException("No active approver found for stage '{$step['label']}'. Please ensure your supervisor and department approvers are correctly configured.");
             }
             $insert->execute([$formId, $approver, $step['sequence']]);
         }
     }
 
-    private function resolveApproverByRole(\PDO $pdo, int $roleId, array $data): ?int {
-        $stmt = $pdo->prepare(
-            'SELECT e.id, COUNT(a.id) AS workload
-             FROM employees e
-             LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = \'pending\'
-             WHERE e.role_id = ? AND e.is_active = 1
-             GROUP BY e.id
-             ORDER BY workload ASC, e.id ASC
-             LIMIT 1'
-        );
-        $stmt->execute([$roleId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    private function resolveApproverByRole(\PDO $pdo, int $roleId, array $data, int $submitterId): ?int {
+        // Role 2 = Immediate Supervisor: use direct link
+        if ($roleId === 2) {
+            $stmt = $pdo->prepare(
+                'SELECT supervisor_id FROM employees WHERE id = ? AND is_active = 1'
+            );
+            $stmt->execute([$submitterId]);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $row['supervisor_id'] ? (int) $row['supervisor_id'] : null;
+        }
+
+        // All other roles: workload-balanced, filtered by department
+        $dept = $data['department'] ?? null;
+        $sql  = 'SELECT e.id, COUNT(a.id) AS workload
+                 FROM employees e
+                 LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = \'pending\'
+                 WHERE e.role_id = :role AND e.is_active = 1';
+        $params = [':role' => $roleId];
+
+        if ($dept) {
+            $sql .= ' AND e.department = :dept';
+            $params[':dept'] = $dept;
+        }
+        $sql .= ' GROUP BY e.id ORDER BY workload ASC, e.id ASC LIMIT 1';
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $row ? (int) $row['id'] : null;
     }
 
