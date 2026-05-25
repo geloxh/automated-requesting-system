@@ -34,6 +34,7 @@
             }
 
             $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id = 2 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $roles = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();

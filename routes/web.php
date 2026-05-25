@@ -118,6 +118,13 @@
         exit;
     }
 
+    // GET /employees/edit/{id}
+    if (preg_match('#^/employees/edit/(\d+)$#', $uri, $m)) {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new EmployeeController)->edit((int)$m[1]);
+        exit;
+    }
+
     // POST /employees/{id}/delete
     if (preg_match('#^/employees/(\d+)/delete$#', $uri, $m) && $method === 'POST') {
         \App\Middleware\RoleMiddleware::requireRole(1);

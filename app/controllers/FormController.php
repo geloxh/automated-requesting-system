@@ -95,7 +95,7 @@ class FormController {
     // GET /forms/{slug}
     // ----------------------------------------------------------------
     public function index(string $slug): void {
-        $type   = $this->resolveType($slug);
+        $type = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
@@ -131,8 +131,8 @@ class FormController {
             $stmt->execute([$type, $userId]);
         }
 
-        $forms     = $stmt->fetchAll();
-        $formType  = $type;
+        $forms = $stmt->fetchAll();
+        $formType = $type;
         $pageTitle = \App\Helpers\FormLabels::get($type);
 
         $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
@@ -150,11 +150,11 @@ class FormController {
             return;
         }
 
-        $fields      = $this->fields[$type];
-        $formType    = $type;
-        $noSuffix    = ['list', 'show', 'request_for_payment'];
-        $viewName    = in_array($type, $noSuffix) ? $type : "{$type}_form";
-        $pageTitle   = \App\Helpers\FormLabels::get($type);
+        $fields = $this->fields[$type];
+        $formType = $type;
+        $noSuffix = ['list', 'show', 'request_for_payment'];
+        $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $pageTitle = \App\Helpers\FormLabels::get($type);
 
         $departments = db()->query(
             'SELECT DISTINCT department FROM employees WHERE department IS NOT NULL ORDER BY department'
@@ -198,8 +198,8 @@ class FormController {
         }
         $nextAction = $statusToAction[$form['status']] ?? null;
 
-        $canAct    = $this->canActOnForm($form, $approvalSteps);
-        $data      = json_decode($form['data'], true) ?? [];
+        $canAct = $this->canActOnForm($form, $approvalSteps);
+        $data = json_decode($form['data'], true) ?? [];
         $formLabel = \App\Helpers\FormLabels::all();
         $typeLabel = \App\Helpers\FormLabels::get($form['form_type']);
         $pageTitle = $typeLabel . ' #' . $id;
@@ -229,10 +229,10 @@ class FormController {
     public function reject(int $id): void {
         \App\Helpers\Csrf::verify();
 
-        $form    = $this->findForm($id);
+        $form  = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
-        $userId  = (int) $_SESSION['user_id'];
-        $roleId  = (int) $_SESSION['role_id'];
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
 
         $allowedRoles = [1, 2, 4, 5, 6];
         if (!in_array($roleId, $allowedRoles, true)) {
@@ -309,7 +309,7 @@ class FormController {
 
     // GET /my-submissions
     public function mySubmissions(): void {
-        $userId     = $_SESSION['user_id'];
+        $userId = $_SESSION['user_id'];
         $statusFilter = $_GET['status'] ?? '';
 
         $stmt = db()->prepare(
@@ -320,7 +320,7 @@ class FormController {
             ORDER BY f.created_at DESC LIMIT 50"
         );
         $stmt->execute([$userId]);
-        $forms     = $stmt->fetchAll();
+        $forms = $stmt->fetchAll();
         $formLabel = \App\Helpers\FormLabels::all();
         $pageTitle = 'My Submissions';
         $breadcrumbs = [['label' => 'My Submissions']];
@@ -346,7 +346,7 @@ class FormController {
             ORDER BY f.created_at DESC LIMIT 100'
         );
         $stmt->execute();
-        $forms     = $stmt->fetchAll();
+        $forms = $stmt->fetchAll();
         $formLabel = \App\Helpers\FormLabels::all();
         $pageTitle = 'All Requests';
         $breadcrumbs = [['label' => 'All Requests']];
@@ -365,10 +365,10 @@ class FormController {
     private function processApproval(int $id, string $action): void {
         \App\Helpers\Csrf::verify();
 
-        $form    = $this->findForm($id);
+        $form = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
-        $userId  = (int) $_SESSION['user_id'];
-        $roleId  = (int) $_SESSION['role_id'];
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
         $isAdmin = $roleId === 1;
 
         $pipeline = $this->getPipeline($form['form_type']);
@@ -430,10 +430,10 @@ class FormController {
         // ── Optional file upload ──────────────────────────────────────
         $uploadedFilePath = null;
         if (!empty($_FILES['approval_file']['tmp_name'])) {
-            $file     = $_FILES['approval_file'];
-            $allowed  = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            $file = $_FILES['approval_file'];
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
             $maxBytes = 5 * 1024 * 1024;
-            $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if (!in_array($mimeType, $allowed, true)) {
@@ -446,8 +446,8 @@ class FormController {
                 header("Location: /processing-system/public/forms/view/{$id}");
                 exit;
             }
-            $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
-            $destDir  = __DIR__ . '/../../storage/approvals/';
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $destDir = __DIR__ . '/../../storage/approvals/';
             if (!is_dir($destDir)) mkdir($destDir, 0755, true);
             $fileName = sprintf('%d_%d_%s.%s', $id, time(), bin2hex(random_bytes(4)), $ext);
             if (!move_uploaded_file($file['tmp_name'], $destDir . $fileName)) {
@@ -586,7 +586,7 @@ class FormController {
 
         // All other roles: workload-balanced, filtered by department (except Admins/Final Approvers)
         $dept = $data['department'] ?? null;
-        $sql  = 'SELECT e.id, COUNT(a.id) AS workload
+        $sql = 'SELECT e.id, COUNT(a.id) AS workload
                  FROM employees e
                  LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = \'pending\'
                  WHERE e.role_id = :role AND e.is_active = 1';
@@ -644,8 +644,8 @@ class FormController {
         foreach ($steps as $step) {
             if (
                 (int)$step['approver_id'] === $userId
-                && $step['status']         === 'pending'
-                && (int)$step['sequence']  === (int)$activeSequence
+                && $step['status'] === 'pending'
+                && (int)$step['sequence'] === (int)$activeSequence
             ) {
                 return true;
             }
@@ -672,7 +672,7 @@ class FormController {
 
     private function sendPipelineNotifications(int $formId, string $action, array $step, string $remarks): void {
         try {
-            $pdo     = db();
+            $pdo = db();
             $formRow = $pdo->prepare(
                 'SELECT f.form_type, f.status, f.submitted_by,
                         e.full_name AS submitter_name, e.email AS submitter_email
@@ -684,27 +684,27 @@ class FormController {
             if (!$form) return;
 
             $submittedBy = (int) $form['submitted_by'];
-            $formLabel   = \App\Helpers\FormLabels::get($form['form_type']);
-            $stageName   = $step['label'];
-            $newStatus   = $step['to'];
+            $formLabel = \App\Helpers\FormLabels::get($form['form_type']);
+            $stageName = $step['label'];
+            $newStatus = $step['to'];
 
             $outcome = match($newStatus) {
-                'completed'      => 'completed',
+                'completed' => 'completed',
                 'final_approved' => 'final_approved',
-                'rejected'       => 'rejected',
-                default          => 'approved_step',
+                'rejected' => 'rejected',
+                default => 'approved_step',
             };
 
             $submitterMsg = match($outcome) {
-                'completed'      => "Your {$formLabel} #{$formId} has been fully completed.",
+                'completed' => "Your {$formLabel} #{$formId} has been fully completed.",
                 'final_approved' => "Your {$formLabel} #{$formId} reached final approval.",
-                'rejected'       => "Your {$formLabel} #{$formId} was rejected at {$stageName}.",
-                default          => "Your {$formLabel} #{$formId} passed {$stageName}.",
+                'rejected' => "Your {$formLabel} #{$formId} was rejected at {$stageName}.",
+                default => "Your {$formLabel} #{$formId} passed {$stageName}.",
             };
             $submitterType = match($outcome) {
                 'completed', 'final_approved' => 'success',
-                'rejected'                    => 'danger',
-                default                       => 'info',
+                'rejected' => 'danger',
+                default => 'info',
             };
 
             \App\Controllers\NotificationController::create(
@@ -781,10 +781,10 @@ class FormController {
 
     private function renderError(int $code, string $title, string $message): never {
         http_response_code($code);
-        $errorCode    = $code;
-        $errorTitle   = $title;
+        $errorCode = $code;
+        $errorTitle = $title;
         $errorMessage = $message;
-        $pageTitle    = "{$code} — {$title}";
+        $pageTitle = "{$code} — {$title}";
         define('BASE_LOADED', true);
         ob_start();
         require __DIR__ . '/../../views/errors/error.php';
