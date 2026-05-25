@@ -45,11 +45,6 @@ CREATE INDEX idx_employees_role  ON employees(role_id);
 
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
 ('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT'),
-('EMP-0002', 'Approver', 'approver@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 2, 'Management'),
-('EMP-0003', 'Staff', 'staff@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 3, 'Operations'),
-('EMP-0004', 'Dept Head', 'depthead@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 4, 'Management'),
-('EMP-0005', 'Checker', 'checker@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 5, 'Finance'),
-('EMP-0006', 'Final Approver','final@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 6, 'Executive');
 
 -- ============================================================
 -- FORMS
