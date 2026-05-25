@@ -334,6 +334,11 @@ class FormController {
 
     // GET /requests — admin: all forms
     public function allRequests(): void {
+        if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+            $_SESSION['error'] = 'Access denied. You do not have permission to view all requests.';
+            header('Location: /processing-system/public/dashboard'); exit;
+        }
+
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
             FROM forms f JOIN employees e ON e.id = f.submitted_by
