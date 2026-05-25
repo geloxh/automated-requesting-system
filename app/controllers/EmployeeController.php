@@ -224,9 +224,9 @@
                 } else {
                     // Derive correct pipeline status from the sequence just approved
                     $seqToStatus = [
-                        2 => 'supervisor_reviewed',
-                        3 => 'department_checked',
-                        4 => 'checker_approved',
+                        2 => 'checker_approved',
+                        3 => 'process_approved', // Or department_reviewed for Admin
+                        4 => 'finance_reviewed', // Or final_approved for Admin
                         5 => 'final_approved',
                         6 => 'completed',
                     ];

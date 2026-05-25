@@ -17,7 +17,7 @@ class Approval {
         3 => ['role' => 4, 'label' => 'Department Check', 'status' => 'department_checked'],
         4 => ['role' => 5, 'label' => 'Checker Supervisor', 'status' => 'checker_approved'],
         5 => ['role' => 6, 'label' => 'Final Approval', 'status' => 'final_approved'],
-        6 => ['role' => 6, 'label' => 'Completed', 'status' => 'completed'],
+        6 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
     ];
 
     public const MAX_LEVEL = 6;

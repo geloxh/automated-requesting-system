@@ -54,7 +54,7 @@ class FormController {
         ],
         'complete' => [
             'sequence' => 5, 'from' => 'final_approved', 'to' => 'completed',
-            'role_id' => 6, 'label' => 'Completed',
+            'role_id' => 1, 'label' => 'Completed',
         ],
     ];
 
@@ -81,7 +81,7 @@ class FormController {
         ],
         'complete' => [
             'sequence' => 6, 'from' => 'final_approved', 'to' => 'completed',
-            'role_id' => 6, 'label' => 'Completed',
+            'role_id' => 1, 'label' => 'Completed',
         ],
     ];
 
@@ -579,7 +579,7 @@ class FormController {
             return $row['supervisor_id'] ? (int) $row['supervisor_id'] : null;
         }
 
-        // All other roles: workload-balanced, filtered by department
+        // All other roles: workload-balanced, filtered by department (except Admins/Final Approvers)
         $dept = $data['department'] ?? null;
         $sql  = 'SELECT e.id, COUNT(a.id) AS workload
                  FROM employees e
@@ -587,7 +587,7 @@ class FormController {
                  WHERE e.role_id = :role AND e.is_active = 1';
         $params = [':role' => $roleId];
 
-        if ($dept) {
+        if ($dept && !in_array($roleId, [1, 6], true)) {
             $sql .= ' AND e.department = :dept';
             $params[':dept'] = $dept;
         }
