@@ -72,6 +72,8 @@ System for SMEs for paperless and make the indicated features below automated, g
     ├── migrations/             # DB schema versioning
     └── .env                    # Environment config (never commit)
 ```
+### System Process Flow
+![Flow](images/Flow.png)
 
 ### SDLC - AGILE MODEL
 This project uses Agile Model to adapt to sudden and quick client project request.
