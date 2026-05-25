@@ -106,7 +106,7 @@ class FormController {
                 WHERE f.form_type = ? ORDER BY f.created_at DESC LIMIT 50'
             );
             $stmt->execute([$type]);
-        } elseif ($roleId == 2) {
+        } elseif (in_array($roleId, [2, 4, 5, 6])) {
             $stmt = db()->prepare(
                 'SELECT DISTINCT f.id, f.status, f.created_at, e.full_name
                 FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -584,7 +584,7 @@ class FormController {
             return $row['supervisor_id'] ? (int) $row['supervisor_id'] : null;
         }
 
-        // All other roles: workload-balanced, filtered by department (except Admins/Final Approvers)
+        // All other roles: workload-balanced, filtered by department (except global roles)
         $dept = $data['department'] ?? null;
         $sql = 'SELECT e.id, COUNT(a.id) AS workload
                  FROM employees e
@@ -592,7 +592,7 @@ class FormController {
                  WHERE e.role_id = :role AND e.is_active = 1';
         $params = [':role' => $roleId];
 
-        if ($dept && !in_array($roleId, [1, 6], true)) {
+        if ($dept && !in_array($roleId, [1, 4, 5, 6], true)) {
             $sql .= ' AND e.department = :dept';
             $params[':dept'] = $dept;
         }
