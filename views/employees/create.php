@@ -23,9 +23,22 @@
                     <option value="1">Admin</option>
                     <option value="2">Approver</option>
                     <option value="3">Staff</option>
+                    <option value="4">Dept Head</option>
+                    <option value="5">Checker</option>
+                    <option value="6">Final Approver</option>
                 </select>
             </div>
             <div class="form-group"><label>Department</label><input type="text" name="department"></div>
+            <div class="form-group">
+                <label>Supervisor (Immediate Manager)</label>
+                <select name="supervisor_id">
+                    <option value="">-- None --</option>
+                    <?php foreach ($supervisors as $s): ?>
+                        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['full_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Optional. Usually required for Staff to route approvals.</small>
+            </div>
         </div>
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">

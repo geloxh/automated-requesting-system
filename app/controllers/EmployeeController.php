@@ -27,6 +27,9 @@
                 $this->store();
                 return;
             }
+
+            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id = 2 AND is_active = 1 ORDER BY full_name')->fetchAll();
+
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/employees/create.php';
@@ -41,7 +44,7 @@
             $data = [];
             foreach (['full_name', 'email', 'password', 'role_id', 'department', 'supervisor_id'] as $f) {
                 $val = trim($_POST[$f] ?? '');
-                if ($val === '' && $f !== 'department') {
+                if ($val === '' && $f !== 'department' && $f !== 'supervisor_id') {
                     $_SESSION['error'] = "Field '{$f}' is required.";
                     header('Location: /processing-system/public/employees/create'); exit;
                 }
@@ -77,11 +80,11 @@
                     $data['email'],
                     password_hash($data['password'], PASSWORD_BCRYPT),
                     (int) $data['role_id'],
-                    $data['department'],
+                    $data['department'] ?: null,
                     $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
                 ]);
-            } catch (\Throwable) {
-                $_SESSION['error'] = 'Failed to create employee.';
+            } catch (\Throwable $e) {
+                $_SESSION['error'] = 'Failed to create employee: ' . $e->getMessage();
                 header('Location: /processing-system/public/employees/create'); exit;
             }
 
