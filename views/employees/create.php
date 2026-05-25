@@ -20,12 +20,9 @@
                 <label>Role</label>
                 <select name="role_id" required>
                     <option value="">-- Select --</option>
-                    <option value="1">Admin</option>
-                    <option value="2">Approver</option>
-                    <option value="3">Staff</option>
-                    <option value="4">Dept Head</option>
-                    <option value="5">Checker</option>
-                    <option value="6">Final Approver</option>
+                    <?php foreach ($roles as $role): ?>
+                        <option value="<?= $role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="form-group"><label>Department</label><input type="text" name="department"></div>
@@ -43,9 +40,6 @@
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
                 <i class="ti ti-send"></i> Submit for Approval
-            </button>
-            <button type="submit" name="save_draft" value="1" class="btn btn-ghost">
-                <i class="ti ti-device-floppy"></i> Save as Draft
             </button>
             <a href="javascript:history.back()" class="btn btn-ghost">Cancel</a>
         </div>
