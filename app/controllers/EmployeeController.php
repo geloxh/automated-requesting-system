@@ -29,7 +29,7 @@
             \App\Helpers\Csrf::verify();
 
             $data = [];
-            foreach (['full_name', 'email', 'password', 'role_id', 'department'] as $f) {
+            foreach (['full_name', 'email', 'password', 'role_id', 'department', 'supervisor_id'] as $f) {
                 $val = trim($_POST[$f] ?? '');
                 if ($val === '' && $f !== 'department') {
                     $_SESSION['error'] = "Field '{$f}' is required.";
@@ -59,8 +59,8 @@
             try {
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
-                    'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department)
-                    VALUES (?, ?, ?, ?, ?, ?)'
+                    'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department, supervisor_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'
                 )->execute([
                     $empCode,
                     $data['full_name'],
@@ -68,6 +68,7 @@
                     password_hash($data['password'], PASSWORD_BCRYPT),
                     (int) $data['role_id'],
                     $data['department'],
+                    $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
                 ]);
             } catch (\Throwable) {
                 $_SESSION['error'] = 'Failed to create employee.';

@@ -32,12 +32,14 @@ CREATE TABLE employees (
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
+    supervisor_id INT NULL,
     department VARCHAR(100) NULL,
     is_active TINYINT(1) DEFAULT 1,
     employment_status ENUM('employed','resigned','floating') NOT NULL DEFAULT 'employed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT,
+    FOREIGN KEY (supervisor_id) REFERENCES employees(id) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_employees_email ON employees(email);
