@@ -7,7 +7,12 @@
             }
 
             $employees = db()->query(
-                'SELECT id, employee_code, full_name, email, department, is_active, employment_status, role_id FROM employees ORDER BY full_name'
+                'SELECT e.*, r.name as role_name, s.full_name as supervisor_name 
+                 FROM employees e 
+                 LEFT JOIN roles r ON e.role_id = r.id 
+                 LEFT JOIN employees s ON e.supervisor_id = s.id 
+                 WHERE e.employment_status != "resigned" OR e.is_active = 1
+                 ORDER BY e.is_active DESC, e.full_name ASC'
             )->fetchAll();
             define('BASE_LOADED', true);
             ob_start();
@@ -167,6 +172,84 @@
             } catch (\Throwable $e) {
                 $pdo->rollBack();
                 $_SESSION['error'] = 'Failed to deactivate employee.';
+            }
+
+            header('Location: /processing-system/public/employees');
+            exit;
+        }
+
+        public function edit(int $id): void {
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied.';
+                header('Location: /processing-system/public/dashboard'); exit;
+            }
+
+            $stmt = db()->prepare('SELECT * FROM employees WHERE id = ?');
+            $stmt->execute([$id]);
+            $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$employee) {
+                $_SESSION['error'] = 'Employee not found.';
+                header('Location: /processing-system/public/employees'); exit;
+            }
+
+            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id = 2 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $roles = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
+
+            define('BASE_LOADED', true);
+            ob_start();
+            require __DIR__ . '/../../views/employees/edit.php';
+            $content = ob_get_clean();
+            $pageTitle = 'Edit Employee: ' . htmlspecialchars($employee['full_name']);
+            require __DIR__ . '/../../views/layouts/base.php';
+        }
+
+        public function update(int $id): void {
+            \App\Helpers\Csrf::verify();
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) { exit; }
+
+            $data = [];
+            foreach (['full_name', 'email', 'role_id', 'department', 'supervisor_id', 'is_active'] as $f) {
+                $data[$f] = trim($_POST[$f] ?? '');
+            }
+
+            // Validation
+            if (empty($data['full_name']) || empty($data['email'])) {
+                $_SESSION['error'] = "Name and Email are required.";
+                header("Location: /processing-system/public/employees/edit/{$id}"); exit;
+            }
+
+            $pdo = db();
+            try {
+                $sql = "UPDATE employees SET 
+                        full_name = ?, email = ?, role_id = ?, 
+                        department = ?, supervisor_id = ?, is_active = ?";
+                $params = [
+                    $data['full_name'], 
+                    $data['email'], 
+                    (int)$data['role_id'],
+                    $data['department'] ?: null,
+                    $data['supervisor_id'] ? (int)$data['supervisor_id'] : null,
+                    isset($_POST['is_active']) ? 1 : 0
+                ];
+
+                // Optional Password update
+                if (!empty($_POST['password'])) {
+                    if (strlen($_POST['password']) < 8) {
+                        throw new Exception("Password too short.");
+                    }
+                    $sql .= ", password_hash = ?";
+                    $params[] = password_hash($_POST['password'], PASSWORD_BCRYPT);
+                }
+
+                $sql .= " WHERE id = ?";
+                $params[] = $id;
+
+                $pdo->prepare($sql)->execute($params);
+                $_SESSION['success'] = 'Employee updated successfully.';
+            } catch (\Throwable $e) {
+                $_SESSION['error'] = 'Update failed: ' . $e->getMessage();
+                header("Location: /processing-system/public/employees/edit/{$id}"); exit;
             }
 
             header('Location: /processing-system/public/employees');
