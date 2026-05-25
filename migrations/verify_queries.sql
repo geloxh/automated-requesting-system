@@ -16,10 +16,10 @@
 SELECT 
     e.full_name,
     e.role_id,
-    COUNT(a.id)
-    SUM(CASE WHEN a.status = 'pending' THEN 1 ELSE 0 END)
-    SUM(CASE WHEN a.status = 'approved' THEN 1 ELSE 0 END)
-    SUM(CASE WHEN a.status = 'rejected' THEN 1 ELSE 0 END)
+    COUNT(a.id) AS total_assigned,
+    SUM(CASE WHEN a.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+    SUM(CASE WHEN a.status = 'approved' THEN 1 ELSE 0 END) AS approved,
+    SUM(CASE WHEN a.status = 'rejected' THEN 1 ELSE 0 END) AS rejected
 FROM employees e
 LEFT JOIN approvals a ON a.approver_id = e.id
 WHERE e.role_id = 2
@@ -83,8 +83,8 @@ SELECT
     al.action,
     al.entity_type,
     al.entity_id,
-    al.created_at
-FROM audit_log al
-LEFT JOIN employees e ON e.id = ai.performed_by
-ORDER BY al.created_at DESC
+    al.performed_at
+FROM audit_logs al
+LEFT JOIN employees e ON e.id = al.performed_by
+ORDER BY al.performed_at DESC
 LIMIT 20;
