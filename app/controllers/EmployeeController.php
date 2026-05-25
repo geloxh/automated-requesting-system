@@ -1,6 +1,11 @@
 <?php
     class EmployeeController {
         public function index(): void {
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied. Administrator privileges required.';
+                header('Location: /processing-system/public/dashboard'); exit;
+            }
+
             $employees = db()->query(
                 'SELECT id, employee_code, full_name, email, department, is_active, employment_status, role_id FROM employees ORDER BY full_name'
             )->fetchAll();
@@ -13,6 +18,11 @@
         }
 
         public function create(): void {
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied.';
+                header('Location: /processing-system/public/dashboard'); exit;
+            }
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $this->store();
                 return;
@@ -82,6 +92,11 @@
         
         public function delete(int $id): void {
             \App\Helpers\Csrf::verify();
+
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied.';
+                header('Location: /processing-system/public/dashboard'); exit;
+            }
 
             // Prevent self-deletion
             if ($id === (int)$_SESSION['user_id']) {
@@ -158,6 +173,11 @@
         public function updateStatus(int $id): void {
             \App\Helpers\Csrf::verify();
 
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied.';
+                header('Location: /processing-system/public/dashboard'); exit;
+            }
+
             $allowed = ['employed', 'resigned', 'floating'];
             $status = trim($_POST['employment_status'] ?? '');
 
@@ -177,6 +197,11 @@
 
         public function actAsApprover(int $formId, string $action): void {
             \App\Helpers\Csrf::verify();
+
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied. Only SysAdmins can perform manual overrides.';
+                header("Location: /processing-system/public/forms/view/{$formId}"); exit;
+            }
 
             if (!in_array($action, ['approved', 'rejected'], true)) {
                 http_response_code(400);

@@ -32,21 +32,19 @@ CREATE TABLE employees (
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
-    supervisor_id INT NULL,
     department VARCHAR(100) NULL,
     is_active TINYINT(1) DEFAULT 1,
     employment_status ENUM('employed','resigned','floating') NOT NULL DEFAULT 'employed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT,
-    FOREIGN KEY (supervisor_id) REFERENCES employees(id) ON DELETE SET NULL
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
 );
 
 CREATE INDEX idx_employees_email ON employees(email);
 CREATE INDEX idx_employees_role  ON employees(role_id);
 
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
-('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT'),
+('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT');
 
 -- ============================================================
 -- FORMS
