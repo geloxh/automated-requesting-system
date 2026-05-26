@@ -16,7 +16,7 @@
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
-    } elseif ($roleId === 2) {
+    } elseif (in_array($roleId, [2, 4, 5, 6], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -37,9 +37,9 @@
         $stmt->execute([$userId]);
     }
 
-    $forms     = $stmt->fetchAll();
+    $forms = $stmt->fetchAll();
     $formLabel = \App\Helpers\FormLabels::all();
-    $badgeMap  = \App\Helpers\FormLabels::allBadges();
+    $badgeMap = \App\Helpers\FormLabels::allBadges();
 
     ob_start();
 
@@ -47,16 +47,16 @@
     // FIX: was using ucfirst(str_replace('_',' ',$status)) which produced
     //      "Checker approved" instead of a meaningful label.
     $statusLabels = [
-        'draft'               => 'Draft',
-        'submitted'           => 'Submitted',
-        'checker_approved'    => 'With Checker',
-        'process_approved'    => 'Processing',
+        'draft' => 'Draft',
+        'submitted' => 'Submitted',
+        'checker_approved' => 'With Checker',
+        'process_approved' => 'Processing',
         'department_reviewed' => 'Dept. Review',
-        'finance_reviewed'    => 'Finance Review',
-        'final_approved'      => 'Final Approved',
-        'completed'           => 'Completed',
-        'rejected'            => 'Rejected',
-        'cancelled'           => 'Cancelled',
+        'finance_reviewed' => 'Finance Review',
+        'final_approved' => 'Final Approved',
+        'completed' => 'Completed',
+        'rejected' => 'Rejected',
+        'cancelled' => 'Cancelled',
     ];
 
     // ── KPI bucket mapping ──────────────────────────────────────────────────
@@ -88,13 +88,13 @@
 
     // ── Icon + fixed colour map (keyed by form_type) ───────────────────────
     $iconMap = [
-        'advance_payment'      => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash',               'barColor' => '#10b981'],
-        'overtime_authorization'=> ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4',       'barColor' => '#8b5cf6'],
-        'request_for_payment'  => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt',             'barColor' => '#ec4899'],
-        'leave_application'    => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach',               'barColor' => '#0ea5e9'],
-        'reimbursement'        => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund',  'barColor' => '#f97316'],
-        'liquidation'          => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator',          'barColor' => '#0284c7'],
-        'vehicle_request'      => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car',                 'barColor' => '#ca8a04'],
+        'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash', 'barColor' => '#10b981'],
+        'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4', 'barColor' => '#8b5cf6'],
+        'request_for_payment' => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt', 'barColor' => '#ec4899'],
+        'leave_application' => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach', 'barColor' => '#0ea5e9'],
+        'reimbursement' => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund', 'barColor' => '#f97316'],
+        'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator', 'barColor' => '#0284c7'],
+        'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car', 'barColor' => '#ca8a04'],
     ];
 
     // ── Form volume (FIX: use type-fixed colours, not index-cycling array) ─
@@ -106,13 +106,13 @@
     arsort($typeCounts);
 
     $quickForms = [
-        ['slug' => 'advance-payment',  'label' => 'Advance',    'desc' => 'Cash advance',    'color' => '#10b981', 'icon' => 'ti-cash'],
-        ['slug' => 'overtime',         'label' => 'Overtime',   'desc' => 'OT authorization','color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-        ['slug' => 'request-payment',  'label' => 'Payment',    'desc' => 'Request payment', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
-        ['slug' => 'leave',            'label' => 'Leave',      'desc' => 'File absence',    'color' => '#0ea5e9', 'icon' => 'ti-beach'],
-        ['slug' => 'reimbursement',    'label' => 'Reimburse',  'desc' => 'Claim expenses',  'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
-        ['slug' => 'liquidation',      'label' => 'Liquidation','desc' => 'Clear advance',   'color' => '#0284c7', 'icon' => 'ti-calculator'],
-        ['slug' => 'vehicle-request',  'label' => 'Vehicle',    'desc' => 'Reserve vehicle', 'color' => '#ca8a04', 'icon' => 'ti-car'],
+        ['slug' => 'advance-payment', 'label' => 'Advance', 'desc' => 'Cash advance', 'color' => '#10b981', 'icon' => 'ti-cash'],
+        ['slug' => 'overtime', 'label' => 'Overtime', 'desc' => 'OT authorization','color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
+        ['slug' => 'request-payment', 'label' => 'Payment', 'desc' => 'Request payment', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        ['slug' => 'leave', 'label' => 'Leave', 'desc' => 'File absence', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
+        ['slug' => 'reimbursement', 'label' => 'Reimburse', 'desc' => 'Claim expenses', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
+        ['slug' => 'liquidation', 'label' => 'Liquidation','desc' => 'Clear advance', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
+        ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#ca8a04', 'icon' => 'ti-car'],
     ];
 
     // ── Pending alert — reuse the session-cached count from base.php ───────
@@ -177,7 +177,9 @@
             <span class="card-panel-title">Recent Activity</span>
             <?php $allLink = ($roleId === 1)
                 ? '/processing-system/public/requests'
-                : '/processing-system/public/my-submissions';
+                : (in_array($roleId, [2, 4, 5, 6], true)
+                    ? '/processing-system/public/approvals'
+                    : '/processing-system/public/my-submissions');
             ?>
             <a href="<?= $allLink ?>" class="card-panel-link">View all →</a>
         </div>
@@ -188,8 +190,8 @@
             </div>
         <?php else: ?>
             <?php foreach (array_slice($forms, 0, 8) as $form):
-                $ic      = $iconMap[$form['form_type']] ?? ['bg' => '#e2e8f0', 'color' => '#64748b', 'icon' => 'ti-file'];
-                $ago     = (new DateTime())->diff(new DateTime($form['created_at']));
+                $ic = $iconMap[$form['form_type']] ?? ['bg' => '#e2e8f0', 'color' => '#64748b', 'icon' => 'ti-file'];
+                $ago = (new DateTime())->diff(new DateTime($form['created_at']));
                 $timeStr = $ago->days >= 1
                     ? date('M d', strtotime($form['created_at']))
                     : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
