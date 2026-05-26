@@ -3,7 +3,8 @@
         public function index(): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied. Administrator privileges required.';
-                header('Location: /processing-system/public/dashboard'); exit;
+                header('Location: /processing-system/public/dashboard'); 
+                exit;
             }
 
             $employees = db()->query(
@@ -25,7 +26,8 @@
         public function create(): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /processing-system/public/dashboard'); exit;
+                header('Location: /processing-system/public/dashboard'); 
+                exit;
             }
 
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -52,26 +54,30 @@
                 $val = trim($_POST[$f] ?? '');
                 if ($val === '' && $f !== 'department' && $f !== 'supervisor_id') {
                     $_SESSION['error'] = "Field '{$f}' is required.";
-                    header('Location: /processing-system/public/employees/create'); exit;
+                    header('Location: /processing-system/public/employees/create'); 
+                    exit;
                 }
                 $data[$f] = $val;
             }
 
             if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['error'] = 'Invalid email address.';
-                header('Location: /processing-system/public/employees/create'); exit;
+                header('Location: /processing-system/public/employees/create'); 
+                exit;
             }
 
             if (strlen($data['password']) < 8) {
                 $_SESSION['error'] = 'Password must be at least 8 characters.';
-                header('Location: /processing-system/public/employees/create'); exit;
+                header('Location: /processing-system/public/employees/create'); 
+                exit;
             }
 
             $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
             $stmt->execute([$data['email']]);
             if ($stmt->fetch()) {
                 $_SESSION['error'] = 'Email already registered.';
-                header('Location: /processing-system/public/employees/create'); exit;
+                header('Location: /processing-system/public/employees/create'); 
+                exit;
             }
 
             $pdo = db();
@@ -91,7 +97,8 @@
                 ]);
             } catch (\Throwable $e) {
                 $_SESSION['error'] = 'Failed to create employee: ' . $e->getMessage();
-                header('Location: /processing-system/public/employees/create'); exit;
+                header('Location: /processing-system/public/employees/create'); 
+                exit;
             }
 
             $_SESSION['success'] = 'Employee created.';
@@ -104,7 +111,8 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /processing-system/public/dashboard'); exit;
+                header('Location: /processing-system/public/dashboard'); 
+                exit;
             }
 
             // Prevent self-deletion
@@ -207,7 +215,9 @@
 
         public function update(int $id): void {
             \App\Helpers\Csrf::verify();
-            if ((int)($_SESSION['role_id'] ?? 0) !== 1) { exit; }
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) { 
+                exit; 
+            }
 
             $data = [];
             foreach (['full_name', 'email', 'role_id', 'department', 'supervisor_id', 'is_active'] as $f) {
@@ -217,7 +227,8 @@
             // Validation
             if (empty($data['full_name']) || empty($data['email'])) {
                 $_SESSION['error'] = "Name and Email are required.";
-                header("Location: /processing-system/public/employees/edit/{$id}"); exit;
+                header("Location: /processing-system/public/employees/edit/{$id}"); 
+                exit;
             }
 
             $pdo = db();
@@ -250,7 +261,8 @@
                 $_SESSION['success'] = 'Employee updated successfully.';
             } catch (\Throwable $e) {
                 $_SESSION['error'] = 'Update failed: ' . $e->getMessage();
-                header("Location: /processing-system/public/employees/edit/{$id}"); exit;
+                header("Location: /processing-system/public/employees/edit/{$id}"); 
+                exit;
             }
 
             header('Location: /processing-system/public/employees');
@@ -262,7 +274,8 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /processing-system/public/dashboard'); exit;
+                header('Location: /processing-system/public/dashboard'); 
+                exit;
             }
 
             $allowed = ['employed', 'resigned', 'floating'];
@@ -287,7 +300,8 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied. Only SysAdmins can perform manual overrides.';
-                header("Location: /processing-system/public/forms/view/{$formId}"); exit;
+                header("Location: /processing-system/public/forms/view/{$formId}"); 
+                exit;
             }
 
             if (!in_array($action, ['approved', 'rejected'], true)) {
@@ -334,14 +348,29 @@
                     )->execute([$remarks, $formId, $approval['id']]);
 
                 } else {
-                    // Derive correct pipeline status from the sequence just approved
-                    $seqToStatus = [
-                        2 => 'checker_approved',
-                        3 => 'process_approved', // Or department_reviewed for Admin
-                        4 => 'finance_reviewed', // Or final_approved for Admin
-                        5 => 'final_approved',
-                        6 => 'completed',
-                    ];
+                    // Fetch form_type to pick the right pipeline status
+                    $formTypeRow = db()->prepare('SELECT form_type FROM forms WHERE id = ?');
+                    $formTypeRow->execute([$formId]);
+                    $formType = $formTypeRow->fetchColumn();
+
+                    $adminForms = ['overtime_authorization', 'leave_application', 'vehicle_request'];
+                    $isAdminForm = in_array($formType, $adminForms, true);
+
+                    $seqToStatus = $isAdminForm
+                        ? [
+                            2 => 'checker_approved',
+                            3 => 'department_reviewed',  // Review Approval
+                            4 => 'final_approved',       // Grant Approval
+                            5 => 'completed',
+                        ]
+                        : [
+                            2 => 'checker_approved',
+                            3 => 'process_approved',     // Process Approval
+                            4 => 'finance_reviewed',     // Evaluation Approval
+                            5 => 'final_approved',       // Grant Approval
+                            6 => 'completed',
+                        ];
+
                     $seq = (int) ($approval['sequence'] ?? 0);
                     $newStatus = $seqToStatus[$seq] ?? 'submitted';
                 }

@@ -94,6 +94,7 @@ CREATE TABLE approvals (
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending','approved','rejected','skipped')),
     remarks TEXT,
+    file_path VARCHAR(500) NULL,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approved_at TIMESTAMP NULL DEFAULT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

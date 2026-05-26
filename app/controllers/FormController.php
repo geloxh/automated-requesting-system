@@ -559,7 +559,7 @@ class FormController {
     }
 
     private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data, int $submitterId): void {
-        $pipeline              = $this->getPipeline($type);
+        $pipeline = $this->getPipeline($type);
         $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
