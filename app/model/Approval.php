@@ -4,23 +4,42 @@ class Approval {
     private $pdo;
 
     /**
-     * Pipeline levels — mirrors the PIPELINE constant in FormController.
+     * Admin pipeline — 5 stages.
+     * Forms: overtime_authorization, leave_application, vehicle_request
      *
      * sequence → the approvals.sequence value
-     * role   → role_id of the employee allowed to approve at this level
-     * label  → human-readable stage name
-     * status → the value written to forms.status after this level passes
+     * role     → role_id of the employee allowed to approve at this level
+     * label    → human-readable stage name
+     * status   → the value written to forms.status after this level passes
      */
-    private const LEVELS = [
+    private const LEVELS_ADMIN = [
+        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
+        2 => ['role' => 2, 'label' => 'Checker Approval', 'status' => 'checker_approved'],
+        3 => ['role' => 4, 'label' => 'Review Approval', 'status' => 'department_reviewed'],
+        4 => ['role' => 6, 'label' => 'Grant Approval Request', 'status' => 'final_approved'],
+        5 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
+    ];
+
+    /**
+     * Finance pipeline — 6 stages.
+     * Forms: advance_payment, request_for_payment, reimbursement, liquidation
+     */
+    private const LEVELS_FINANCE = [
         1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
         2 => ['role' => 2, 'label' => 'Checker Approval', 'status' => 'checker_approved'],
         3 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
         4 => ['role' => 4, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
-        5 => ['role' => 6, 'label' => 'Final Approval', 'status' => 'final_approved'],
-        6 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
+        5 => ['role' => 6, 'label' => 'Grant Approval Request','status' => 'final_approved'],
+        6 => ['role' => 1, 'label' => 'Completed',             'status' => 'completed'],
     ];
 
-    public const MAX_LEVEL = 6;
+    /** Form types that follow the finance pipeline. */
+    private const FINANCE_TYPES = [
+        'advance_payment',
+        'request_for_payment',
+        'reimbursement',
+        'liquidation',
+    ];
 
     public function __construct() {
         $this->pdo = new PDO(
@@ -111,20 +130,22 @@ class Approval {
     /**
      * Advance the approval to the next level.
      *
+     * @param string $formType  The form_type value from the forms table.
+     *                          Used to select the correct pipeline (admin vs finance).
+     *
      * Validates:
-     *  - the approval row exists
-     *  - it is still 'pending'
+     *  - the approval row exists and is still 'pending'
      *  - the acting user's role matches the current level's required role
-     *    (admin role_id = 1 bypasses role check)
+     *    (admin role_id = 1 bypasses the role check)
      *
      * On success:
-     *  - marks current row approved
-     *  - inserts a new pending row at level + 1
-     *    OR marks the form fully completed if already at MAX_LEVEL
+     *  - marks the current row approved
+     *  - advances forms.status to the next pipeline status,
+     *    OR marks the form completed if already at the final level
      *
      * Returns ['ok' => true] or ['ok' => false, 'error' => '...']
      */
-    public function advance(int $id, int $actorId, int $actorRole, string $remarks = ''): array {
+    public function advance(int $id, int $actorId, int $actorRole, string $formType, string $remarks = ''): array {
         $row = $this->find($id);
 
         if (!$row) {
@@ -135,8 +156,10 @@ class Approval {
             return ['ok' => false, 'error' => 'This approval step is no longer pending.'];
         }
 
+        $levels = $this->getLevels($formType);
+        $maxLevel = count($levels);
         $sequence = (int) $row['sequence'];
-        $levelCfg = self::LEVELS[$sequence] ?? null;
+        $levelCfg = $levels[$sequence] ?? null;
 
         if (!$levelCfg) {
             return ['ok' => false, 'error' => "Unknown approval sequence: {$sequence}."];
@@ -157,21 +180,15 @@ class Approval {
             $this->log($row['form_id'], $sequence, 'approved', $actorId, $levelCfg['status'], $remarks);
 
             // 3. Move to next level or complete
-            if ($sequence >= self::MAX_LEVEL) {
-                // Final level passed — mark the form completed
+            if ($sequence >= $maxLevel) {
                 $this->setFormStatus($row['form_id'], 'completed');
             } else {
-                $nextLevel = $sequence + 1;
-                // Note: In the current architecture, seedApprovalRows handles initial creation. 
-                // If using dynamic insertion, ensure logic for finding next approver is here.
-                // For schema compliance, we fix the signature:
-                // $this->insertLevel($row['form_id'], $nextLevel); 
-                
-                $this->setFormStatus($row['form_id'], self::LEVELS[$nextLevel]['status'] ?? 'in_approval');
+                $nextStatus = $levels[$sequence + 1]['status'] ?? 'in_approval';
+                $this->setFormStatus($row['form_id'], $nextStatus);
             }
 
             $this->pdo->commit();
-            return ['ok' => true, 'next_level' => $sequence < self::MAX_LEVEL ? $sequence + 1 : null];
+            return ['ok' => true, 'next_level' => $sequence < $maxLevel ? $sequence + 1 : null];
 
         } catch (\Throwable $e) {
             $this->pdo->rollBack();
@@ -182,8 +199,10 @@ class Approval {
     /**
      * Reject the approval at any active level.
      * Remarks are required for rejection.
+     *
+     * @param string $formType  The form_type value from the forms table.
      */
-    public function reject(int $id, int $actorId, int $actorRole, string $remarks): array {
+    public function reject(int $id, int $actorId, int $actorRole, string $formType, string $remarks): array {
         if (trim($remarks) === '') {
             return ['ok' => false, 'error' => 'A rejection reason is required.'];
         }
@@ -199,7 +218,8 @@ class Approval {
         }
 
         // Only roles that can approve at this level (or admin) may reject
-        $levelCfg = self::LEVELS[$row['sequence']] ?? null;
+        $levels = $this->getLevels($formType);
+        $levelCfg = $levels[$row['sequence']] ?? null;
         if ($actorRole !== 1 && $levelCfg && $actorRole !== $levelCfg['role']) {
             return ['ok' => false, 'error' => 'You are not authorised to reject at this level.'];
         }
@@ -227,25 +247,44 @@ class Approval {
     /**
      * Check whether a given actor (by role) can act on the current
      * pending step of a form. Used by the controller / view.
+     *
+     * @param string $formType  The form_type value from the forms table.
      */
-    public function canAct(int $formId, int $actorId, int $actorRole): bool {
+    public function canAct(int $formId, int $actorId, int $actorRole, string $formType): bool {
         if ($actorRole === 1) return true; // admin always can
 
         $pending = $this->currentPending($formId);
         if (!$pending) return false;
 
-        $required = self::LEVELS[$pending['sequence']]['role'] ?? null;
+        $levels   = $this->getLevels($formType);
+        $required = $levels[$pending['sequence']]['role'] ?? null;
         return $required !== null && $actorRole === $required;
     }
 
-    /** Return the LEVELS config so views can render a progress stepper. */
-    public static function pipeline(): array {
-        return self::LEVELS;
+    /**
+     * Return the pipeline levels for a given form type.
+     * Useful for views that render a progress stepper.
+     *
+     * @param string $formType  The form_type value from the forms table.
+     */
+    public static function pipeline(string $formType): array {
+        return in_array($formType, self::FINANCE_TYPES, true)
+            ? self::LEVELS_FINANCE
+            : self::LEVELS_ADMIN;
     }
 
     // ----------------------------------------------------------------
     // PRIVATE
     // ----------------------------------------------------------------
+
+    /**
+     * Select the correct levels array based on form type.
+     */
+    private function getLevels(string $formType): array {
+        return in_array($formType, self::FINANCE_TYPES, true)
+            ? self::LEVELS_FINANCE
+            : self::LEVELS_ADMIN;
+    }
 
     private function updateStatus(int $id, string $status, int $actorId, string $remarks): void {
         $stmt = $this->pdo->prepare("
@@ -283,7 +322,7 @@ class Approval {
         $newVals = json_encode([
             'status' => $resultStatus,
             'remarks' => $remarks,
-            'sequence' => $sequence
+            'sequence' => $sequence,
         ]);
 
         $this->pdo->prepare("
@@ -298,11 +337,11 @@ class Approval {
                 :ip
             )
         ")->execute([
-            ':actor'   => $actorId,
-            ':action'  => $action,
+            ':actor' => $actorId,
+            ':action' => $action,
             ':form_id' => $formId,
-            ':new_vals'=> $newVals,
-            ':ip'      => $_SERVER['REMOTE_ADDR'] ?? null
+            ':new_vals' => $newVals,
+            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
     }
 }
