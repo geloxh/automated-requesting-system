@@ -92,9 +92,102 @@ is a type of approach iterative and incremental process models.
 
 ### Workflow Schema Design
 ```
-    processing-system/config
-    ├── psdb/
-    │   ├── requests        # Tracks current position in workflow
-    │   ├── workflows       # Defines different approval processes (e.g., “Leave Request”, “Purchase Request”)
-    │   ├── workflow_steps   #Assigns who can approve (role-based)
-    │   └── approvals         # Tracks each approval decision
+    processing-system
+    ├── app/
+    │   ├── controllers/        # Business logic per form
+    |   |   ├── ApprovalController.php
+    |   |   ├── AuthController.php
+    |   |   ├── EmployeeController.php
+    |   |   ├── FormController.php
+    |   |   ├── FormsController.php
+    |   |   └── NotificationController.php
+    |   |
+    |   ├── helpers/            # Reusable utilities
+    |   |   ├── csrf.php
+    |   |   ├── EmployeeCode.php
+    |   |   └── FormLabels.php
+    |   |
+    |   ├── middleware/
+    |   |   ├── AuthMiddleware.php
+    |   |   └── RoleMiddleware.php
+    |   |
+    |   ├── model/            # DB interactions
+    |   |   └── Approval.php
+    |   |
+    |   └── services/
+    |       └── NotificationService.php
+    |
+    ├── config/
+    |   ├── app.php
+    |   ├── database.php
+    |   └── psdb.sql
+    |
+    ├── public/
+    |   ├── scripts
+    |   ├── stylesheets
+    |   ├── .htaccess
+    |   └── index.php
+    |
+    ├── routes/
+    |   └── web.php
+    |
+    ├── vendor/
+    |   ├── composer
+    |   ├── graham-campbell
+    |   ├── phpmailer
+    |   ├── phpoption
+    |   ├── symfony
+    |   ├── vlucas
+    |   └── autoload.php
+    |   
+    ├── views/
+    |   ├── approvals/
+    |   |   └── inbox.php
+    |   ├── auth/
+    |   |   ├── login.php
+    |   |   └── authchange/
+    |   |       ├── forgot_password.php
+    |   |       └── reset_password.php
+    |   ├── employees/
+    |   |   ├── index.php
+    |   |   ├── create.php
+    |   |   └── edit.php
+    |   |
+    |   ├── error/
+    |   |   └── error.php
+    |   |
+    |   ├── forms/
+    |   |   ├── advance_payment_form.php
+    |   |   ├── leave_application_form.php
+    |   |   ├── overtime_authorization_form.php
+    |   |   ├── reimbursement_form.php
+    |   |   ├── request_for_payment.php
+    |   |   ├── vehicle_request_form.php
+    |   |   ├── liquidation_form.php
+    |   |   ├── approval_trail.php
+    |   |   ├── all_requests.php
+    |   |   ├── list.php
+    |   |   ├── pipeline_stepper.php
+    |   |   └── show.php
+    |   ├── images    # images use for project
+    |   |
+    |   ├── layouts/
+    |   |   ├── base.php
+    |   |   └── dashboard.php
+    |   |
+    |   └── profile/
+    |       └── index.php  
+    |   
+    ├── .gitignore
+    |
+    ├── composer.json
+    |
+    ├── composer.lock
+    |
+    ├── hash.php
+    | 
+    ├── package-lock.json
+    |
+    └── README.md      # Overview of the project   
+
+

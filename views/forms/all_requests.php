@@ -2,7 +2,7 @@
 <div class="page-subheading">Complete record of all submitted forms across all departments.</div>
 
 <?php
-$badgeMap     = \App\Helpers\FormLabels::allBadges();
+$badgeMap = \App\Helpers\FormLabels::allBadges();
 $statusLabels = \App\Helpers\FormLabels::allStatusLabels();
 
 $uniqueTypes = array_unique(array_column($forms ?? [], 'form_type'));
@@ -84,10 +84,10 @@ sort($uniqueDepts);
     var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
 
     function refilter() {
-        var deptVal   = (document.getElementById('deptFilter')?.value   || '').toLowerCase();
+        var deptVal = (document.getElementById('deptFilter')?.value || '').toLowerCase();
         var statusVal = (document.getElementById('statusFilterAll')?.value || '').toLowerCase();
         document.querySelectorAll('table[data-filterable] tbody tr').forEach(function (row) {
-            var dept   = (row.dataset.dept   || '').toLowerCase();
+            var dept = (row.dataset.dept || '').toLowerCase();
             var status = (row.dataset.status || '');
             var deptOk = !deptVal || dept === deptVal;
             var statOk = !statusVal;
