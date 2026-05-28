@@ -415,7 +415,16 @@
                 $this->updateProfile();
                 return;
             }
-            $employee = db()->prepare('SELECT id, employee_code, full_name, email, department FROM employees WHERE id = ?');
+            $employee = db()->prepare('
+                SELECT e.id, e.employee_code, e.full_name, e.email, e.department,
+                    e.username, e.is_active, e.role_id, e.updated_at,
+                    e.full_name AS supervisor_name
+                FROM employees e
+                LEFT JOIN employees s ON s.id = e.supervisor_id
+                WHERE e.id = ?
+                '
+            );
+
             $employee->execute([$_SESSION['user_id']]);
             $employee = $employee->fetch();
 
@@ -441,7 +450,7 @@
                 exit;
             }
 
-            if (!empty($data['username'])) {
+            if (!empty($data['username'])) { // Check username uniqueness
                 $check = db()->prepare('SELECT id FROM employees WHERE username = ? AND id != ?');
                 $check->execute([$data['username'], $_SESSION['user_id']]);
                 if ($check->fetch()) {
@@ -454,6 +463,12 @@
             if (!empty($_POST['new_password'])) {
                 if (strlen($_POST['new_password']) < 8) {
                     $_SESSION['error'] = 'New password must be at least 8 characters.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
+
+                if ($_POST['new_password'] !== ($_POST['confirm_password'] ?? '')) {
+                    $_SESSION['error'] = 'Passwords do not match.';
                     header('Location: /processing-system/public/profile');
                     exit;
                 }

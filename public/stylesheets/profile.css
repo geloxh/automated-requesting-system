@@ -1,0 +1,105 @@
+.profile-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+.profile-sidebar {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    text-align: center;
+    position: sticky;
+    top: 90px;
+}
+.profile-avatar {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 22px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #0ea5e930;
+}
+.profile-name  { font-size: .95rem; font-weight: 600; color: var(--text-main); }
+.profile-role  { font-size: .75rem; color: var(--text-muted); margin-top: 1px; }
+.profile-code  {
+    font-size: .7rem; color: var(--text-soft);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 8px; margin-top: 2px;
+}
+.profile-divider { width: 100%; height: 1px; background: var(--border); }
+.profile-meta { width: 100%; display: flex; flex-direction: column; gap: 7px; text-align: left; }
+.profile-meta-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .75rem; color: var(--text-muted);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.profile-meta-row i { font-size: 14px; flex-shrink: 0; color: var(--text-soft); }
+.profile-nav { width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.profile-nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 8px;
+    font-size: .8rem; color: var(--text-muted);
+    cursor: pointer; text-decoration: none;
+    transition: background .12s;
+}
+.profile-nav-item:hover { background: var(--surface); color: var(--text-main); }
+.profile-nav-item.active {
+    background: var(--accent-glow);
+    color: var(--accent); font-weight: 600;
+    border: 1px solid #0ea5e930;
+}
+.profile-nav-item i { font-size: 15px; }
+.profile-main { display: flex; flex-direction: column; gap: 1.25rem; }
+.section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .8rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+.section-head-left { display: flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 600; color: var(--text-main); }
+.section-head-left i { font-size: 16px; color: var(--text-muted); }
+.section-hint { font-size: .73rem; color: var(--text-soft); }
+.section-body { padding: 1.25rem; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem 1.25rem; }
+.field-full { grid-column: 1 / -1; }
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: .73rem; font-weight: 600; color: var(--text-muted); }
+.field-optional {
+    font-size: .68rem; font-weight: 400; color: var(--text-soft);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 5px; margin-left: 4px;
+}
+.field-input-wrap { position: relative; display: flex; align-items: center; }
+.field-input-wrap i {
+    position: absolute; right: 9px;
+    font-size: 14px; color: var(--text-soft);
+    pointer-events: none;
+}
+.field-input-wrap input { padding-right: 28px !important; }
+.section-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+}
+.footer-hint { display: flex; align-items: center; gap: 5px; font-size: .73rem; color: var(--text-soft); }
+.footer-hint i { font-size: 13px; }
+.btn-row { display: flex; gap: .5rem; }
+.field-hint { font-size: .7rem; color: var(--text-soft); margin-top: 2px; }
+.badge-active {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .7rem; padding: 2px 8px; border-radius: 20px;
+    background: #d1fae5; color: #065f46;
+}

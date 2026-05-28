@@ -1,5 +1,19 @@
+<?php
+    $roleLabels = [ 1 => 'Admin', 2 => 'Approver', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Checker', 6 => 'Final Approver' ];
+    $roleName = $roleLabels[$employee['role_id']] ?? 'User';
+    $initials = strtoupper(substr($employee['full_name'], 0, 2));
+    $updatedAt = $employee['updated_at'] ? date('M d, Y', strtotime($employee['updated_at'])) : '—'
+?>
+
+<link rel="stylesheet" href="/processing-system/public/stylesheets/profile.css">
 <div class="page-header">
-    <h5>Profile</h5>
+    <div class="page-title-group">
+        <h5 class="page-heading">My Profile</h5>
+        <p class="page-subheading">Manage your account details and login credentials.</p>
+    </div>
+    <span style="font-size:.75rem; color:var(--text-soft); display:flex; align-items:center; gap:5px;">
+        <i class="ti ti-clock" style="font-size:13px"></i>
+    </span>
 </div>
 
 <?php if (!empty($_SESSION['success'])): ?>
