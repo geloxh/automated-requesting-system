@@ -26,19 +26,25 @@
                 exit;
             }
 
-            $email = trim($_POST['email'] ?? '');
+            $input = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
 
+            // inspect input if email
+            $isEmail = filter_var($input, FILTER_VALIDATE_EMAIL);
+
             $stmt = db()->prepare(
-                'SELECT id, full_name, password_hash, role_id, is_active FROM employees WHERE email = ?'
+                $isEmail
+                    ? 'SELECT id, full_name, password_hash, role_id, is_active FROM employees WHERE email = ?'
+                    : 'SELECT id, full_name, password_hash, role_id, is_active FROM employees WHERE username  = ?'
             );
-            $stmt->execute([$email]);
+
+            $stmt->execute([$input]);
             $employee = $stmt->fetch();
 
             if (!$employee || !$employee['is_active'] || !password_verify($password, $employee['password_hash'])) {
                 $_SESSION[$key]['count']++;
                 $_SESSION['login_error'] = 'Invalid credentials or account inactive.';
-                $_SESSION['old_email'] = htmlspecialchars($email);
+                $_SESSION['old_email'] = htmlspecialchars($input);
                 header('Location: /processing-system/public/login');
                 exit;
             }
@@ -67,6 +73,7 @@
 
             $first = trim($_POST['firstname'] ?? '');
             $last = trim($_POST['lastname'] ?? '');
+            $username = trim($_POST['username'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
             $confirm  = $_POST['password_confirmation'] ?? '';
@@ -74,6 +81,7 @@
             $old = [
                 'firstname' => htmlspecialchars($first),
                 'lastname' => htmlspecialchars($last),
+                'username' => htmlspecialchars($username),
                 'email' => htmlspecialchars($email),
             ];
 
@@ -85,8 +93,14 @@
                 exit;
             };
 
-            if (!$first || !$last || !$email || !$password || !$confirm) {
+            if (!$first || !$last || !$username || !$email || !$password || !$confirm) {
                 $fail('All fields are required.');
+            }
+
+            if ($username) {
+                $stmt = db()->prepare('SELECT id FROM employees WHERE username = ?');
+                $stmt->execute([$username]);
+                if ($stmt->fetch()) { $fail('Username already taken.'); }
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -111,8 +125,8 @@
             try {
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
-                    'INSERT INTO employees (employee_code, full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?)'
-                )->execute([$empCode, "$first $last", $email, password_hash($password, PASSWORD_BCRYPT), 3]);
+                    'INSERT INTO employees (employee_code, full_name, username, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?, ?)'
+                )->execute([$empCode, "$first $last", $username ?: null, $email, password_hash($password, PASSWORD_BCRYPT), 3]);
             } catch (\Throwable) {
                 $fail('Registration failed. Please try again.');
             }

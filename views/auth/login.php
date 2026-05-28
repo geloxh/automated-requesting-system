@@ -36,9 +36,12 @@
         <form method="POST" action="/processing-system/public/login">
             <?= \App\Helpers\Csrf::field() ?>
             <label for="login_email">
-                <span>Email</span>
-                <input type="email" id="login_email" name="email"
-                       value="<?= htmlspecialchars($oldEmail) ?>" required autofocus>
+                <span>Email or Username</span>
+                <input 
+                    type="text" id="login_email" name="email"
+                    value="<?= htmlspecialchars($oldEmail) ?>" required autofocus
+                    autocomplete="username"
+                >
             </label>
             <label for="login_password">
                 <span>Password</span>
@@ -88,6 +91,13 @@
                     <span>Last Name</span>
                     <input type="text" id="reg_lastname" name="lastname"
                            value="<?= htmlspecialchars($oldRegister['lastname'] ?? '') ?>" required>
+                </label>
+                <label for="reg_username">
+                    <span>Username</span>
+                    <input 
+                        type="text" id="reg_username" name="username"
+                        value="<?= htmlspecialchars($oldRegister['username'] ?? '') ?>"
+                    >
                 </label>
                 <label for="reg_email">
                     <span>Email</span>
