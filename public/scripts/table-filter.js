@@ -4,9 +4,9 @@
  * Client-side search + filter for all data tables.
  *
  * Usage: add data attributes to the <table>:
- *   data-filterable              — enables this script
- *   data-search-col="0,1,2"     — comma-separated column indices to search
- *   data-filter-col="2"         — column index for the type/status dropdown
+ *   data-filterable — enables this script
+ *   data-search-col="0,1,2"  — comma-separated column indices to search
+ *   data-filter-col="2" — column index for the type/status dropdown
  *
  * Then add inside .table-wrap, before <table>:
  *   <div class="filter-bar" data-filter-bar>
@@ -24,15 +24,15 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('table[data-filterable]').forEach(function (table) {
-        var wrap        = table.closest('.table-wrap');
+        var wrap = table.closest('.table-wrap');
         if (!wrap) return;
 
-        var searchInput  = wrap.querySelector('[data-search-input]');
+        var searchInput = wrap.querySelector('[data-search-input]');
         var filterSelect = wrap.querySelector('[data-filter-select]');
-        var countEl      = wrap.querySelector('[data-filter-count]');
-        var rows         = Array.from(table.querySelectorAll('tbody tr'));
-        var searchCols   = (table.dataset.searchCol || '0').split(',').map(Number);
-        var filterCol    = table.dataset.filterCol !== undefined ? parseInt(table.dataset.filterCol) : null;
+        var countEl = wrap.querySelector('[data-filter-count]');
+        var rows = Array.from(table.querySelectorAll('tbody tr'));
+        var searchCols = (table.dataset.searchCol || '0').split(',').map(Number);
+        var filterCol = table.dataset.filterCol !== undefined ? parseInt(table.dataset.filterCol) : null;
         var debounceTimer;
 
         function getCell(row, colIndex) {
@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function applyFilter() {
-            var query     = (searchInput?.value    || '').toLowerCase().trim();
-            var filterVal = (filterSelect?.value   || '').toLowerCase().trim();
-            var visible   = 0;
+            var query = (searchInput?.value || '').toLowerCase().trim();
+            var filterVal = (filterSelect?.value || '').toLowerCase().trim();
+            var visible = 0;
 
             rows.forEach(function (row) {
                 var matchesSearch = !query || searchCols.some(function (col) {
@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 var show = matchesSearch && matchesFilter;
                 // Fade instead of snap
-                row.style.opacity    = show ? '1' : '0';
-                row.style.display    = show ? '' : 'none';
+                row.style.opacity = show ? '1' : '0';
+                row.style.display = show ? '' : 'none';
                 if (show) visible++;
             });
 

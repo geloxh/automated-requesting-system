@@ -23,34 +23,34 @@ use App\Helpers\FormLabels;
 
 // ── Choose the correct pipeline for this form type ──────────────────────────
 $financeTypes = ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'];
-$isFinance    = in_array($form['form_type'], $financeTypes, true);
+$isFinance = in_array($form['form_type'], $financeTypes, true);
 
 if ($isFinance) {
     // Finance pipeline: submitted → checker → process → evaluation → final → completed
     $statusOrder = [
-        'draft'            => 'Draft',
-        'submitted'        => 'Submitted',
+        'draft' => 'Draft',
+        'submitted' => 'Submitted',
         'checker_approved' => 'Checker',
         'process_approved' => 'Process',
         'finance_reviewed' => 'Evaluation',
-        'final_approved'   => 'Final Approval',
-        'completed'        => 'Approved',
+        'final_approved' => 'Final Approval',
+        'completed' => 'Approved',
     ];
 } else {
     // Admin pipeline: submitted → checker → review → final → completed
     $statusOrder = [
-        'draft'               => 'Draft',
-        'submitted'           => 'Submitted',
-        'checker_approved'    => 'Checker',
+        'draft' => 'Draft',
+        'submitted' => 'Submitted',
+        'checker_approved' => 'Checker',
         'department_reviewed' => 'Review',
-        'final_approved'      => 'Final Approval',
-        'completed'           => 'Approved',
+        'final_approved' => 'Final Approval',
+        'completed' => 'Approved',
     ];
 }
 
-$formStatus   = $form['status'] ?? 'draft';
-$isRejected   = $formStatus === 'rejected';
-$statusKeys   = array_keys($statusOrder);
+$formStatus = $form['status'] ?? 'draft';
+$isRejected = $formStatus === 'rejected';
+$statusKeys = array_keys($statusOrder);
 $currentIndex = array_search($formStatus, $statusKeys, true);
 if ($currentIndex === false) $currentIndex = 0;
 
@@ -82,13 +82,13 @@ if (!empty($approvalSteps) && is_array($approvalSteps)) {
         }
 
         // Look up approver info for completed steps (sequence = index)
-        $stepRow      = $stepBySeq[$i] ?? null;
+        $stepRow = $stepBySeq[$i] ?? null;
         $approverName = ($stepRow && $state === 'done') ? htmlspecialchars($stepRow['full_name'] ?? '') : '';
-        $approvedAt   = ($stepRow && $state === 'done' && !empty($stepRow['approved_at']))
+        $approvedAt = ($stepRow && $state === 'done' && !empty($stepRow['approved_at']))
                         ? date('M d, Y', strtotime($stepRow['approved_at']))
                         : '';
     ?>
-    <div class="approval-step <?= $state === 'done'    ? 'is-done'     : '' ?>
+    <div class="approval-step <?= $state === 'done' ? 'is-done' : '' ?>
                                <?= $state === 'current' ? 'is-current'  : '' ?>
                                <?= ($isRejected && $state !== 'done') ? 'is-rejected' : '' ?>">
         <div class="step-dot <?= $state ?>">

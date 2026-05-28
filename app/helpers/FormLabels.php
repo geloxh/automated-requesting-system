@@ -27,18 +27,18 @@
          * Use FormLabels::statusLabel($status) everywhere a status is displayed.
          */
         private const STATUS_LABELS = [
-            'draft'               => 'Draft',
-            'submitted'           => 'Submitted',
-            'checker_approved'    => 'With Checker',
-            'process_approved'    => 'Processing',
+            'draft' => 'Draft',
+            'submitted' => 'Submitted',
+            'checker_approved' => 'With Checker',
+            'process_approved' => 'Processing',
             'department_reviewed' => 'Dept. Review',
-            'finance_reviewed'    => 'Finance Review',
+            'finance_reviewed' => 'Finance Review',
             'supervisor_reviewed' => 'With Supervisor',
-            'department_checked'  => 'Dept. Check',
-            'final_approved'      => 'Final Approved',
-            'completed'           => 'Completed',
-            'rejected'            => 'Rejected',
-            'cancelled'           => 'Cancelled',
+            'department_checked' => 'Dept. Check',
+            'final_approved' => 'Final Approved',
+            'completed' => 'Completed',
+            'rejected' => 'Rejected',
+            'cancelled' => 'Cancelled',
         ];
 
         /** Human-readable label for a status string. Falls back to ucwords transform. */
@@ -56,18 +56,18 @@
          * Single source of truth — replaces the local $badgeMap in every view.
          */
         private const BADGE_MAP = [
-            'draft'               => 'secondary',
-            'submitted'           => 'primary',
-            'checker_approved'    => 'info',
-            'process_approved'    => 'info',
+            'draft' => 'secondary',
+            'submitted' => 'primary',
+            'checker_approved' => 'info',
+            'process_approved' => 'info',
             'department_reviewed' => 'info',
-            'finance_reviewed'    => 'warning',
+            'finance_reviewed' => 'warning',
             'supervisor_reviewed' => 'info',
-            'department_checked'  => 'info',
-            'final_approved'      => 'success',
-            'completed'           => 'success',
-            'rejected'            => 'danger',
-            'cancelled'           => 'dark',
+            'department_checked' => 'info',
+            'final_approved' => 'success',
+            'completed' => 'success',
+            'rejected' => 'danger',
+            'cancelled' => 'dark',
         ];
 
         /** Badge class for a single status string. Defaults to 'secondary'. */
@@ -100,13 +100,13 @@
         private const ADMIN_FORMS = ['overtime_authorization', 'leave_application', 'vehicle_request'];
 
         private const LABELS = [
-            'advance_payment'       => 'Advance Payment',
-            'overtime_authorization'=> 'Overtime Authorization',
-            'request_for_payment'   => 'Request for Payment',
-            'leave_application'     => 'Leave Application',
-            'reimbursement'         => 'Reimbursement',
-            'liquidation'           => 'Liquidation',
-            'vehicle_request'       => 'Vehicle Request',
+            'advance_payment' => 'Advance Payment',
+            'overtime_authorization' => 'Overtime Authorization',
+            'request_for_payment' => 'Request for Payment',
+            'leave_application' => 'Leave Application',
+            'reimbursement' => 'Reimbursement',
+            'liquidation' => 'Liquidation',
+            'vehicle_request' => 'Vehicle Request',
         ];
 
         public static function stepLabel(int $sequence, string $formType = ''): string {
@@ -160,8 +160,8 @@
          * @param string $formType The type of form to resolve correct labels
          */
         public static function currentStage(string $status, ?int $currentStep, string $formType = ''): string {
-            if ($status === 'draft')     return 'Draft';
-            if ($status === 'rejected')  return 'Rejected';
+            if ($status === 'draft') return 'Draft';
+            if ($status === 'rejected') return 'Rejected';
             if ($status === 'completed') return 'Completed';
             if ($status === 'cancelled') return 'Cancelled';
 

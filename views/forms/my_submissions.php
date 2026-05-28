@@ -2,7 +2,7 @@
 <div class="page-subheading">Track the approval status of all your submitted requests.</div>
 
 <?php
-$badgeMap     = \App\Helpers\FormLabels::allBadges();
+$badgeMap = \App\Helpers\FormLabels::allBadges();
 $statusLabels = \App\Helpers\FormLabels::allStatusLabels();
 
 // Support pre-filtering from KPI card links (?status=draft|approved|rejected|in_approval)
@@ -69,11 +69,11 @@ sort($uniqueTypes);
         </select>
         <select id="statusFilter" aria-label="Filter by status">
             <option value="">All statuses</option>
-            <option value="draft"       <?= $activeFilter === 'draft'       ? 'selected' : '' ?>>Draft</option>
-            <option value="submitted"   <?= $activeFilter === 'submitted'   ? 'selected' : '' ?>>Submitted</option>
+            <option value="draft" <?= $activeFilter === 'draft' ? 'selected' : '' ?>>Draft</option>
+            <option value="submitted" <?= $activeFilter === 'submitted' ? 'selected' : '' ?>>Submitted</option>
             <option value="in_approval" <?= $activeFilter === 'in_approval' ? 'selected' : '' ?>>In Approval</option>
-            <option value="approved"    <?= $activeFilter === 'approved'    ? 'selected' : '' ?>>Approved</option>
-            <option value="rejected"    <?= $activeFilter === 'rejected'    ? 'selected' : '' ?>>Rejected</option>
+            <option value="approved" <?= $activeFilter === 'approved' ? 'selected' : '' ?>>Approved</option>
+            <option value="rejected" <?= $activeFilter === 'rejected' ? 'selected' : '' ?>>Rejected</option>
         </select>
         <span class="filter-count" data-filter-count></span>
     </div>
