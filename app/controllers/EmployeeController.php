@@ -432,12 +432,23 @@
             $data = [
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'department' => trim($_POST['department'] ?? ''),
+                'username' => trim($_POST['username'] ?? '') ?: null,
             ];
 
             if ($data['full_name'] === '') {
                 $_SESSION['error'] = 'Full name is required.';
                 header('Location: /processing-system/public/profile');
                 exit;
+            }
+
+            if (!empty($data['username'])) {
+                $check = db()->prepare('SELECT id FROM employees WHERE username = ? AND id != ?');
+                $check->execute([$data['username'], $_SESSION['user_id']]);
+                if ($check->fetch()) {
+                    $_SESSION['error'] = 'That username is already taken.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
             }
 
             if (!empty($_POST['new_password'])) {
@@ -459,8 +470,8 @@
                 $data['password_hash'] = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
             }
 
-            $sets = 'full_name = ?, department = ?';
-            $params = [$data['full_name'], $data['department']];
+            $sets = 'full_name = ?, username = ?, department = ?';
+            $params = [$data['full_name'], $data['username'], $data['department']];
 
             if (isset($data['password_hash'])) {
                 $sets .= ', password_hash = ?';

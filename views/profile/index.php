@@ -18,7 +18,8 @@
         <div class="form-section-title">Account Details</div>
         <div class="form-grid g-2">
             <div class="form-group"><label>Employee Code</label><input type="text" value="<?= htmlspecialchars($employee['employee_code']) ?>" disabled></div>
-            <div class="form-group"><label>Email</label><input type="email" value="<?= htmlspecialchars($employee['email']) ?>" disabled></div>
+            <div class="form-group"><label>Email</label><input type="email" value="<?= htmlspecialchars($employee['email']) ?>"></div>
+            <div class="form-group"><label>Username</label><input type="text" name="username" value="<?= htmlspecialchars($employee['username'] ?? '') ?>"></div>
             <div class="form-group"><label>Full Name</label><input type="text" name="full_name" value="<?= htmlspecialchars($employee['full_name']) ?>" required></div>
             <div class="form-group"><label>Department</label><input type="text" name="department" value="<?= htmlspecialchars($employee['department'] ?? '') ?>"></div>
         </div>
