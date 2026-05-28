@@ -19,6 +19,10 @@
         
         <div class="form-grid g-2">
             <div class="form-group"><label>Full Name</label><input type="text" name="full_name" value="<?= htmlspecialchars($employee['full_name']) ?>" required></div>
+            <div class="form-group">
+                <label>Username <span class="muted">(optional, used for login)</span></label>
+                <input type="text" name="username" value="<?= htmlspecialchars($employee['username'] ?? '') ?>" placeholder="e.g. juan">
+            </div>
             <div class="form-group"><label>Email Address</label><input type="email" name="email" value="<?= htmlspecialchars($employee['email']) ?>" required></div>
             <div class="form-group">
                 <label>New Password <span class="muted">(Leave blank to keep current)</span></label>

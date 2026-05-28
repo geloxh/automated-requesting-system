@@ -82,3 +82,8 @@ On a real server (cPanel, VPS, etc.), replace the self-signed cert with a free L
 
 ### Passsword
 rasj bdwt nfkl mnko
+
+### MySQL
+ SELECT id, full_name, username, email, role_id FROM employees ORDER BY role_id;  // Get the Data Tables
+
+ UPDATE employees SET username = 'your username' WHERE id = 1; // CREATING username direct to cli

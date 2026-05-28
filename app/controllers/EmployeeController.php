@@ -50,7 +50,7 @@
             \App\Helpers\Csrf::verify();
 
             $data = [];
-            foreach (['full_name', 'email', 'password', 'role_id', 'department', 'supervisor_id'] as $f) {
+            foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'supervisor_id'] as $f) {
                 $val = trim($_POST[$f] ?? '');
                 if ($val === '' && $f !== 'department' && $f !== 'supervisor_id') {
                     $_SESSION['error'] = "Field '{$f}' is required.";
@@ -220,7 +220,7 @@
             }
 
             $data = [];
-            foreach (['full_name', 'email', 'role_id', 'department', 'supervisor_id', 'is_active'] as $f) {
+            foreach (['full_name', 'username', 'email', 'role_id', 'department', 'supervisor_id', 'is_active'] as $f) {
                 $data[$f] = trim($_POST[$f] ?? '');
             }
 
@@ -234,10 +234,11 @@
             $pdo = db();
             try {
                 $sql = "UPDATE employees SET 
-                        full_name = ?, email = ?, role_id = ?, 
+                        full_name = ?, username = ?, email = ?, role_id = ?, 
                         department = ?, supervisor_id = ?, is_active = ?";
                 $params = [
-                    $data['full_name'], 
+                    $data['full_name'],
+                    $data['username'] ?: null, 
                     $data['email'], 
                     (int)$data['role_id'],
                     $data['department'] ?: null,
@@ -245,6 +246,15 @@
                     isset($_POST['is_active']) ? 1 : 0
                 ];
 
+                if (!empty($data['username'])) {
+                    $check = db()->prepare('SELECT id FROM employees WHERE username = ? AND id != ?');
+                    $check->execute([$data['username'], $id]);
+                    if ($check->fetch()) {
+                        $_SESSION['error'] = 'That username is already taken.';
+                        header("Location: /processing-system/public/employees/edit/{$id}");
+                        exit;
+                    }
+                }
                 // Optional Password update
                 if (!empty($_POST['password'])) {
                     if (strlen($_POST['password']) < 8) {
