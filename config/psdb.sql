@@ -28,6 +28,7 @@ INSERT INTO roles (name, description) VALUES
 CREATE TABLE employees (
     id INT AUTO_INCREMENT PRIMARY KEY,
     employee_code VARCHAR(20) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NULL;
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -42,6 +43,7 @@ CREATE TABLE employees (
     FOREIGN KEY (supervisor_id) REFERENCES employees(id) ON DELETE SET NULL
 );
 
+CREATE INDEX idx_employees_username ON employees(username);
 CREATE INDEX idx_employees_email ON employees(email);
 CREATE INDEX idx_employees_role  ON employees(role_id);
 
