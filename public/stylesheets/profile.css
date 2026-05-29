@@ -17,6 +17,8 @@
     position: sticky;
     top: 90px;
 }
+
+
 .profile-avatar {
     width: 68px; height: 68px; border-radius: 50%;
     background: var(--accent-glow);
@@ -25,6 +27,34 @@
     display: flex; align-items: center; justify-content: center;
     border: 2px solid #0ea5e930;
 }
+
+.profile-avatar-wrap {
+    position: relative;
+    width: 68px;
+    height: 68px;
+}
+.profile-avatar-img {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #0ea5e930;
+}
+.avatar-edit-btn {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: 2px solid var(--card-bg);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+}
+.avatar-edit-btn:hover { opacity: .85; }
+
 .profile-name  { font-size: .95rem; font-weight: 600; color: var(--text-main); }
 .profile-role  { font-size: .75rem; color: var(--text-muted); margin-top: 1px; }
 .profile-code  {

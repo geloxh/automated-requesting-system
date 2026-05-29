@@ -5,6 +5,8 @@
     $updatedAt = $employee['updated_at'] ? date('M d, Y', strtotime($employee['updated_at'])) : '—'
 ?>
 
+<?php $avatarUrl = !empty($employee['avatar']) ? htmlspecialchars($employee['avatar']) : null; ?>
+
 <link rel="stylesheet" href="/processing-system/public/stylesheets/profile.css">
 <div class="page-header">
     <div class="page-title-group">
@@ -30,7 +32,29 @@
 
     <!-- Sidebar -->
     <aside class="profile-sidebar">
-        <div class="profile-avatar"><?= $initials ?></div>
+        
+        <div class="profile-avatar-wrap">
+            <?php if ($avatarUrl): ?>
+                <img src="<?= $avatarUrl ?>" class="profile-avatar-img" alt="Profile picture">
+            <?php else: ?>
+                <div class="profile-avatar"><?= $initials ?></div>
+            <?php endif; ?>
+
+            <form method="POST" action="/processing-system/public/profile/avatar"
+                enctype="multipart/form-data" id="avatar-form">
+                <?= \App\Helpers\Csrf::field() ?>
+                <input type="file" name="avatar" id="avatar-input"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    style="display:none"
+                    onchange="document.getElementById('avatar-form').submit()">
+                <button type="button" class="avatar-edit-btn"
+                        onclick="document.getElementById('avatar-input').click()"
+                        title="Change photo">
+                    <i class="ti ti-camera"></i>
+                </button>
+            </form>
+        </div>
+
         <div>
             <div class="profile-name"><?= htmlspecialchars($employee['full_name']) ?></div>
             <div class="profile-role"><?= $roleName ?></div>

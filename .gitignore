@@ -5,3 +5,5 @@ vendor
 
 app/controllers/ApprovalController.php
 config/psdb.sql
+
+public/uploads/avatars

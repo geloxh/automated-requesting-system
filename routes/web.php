@@ -156,6 +156,11 @@
     // ---------------------------------------------------------------
     // Profile
     // ---------------------------------------------------------------
+    if ($uri === '/profile/avatar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        (new EmployeeController)->uploadAvatar();
+        exit;
+    }
+    
     if ($uri === '/profile') {
         (new EmployeeController)->profile();
         exit;
