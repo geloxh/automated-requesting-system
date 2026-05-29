@@ -438,6 +438,48 @@
 
         private function updateProfile(): void {
             \App\Helpers\Csrf::verify();
+
+            $section = $_POST['section'] ?? 'account';
+
+            // Password Section
+            if ($section === 'password') {
+                if (empty($_POST['new_password'])) {
+                    $_SESSION['error'] = 'Please enter a new password.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
+                if (strlen($_POST['new_password']) < 8) {
+                    $_SESSION['error'] = 'New password must be at least 8 characters.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
+                if ($_POST['new_password'] !== ($_POST['confirm_password'] ?? '')) {
+                    $_SESSION['error'] = 'Passwords do not match.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
+
+                $emp = db()->prepare('SELECT password_hash FROM employees WHERE id = ?');
+                $emp->execute([$_SESSION['user_id']]);
+                $emp = $emp->fetch();
+
+                if (!password_verify($_POST['current_password'] ?? '', $emp['password_hash'])) {
+                    $_SESSION['error'] = 'Current password is incorrect.';
+                    header('Location: /processing-system/public/profile');
+                    exit;
+                }
+
+                $hash = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
+                db()->prepare('UPDATE employees SET password_hash = ? WHERE id = ?')
+                    ->execute([$hash, $_SESSION['user_id']]);
+
+                $_SESSION['success'] = 'Password updated.';
+                header('Location: /processing-system/public/profile');
+                exit;
+            }
+
+
+            // Account Section
             $data = [
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'department' => trim($_POST['department'] ?? ''),
@@ -460,40 +502,9 @@
                 }
             }
 
-            if (!empty($_POST['new_password'])) {
-                if (strlen($_POST['new_password']) < 8) {
-                    $_SESSION['error'] = 'New password must be at least 8 characters.';
-                    header('Location: /processing-system/public/profile');
-                    exit;
-                }
+            $sets = 'full_name = ?, department = ?, username = ?';
+            $params = [$data['full_name'], $data['department'], $data['username'], $_SESSION['user_id']];
 
-                if ($_POST['new_password'] !== ($_POST['confirm_password'] ?? '')) {
-                    $_SESSION['error'] = 'Passwords do not match.';
-                    header('Location: /processing-system/public/profile');
-                    exit;
-                }
-
-                $emp = db()->prepare('SELECT password_hash FROM employees WHERE id = ?');
-                $emp->execute([$_SESSION['user_id']]);
-                $emp = $emp->fetch();
-
-                if (!password_verify($_POST['current_password'] ?? '', $emp['password_hash'])) {
-                    $_SESSION['error'] = 'Current password is incorrect.';
-                    header('Location: /processing-system/public/profile');
-                    exit;
-                }
-                $data['password_hash'] = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
-            }
-
-            $sets = 'full_name = ?, username = ?, department = ?';
-            $params = [$data['full_name'], $data['username'], $data['department']];
-
-            if (isset($data['password_hash'])) {
-                $sets .= ', password_hash = ?';
-                $params[] = $data['password_hash'];
-            }
-
-            $params[] = $_SESSION['user_id'];
             db()->prepare("UPDATE employees SET {$sets} WHERE id = ?")->execute($params);
 
             $_SESSION['user_name'] = $data['full_name'];
