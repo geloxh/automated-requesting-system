@@ -417,8 +417,8 @@
             }
             $employee = db()->prepare('
                 SELECT e.id, e.employee_code, e.full_name, e.email, e.department,
-                    e.username, e.is_active, e.role_id, e.updated_at,
-                    e.full_name AS supervisor_name
+                    e.username, e.is_active, e.role_id, e.updated_at, e.avatar,
+                    s.full_name AS supervisor_name
                 FROM employees e
                 LEFT JOIN employees s ON s.id = e.supervisor_id
                 WHERE e.id = ?
@@ -512,4 +512,64 @@
             header('Location: /processing-system/public/profile');
             exit;
         }
+
+        public function uploadAvatar(): void {
+            \App\Helpers\Csrf::verify();
+
+            if (empty($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                $_SESSION['error'] = 'No file uploaded or upload error.';
+                header('Location: /processing-system/public/profile');
+                exit;
+                
+            }
+
+            $file = $_FILES['avatar'];
+            $maxSize = 2 * 1024 * 1024; // 2MB
+            $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
+            $info = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($file['tmp_name']);
+
+            if ($file['size'] > $maxSize) {
+                $_SESSION['error'] = 'Image must be under 2 MB.';
+                header('Location: /processing-system/public/profile');
+                exit;
+            }
+
+            if (!in_array($mimeType, $allowed, true)) {
+                $_SESSION['error'] = 'Only JPG, PNG, WEBP, or GIF images are allowed.';
+                header('Location: /processing-system/public/profile');
+                exit;
+            }
+            $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'][$mimeType];
+            $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
+            $destDir = __DIR__ . '/../../public/uploads/avatars/';
+            $destPath = $destDir . $filename;
+
+            if (!is_dir($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
+
+            // Delete old avatar file if it exists
+            $old = db()->prepare('SELECT avatar FROM employees WHERE id = ?');
+            $old->execute([$_SESSION['user_id']]);
+            $oldAvatar = $old->fetchColumn();
+            if ($oldAvatar && file_exists($destDir . basename($oldAvatar))) {
+                unlink($destDir . basename($oldAvatar));
+            }
+
+            if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+                $_SESSION['error'] = 'Failed to save image.';
+                header('Location: /processing-system/public/profile');
+                exit;
+            }
+
+            $avatarPath = '/processing-system/public/uploads/avatars/' . $filename;
+            db()->prepare('UPDATE employees SET avatar = ? WHERE id = ?')
+                ->execute([$avatarPath, $_SESSION['user_id']]);
+
+            $_SESSION['success'] = 'Profile picture updated.';
+            header('Location: /processing-system/public/profile');
+            exit;
+        }
+
     }
