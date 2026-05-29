@@ -1,0 +1,7 @@
+.env/
+
+hash.php
+vendor
+
+app/controllers/ApprovalController.php
+config/psdb.sql
