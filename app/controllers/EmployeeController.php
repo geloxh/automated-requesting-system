@@ -52,7 +52,7 @@
             $data = [];
             foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'supervisor_id'] as $f) {
                 $val = trim($_POST[$f] ?? '');
-                if ($val === '' && $f !== 'department' && $f !== 'supervisor_id') {
+                if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'username'])) {
                     $_SESSION['error'] = "Field '{$f}' is required.";
                     header('Location: /processing-system/public/employees/create'); 
                     exit;
