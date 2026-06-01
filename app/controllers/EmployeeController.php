@@ -526,7 +526,7 @@
             $file = $_FILES['avatar'];
             $maxSize = 2 * 1024 * 1024; // 2MB
             $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
-            $info = new finfo(FILEINFO_MIME_TYPE);
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if ($file['size'] > $maxSize) {
@@ -540,7 +540,15 @@
                 header('Location: /processing-system/public/profile');
                 exit;
             }
-            $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'][$mimeType];
+            
+            $extMap = ['image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+            if (!isset($extMap[$mimeType])) {
+                $_SESSION['error'] = 'Unsupported image format.';
+                header('Location: /processing-system/public/profile');
+                exit;
+            }
+            $ext = $extMap[$mimeType];
+
             $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
             $destDir = __DIR__ . '/../../public/uploads/avatars/';
             $destPath = $destDir . $filename;

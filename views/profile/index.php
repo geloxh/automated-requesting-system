@@ -59,7 +59,13 @@
             <div class="profile-role"><?= $roleName ?></div>
             <div class="profile-code"><?= htmlspecialchars($employee['employee_code']) ?></div>
         </div>
-        <span class="badge-active"><i class="ti ti-circle-check"></i> Active</span>
+        
+        <?php if ($employee['is_active']): ?>
+            <span class="badge-active"><i class="ti ti-circle-check"></i> Active</span>
+        <?php else: ?>
+            <span class="badge-inactive"><i class="ti ti-circle-x"></i> Inactive</span>
+        <?php endif; ?>
+
         <div class="profile-divider"></div>
         <div class="profile-meta">
             <?php if (!empty($employee['department'])): ?>
