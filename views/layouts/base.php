@@ -1,11 +1,11 @@
 <?php
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
-    $uri       = $uri ?? '/';
+    $uri = $uri ?? '/';
     $roleLabels = [1 => 'Admin', 2 => 'Approver', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Checker', 6 => 'Final Approver'];
-    $roleName   = $roleLabels[$_SESSION['role_id']] ?? 'User';
-    $initials   = strtoupper(substr($_SESSION['user_name'], 0, 2));
-    $roleId     = (int) $_SESSION['role_id'];
-    $userId     = (int) $_SESSION['user_id'];
+    $roleName = $roleLabels[$_SESSION['role_id']] ?? 'User';
+    $initials = strtoupper(substr($_SESSION['user_name'], 0, 2));
+    $roleId = (int) $_SESSION['role_id'];
+    $userId = (int) $_SESSION['user_id'];
 
     // ── Pending count — computed once per request, cached in session for 60s ─
     // FIX: previously this was computed twice per page (sidebar + dashboard banner)
@@ -14,8 +14,8 @@
     $pendingCount = 0;
     if ($roleId !== 3) {
         $cacheKey = "pending_count_{$userId}";
-        $cacheTs  = "pending_count_ts_{$userId}";
-        $ttl      = 60; // seconds
+        $cacheTs = "pending_count_ts_{$userId}";
+        $ttl = 60; // seconds
 
         if (
             isset($_SESSION[$cacheKey], $_SESSION[$cacheTs]) &&
@@ -69,24 +69,24 @@
         }
     }
     $typeIcon = [
-        'success' => ['dot' => '',                  'color' => 'var(--success)'],
+        'success' => ['dot' => '', 'color' => 'var(--success)'],
         'warning' => ['dot' => 'notif-dot-warning', 'color' => 'var(--warning)'],
-        'danger'  => ['dot' => 'notif-dot-danger',  'color' => 'var(--danger)'],
-        'info'    => ['dot' => '',                  'color' => 'var(--primary)'],
+        'danger' => ['dot' => 'notif-dot-danger',  'color' => 'var(--danger)'],
+        'info' => ['dot' => '', 'color' => 'var(--primary)'],
     ];
 
     // ── Status label map (human-readable badge text) ──────────────────────────
     $statusLabels = [
-        'draft'               => 'Draft',
-        'submitted'           => 'Submitted',
-        'checker_approved'    => 'With Checker',
-        'process_approved'    => 'Processing',
+        'draft' => 'Draft',
+        'submitted' => 'Submitted',
+        'checker_approved' => 'With Checker',
+        'process_approved' => 'Processing',
         'department_reviewed' => 'Dept. Review',
-        'finance_reviewed'    => 'Finance Review',
-        'final_approved'      => 'Final Approved',
-        'completed'           => 'Completed',
-        'rejected'            => 'Rejected',
-        'cancelled'           => 'Cancelled',
+        'finance_reviewed' => 'Finance Review',
+        'final_approved' => 'Final Approved',
+        'completed' => 'Completed',
+        'rejected' => 'Rejected',
+        'cancelled' => 'Cancelled',
     ];
 ?>
 <!DOCTYPE html>
@@ -203,7 +203,7 @@
             <span class="notif-panel-title">
                 Notifications
                 <?php if ($notifUnread > 0): ?>
-                    <span class="badge badge-danger" style="font-size:10px;padding:1px 6px"><?= $notifUnread ?></span>
+                    <span class="badge badge-danger notif-count-badge"><?= $notifUnread ?></span>
                 <?php endif; ?>
             </span>
             <span class="notif-mark-read" id="markAllReadBtn">Mark all read</span>
@@ -212,16 +212,16 @@
         <div id="notifList">
         <?php if (empty($notifItems)): ?>
             <div class="notif-empty">
-                <i class="ti ti-bell-off" style="font-size:1.5rem;color:var(--border);display:block;margin-bottom:.25rem"></i>
+                <i class="ti ti-bell-off empty-state-icon"></i>
                 No notifications yet.
             </div>
         <?php else: ?>
             <?php foreach ($notifItems as $n):
-                $tc      = $typeIcon[$n['type']] ?? $typeIcon['info'];
-                $ago     = (new DateTime())->diff(new DateTime($n['created_at']));
+                $tc = $typeIcon[$n['type']] ?? $typeIcon['info'];
+                $ago = (new DateTime())->diff(new DateTime($n['created_at']));
                 $agoStr  = $ago->days > 0 ? $ago->days . 'd ago'
-                         : ($ago->h > 0   ? $ago->h   . 'h ago'
-                         : ($ago->i > 0   ? $ago->i   . 'm ago' : 'Just now'));
+                         : ($ago->h > 0 ? $ago->h . 'h ago'
+                         : ($ago->i > 0 ? $ago->i . 'm ago' : 'Just now'));
                 $isUnread = !(bool)$n['is_read'];
             ?>
             <div class="notif-item <?= $isUnread ? 'notif-item--unread' : '' ?>"
@@ -276,7 +276,7 @@
                 <!-- Notification bell -->
                 <button class="icon-btn" id="notifBtn" title="Notifications">
                     <i class="ti ti-bell"></i>
-                    <span class="notif-dot" id="notifDot" <?= $notifUnread === 0 ? 'style="display:none"' : '' ?>></span>
+                    <span class="notif-dot <?= $notifUnread === 0 ? 'notif-dot--hidden' : '' ?>" id="notifDot"></span>
                 </button>
 
                 <!-- New Request -->

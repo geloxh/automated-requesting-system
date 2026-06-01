@@ -1,4 +1,12 @@
-// ── Smooth scroll + scroll-spy ────────────────────────────────── //
+// ── Avatar upload ────────────────────────────────────────────────
+const avatarInput = document.getElementById('avatar-input');
+const avatarEditBtn = document.getElementById('avatar-edit-btn');
+if (avatarEditBtn && avatarInput) {
+    avatarEditBtn.addEventListener('click', () => avatarInput.click());
+    avatarInput.addEventListener('change', () => document.getElementById('avatar-form').submit());
+}
+
+// ── Smooth scroll + scroll-spy ───────────────────────────────────
 document.querySelectorAll('.profile-nav-item').forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
@@ -7,23 +15,23 @@ document.querySelectorAll('.profile-nav-item').forEach(link => {
     });
 });
 
-const section = ['accounts', 'password'].map(id => document.getElementById(id)).filter(Boolean);
+const sections = ['account', 'password'].map(id => document.getElementById(id)).filter(Boolean);
 const navItems = document.querySelectorAll('.profile-nav-item');
-const observer = new IntersectionObserver(entrie => {
+const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             navItems.forEach(n => n.classList.remove('active'));
-            const active = document.querySelector('.profile-nav-item[href="#${entry.target.id}"]');
+            const active = document.querySelector(`.profile-nav-item[href="#${entry.target.id}"]`);
             if (active) active.classList.add('active');
         }
     });
-}, { treshold: 0.4 });
+}, { threshold: 0.4 });
 sections.forEach(s => observer.observe(s));
 
-// ── Eye toggle ────────────────────────────────────────────────── //
+// ── Eye toggle ───────────────────────────────────────────────────
 document.querySelectorAll('.eye-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
-        const input =  document.getElementById(btn.dataset.target);
+        const input = document.getElementById(btn.dataset.target);
         if (!input) return;
         const show = input.type === 'password';
         input.type = show ? 'text' : 'password';
