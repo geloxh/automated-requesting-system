@@ -16,7 +16,7 @@ document.addEventListener('click', function (e) {
 
 // ── Mobile sidebar toggle ───────────────────────────────────────
 var sidebarToggle = document.getElementById('sidebarToggle');
-var sidebar       = document.getElementById('sidebar');
+var sidebar = document.getElementById('sidebar');
 
 if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener('click', function () {
@@ -121,3 +121,9 @@ document.querySelectorAll('input[type="date"]:not([value])').forEach(function (e
         el.value = new Date().toISOString().split('T')[0];
     }
 });
+
+document.querySelectorAll('.activity-icon-dynamic[data-bg]').forEach(el => {
+    el.style.setProperty('--icon-bg', el.dataset.bg);
+    el.style.setProperty('--icon-color', el.dataset.color);
+});
+

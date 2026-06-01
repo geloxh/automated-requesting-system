@@ -16,13 +16,13 @@ sort($uniqueTypes);
 ?>
 
 <?php if (!empty($drafts)): ?>
-<div class="card" style="border-left:3px solid var(--warning);margin-bottom:1rem">
-    <div class="card-header" style="display:flex;align-items:center;gap:8px">
+<div class="card card--draft-alert">
+    <div class="card-header card-header--flex">
         <i class="ti ti-pencil"></i>
         Draft<?= count($drafts) > 1 ? 's' : '' ?> — Ready to Submit
         <span class="badge badge-warning"><?= count($drafts) ?></span>
     </div>
-    <div class="card-body" style="padding:0">
+    <div class="card-body card-body--flush">
         <table>
             <thead>
                 <tr>
@@ -38,7 +38,7 @@ sort($uniqueTypes);
                     <td class="muted td-first"><?= $form['id'] ?></td>
                     <td><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></td>
                     <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
-                    <td class="td-last text-end">
+                    <td class="muted td-stage">
                         <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">
                             Submit Now
                         </a>
