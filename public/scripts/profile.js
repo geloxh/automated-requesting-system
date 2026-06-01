@@ -6,26 +6,20 @@ if (avatarEditBtn && avatarInput) {
     avatarInput.addEventListener('change', () => document.getElementById('avatar-form').submit());
 }
 
-// ── Smooth scroll + scroll-spy ───────────────────────────────────
+// ── Nav: click handler + scroll-spy ─────────────────────────────
 const navItems = document.querySelectorAll('.profile-nav-item');
+const sections  = ['account', 'password'].map(id => document.getElementById(id)).filter(Boolean);
 
 navItems.forEach(link => {
-    link.addEventListenre('click', e => {
+    link.addEventListener('click', e => {
         e.preventDefault();
         const target = document.querySelector(link.getAttribute('href'));
         if (!target) return;
-
-        // Immediately update active - don't wait for observer
         navItems.forEach(n => n.classList.remove('active'));
         link.classList.add('active');
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 });
-
-// Scroll-spy: use rootMargin to trigger only when section hits top area
-const sections = ['account', 'password']
-    .map(id => document.getElementById(id))
-    .filter(Boolean);
 
 const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -34,32 +28,8 @@ const observer = new IntersectionObserver(entries => {
         const active = document.querySelector(`.profile-nav-item[href="#${entry.target.id}"]`);
         if (active) active.classList.add('active');
     });
-}, {
-    rootMargin: '-30% 0px -60px 0px', // fires when section is in the top 40% of viewport
-    treshold: 0
-})
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
 
-sections.forEach(s => observer.observe(s));
-
-document.querySelectorAll('.profile-nav-item').forEach(link => {
-    link.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(link.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-});
-
-const sections = ['account', 'password'].map(id => document.getElementById(id)).filter(Boolean);
-const navItems = document.querySelectorAll('.profile-nav-item');
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            navItems.forEach(n => n.classList.remove('active'));
-            const active = document.querySelector(`.profile-nav-item[href="#${entry.target.id}"]`);
-            if (active) active.classList.add('active');
-        }
-    });
-}, { threshold: 0.4 });
 sections.forEach(s => observer.observe(s));
 
 // ── Eye toggle ───────────────────────────────────────────────────
@@ -73,9 +43,9 @@ document.querySelectorAll('.eye-toggle').forEach(btn => {
     });
 });
 
-// ── Password strength ─────────────────────────────────────────── //
+// ── Password strength ────────────────────────────────────────────
 const newPw = document.getElementById('new_password');
-const fill = document.getElementById('strenghth-fill');
+const fill = document.getElementById('strength-fill');
 const label = document.getElementById('strength-label');
 const confirmPw = document.getElementById('confirm_password');
 const matchHint = document.getElementById('match-hint');
@@ -89,7 +59,7 @@ const levels = [
 
 function score(pw) {
     let s = 0;
-    if (pw.length >= 8) s++;
+    if (pw.length >= 8)  s++;
     if (pw.length >= 12) s++;
     if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
     if (/\d/.test(pw)) s++;
@@ -100,7 +70,7 @@ function score(pw) {
 if (newPw && fill && label) {
     newPw.addEventListener('input', () => {
         const v = newPw.value;
-        fill.className = 'strength-fill';
+        fill.className  = 'strength-fill';
         label.className = 'strength-label';
         if (!v) { label.textContent = ''; return; }
         const lvl = levels[score(v) - 1] || levels[0];
@@ -116,7 +86,7 @@ function checkMatch() {
     if (!confirmPw.value) { matchHint.textContent = ''; matchHint.className = 'field-hint'; return; }
     const ok = newPw.value === confirmPw.value;
     matchHint.textContent = ok ? '✓ Passwords match' : '✗ Passwords do not match';
-    matchHint.className = 'field-hint ' + (ok ? 'match-ok' : 'match-err');
+    matchHint.className   = 'field-hint ' + (ok ? 'match-ok' : 'match-err');
 }
 
 if (confirmPw) confirmPw.addEventListener('input', checkMatch);
