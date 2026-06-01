@@ -37,6 +37,65 @@ function checkMobile() {
 checkMobile();
 window.addEventListener('resize', checkMobile);
 
+// ── Sidebar group dropdown + popup ─────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var STORAGE_KEY = 'sidebar_groups';
+
+    // Restore collapsed state from localStorage
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+
+    document.querySelectorAll('.sidebar-group').forEach(function (group) {
+        var key = group.dataset.group;
+        if (saved[key] === true) group.classList.add('collapsed');
+    });
+
+    // Toggle on label click
+    document.querySelectorAll('.sidebar-label--toggle').forEach(function (label) {
+        label.addEventListener('click', function () {
+            var key   = label.dataset.toggle;
+            var group = document.querySelector('.sidebar-group[data-group="' + key + '"]');
+            if (!group) return;
+            group.classList.toggle('collapsed');
+            // Persist
+            try {
+                var state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+                state[key] = group.classList.contains('collapsed');
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch(e) {}
+        });
+    });
+
+    // Popup flyout — show when group is collapsed and label is hovered
+    document.querySelectorAll('.sidebar-group').forEach(function (group) {
+        var key    = group.dataset.group;
+        var popup  = document.getElementById('popup-' + key);
+        var label  = group.querySelector('.sidebar-label--toggle');
+        if (!popup || !label) return;
+
+        var hideTimer;
+
+        function showPopup() {
+            if (!group.classList.contains('collapsed')) return;
+            clearTimeout(hideTimer);
+            var rect = label.getBoundingClientRect();
+            popup.style.top = rect.top + 'px';
+            popup.classList.add('visible');
+        }
+
+        function hidePopup() {
+            hideTimer = setTimeout(function () {
+                popup.classList.remove('visible');
+            }, 120);
+        }
+
+        label.addEventListener('mouseenter', showPopup);
+        label.addEventListener('mouseleave', hidePopup);
+        popup.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+        popup.addEventListener('mouseleave', hidePopup);
+    });
+});
+
 // ── Topbar search — filter any data table on the page ──────────
 // Mirrors the search term into the first [data-search-input] on the page
 // so the global search bar drives the table filter without a page reload.
