@@ -8,13 +8,14 @@
 <?php $avatarUrl = !empty($employee['avatar']) ? htmlspecialchars($employee['avatar']) : null; ?>
 
 <link rel="stylesheet" href="/processing-system/public/stylesheets/profile.css">
+
 <div class="page-header">
     <div class="page-title-group">
         <h5 class="page-heading">My Profile</h5>
         <p class="page-subheading">Manage your account details and login credentials.</p>
     </div>
-    <span style="font-size:.75rem; color:var(--text-soft); display:flex; align-items:center; gap:5px;">
-        <i class="ti ti-clock" style="font-size:13px"></i>
+    <span class="profile-updated-at">
+        <i class="ti ti-clock"></i>
         Last updated <?= $updatedAt ?>
     </span>
 </div>
@@ -32,7 +33,7 @@
 
     <!-- Sidebar -->
     <aside class="profile-sidebar">
-        
+
         <div class="profile-avatar-wrap">
             <?php if ($avatarUrl): ?>
                 <img src="<?= $avatarUrl ?>" class="profile-avatar-img" alt="Profile picture">
@@ -44,9 +45,10 @@
                 enctype="multipart/form-data" id="avatar-form">
                 <?= \App\Helpers\Csrf::field() ?>
                 <input type="file" name="avatar" id="avatar-input"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    accept="image/jpeg, image/jpg, image/png, image/webp, image/gif"
                     style="display:none"
-                    onchange="document.getElementById('avatar-form').submit()">
+                    onchange="document.getElementById('avatar-form').submit()"
+                >
                 <button type="button" class="avatar-edit-btn"
                         onclick="document.getElementById('avatar-input').click()"
                         title="Change photo">
@@ -60,17 +62,16 @@
             <div class="profile-role"><?= $roleName ?></div>
             <div class="profile-code"><?= htmlspecialchars($employee['employee_code']) ?></div>
         </div>
-        <span class="badge-active"><i class="ti ti-circle-check" style="font-size:11px"></i> Active</span>
+        <span class="badge-active"><i class="ti ti-circle-check"></i> Active</span>
         <div class="profile-divider"></div>
         <div class="profile-meta">
             <?php if (!empty($employee['department'])): ?>
                 <div class="profile-meta-row"><i class="ti ti-building"></i> <?= htmlspecialchars($employee['department']) ?></div>
-                <?php endif; ?>
-                <div class="profile-meta-row"><i class="ti ti-mail"></i> <?= htmlspecialchars($employee['email']) ?></div>
-                <?php if (!empty($employee['supervisor_name'])): ?>
+            <?php endif; ?>
+            <div class="profile-meta-row"><i class="ti ti-mail"></i> <?= htmlspecialchars($employee['email']) ?></div>
+            <?php if (!empty($employee['supervisor_name'])): ?>
                 <div class="profile-meta-row"><i class="ti ti-user"></i> <?= htmlspecialchars($employee['supervisor_name']) ?></div>
-                <?php endif; ?>
-            <div class="profile-meta-column"><i class="ti  ti-user"></i></div>
+            <?php endif; ?>
         </div>
         <div class="profile-divider"></div>
         <nav class="profile-nav">
@@ -93,10 +94,10 @@
                     <span class="section-hint">Fields marked * are required</span>
                 </div>
                 <div class="section-body">
-                    <div class="fields-grid">
+                    <div class="field-grid">
                         <div class="field-group">
                             <label class="field-label">Employee code</label>
-                            <input type="text" value="<?= htmlspecialchars($employee['email']) ?>" disabled>
+                            <input type="text" value="<?= htmlspecialchars($employee['employee_code']) ?>" disabled>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Email address</label>
@@ -118,7 +119,7 @@
                         </div>
                         <div class="field-group field-full">
                             <label class="field-label">Department</label>
-                            <input type="text" name="department" value="<?= htmlspecialchars($employee['department'] ?? '') ?>" >
+                            <input type="text" name="department" value="<?= htmlspecialchars($employee['department'] ?? '') ?>">
                         </div>
                     </div>
                 </div>
@@ -150,25 +151,29 @@
                         <div class="field-group">
                             <label class="field-label">Current password</label>
                             <div class="field-input-wrap">
-                                <input type="password" name="current_password" placeholder="••••••••">
-                                <i clas="ti ti-eye"></i>
+                                <input type="password" id="current_password" name="current_password" placeholder="••••••••">
+                                <button type="button" class="eye-toggle" data-target="current_password" title="Show/hide"><i class="ti ti-eye"></i></button>
                             </div>
                         </div>
-                        <div class="field-group"></div> <!-- spacer -->
+                        <div class="field-group"></div>
                         <div class="field-group">
                             <label class="field-label">New password</label>
                             <div class="field-input-wrap">
-                                <input type="password" name="new_password" placeholder="Min. 8 characters">
-                                <i class="ti ti-eye"></i>
+                                <input type="password" id="new_password" name="new_password" placeholder="Min. 8 characters">
+                                <button type="button" class="eye-toggle" data-target="new_password" title="Show/hide"><i class="ti ti-eye"></i></button>
                             </div>
-                            <span class="field-hint">At least 8 characters</span>
+                            <div class="strength-bar-wrap" id="strength-bar-wrap">
+                                <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                                <span class="strength-label" id="strength-label"></span>
+                            </div>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Confirm new password</label>
                             <div class="field-input-wrap">
-                                <input type="password" name="confirm_password" placeholder="Repeat new password">
-                                <i class="ti ti-eye"></i>
+                                <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat new password">
+                                <button type="button" class="eye-toggle" data-target="confirm_password" title="Show/hide"><i class="ti ti-eye"></i></button>
                             </div>
+                            <span class="field-hint" id="match-hint"></span>
                         </div>
                     </div>
                 </div>
@@ -185,5 +190,4 @@
         </div>
     </div>
 </div>
-
 <script src="/processing-system/public/scripts/profile.js"></script>

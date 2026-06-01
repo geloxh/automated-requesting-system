@@ -536,7 +536,7 @@
             }
 
             if (!in_array($mimeType, $allowed, true)) {
-                $_SESSION['error'] = 'Only JPG, PNG, WEBP, or GIF images are allowed.';
+                $_SESSION['error'] = 'Only JPEG, JPG, PNG, WEBP, or GIF images are allowed.';
                 header('Location: /processing-system/public/profile');
                 exit;
             }
