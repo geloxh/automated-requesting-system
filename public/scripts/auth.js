@@ -1,30 +1,32 @@
 document.addEventListener('DOMContentLoaded', function () {
     lucide.createIcons();
 
-    function setupPasswordToggle(buttonId, inputId, iconId) {
-        const button = document.getElementById(buttonId);
-        if (!button) return;
-        button.addEventListener('click', function () {
+    // ── Tab switcher ─────────────────────────────────────────────
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-pane').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('pane-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ── Password toggles ─────────────────────────────────────────
+    function setupToggle(btnId, inputId, iconId) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.addEventListener('click', () => {
             const input = document.getElementById(inputId);
             const icon  = document.getElementById(iconId);
-            if (input && icon) {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
-                lucide.createIcons();
-            }
+            if (!input || !icon) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.setAttribute('data-lucide', show ? 'eye-off' : 'eye');
+            lucide.createIcons();
         });
     }
 
-    setupPasswordToggle('toggleBtn',       'login_password', 'eyeIcon');
-    setupPasswordToggle('toggleBtnReg',    'reg_password',   'eyeIconReg');
-    setupPasswordToggle('toggleBtnConfirm','reg_confirm',    'eyeIconConfirm');
-
-    const cont   = document.querySelector('.cont');
-    const imgBtn = document.querySelector('.img__btn');
-    if (cont && imgBtn) {
-        imgBtn.addEventListener('click', function () {
-            cont.classList.toggle('s--signup');
-        });
-    }
+    setupToggle('toggleBtn', 'login_password', 'eyeIcon');
+    setupToggle('toggleBtnReg', 'reg_password', 'eyeIconReg');
+    setupToggle('toggleBtnConfirm', 'reg_confirm', 'eyeIconConfirm');
 });

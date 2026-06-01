@@ -14,67 +14,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login — Processing System</title>
+    <title>Login — SysPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
 </head>
+
 <body>
 
-<div class="cont <?= $showSignup ? 's--signup' : '' ?>">
+<div class="auth-wrap">
 
-    <!-- Sign In -->
-    <div class="form sign-in">
-        <h2>Welcome Back</h2>
-
-        <?php if ($success): ?>
-            <p class="form-success" role="alert"><?= htmlspecialchars($success) ?></p>
-        <?php endif; ?>
-
-        <?php if ($loginError): ?>
-            <p class="form-error" role="alert"><?= htmlspecialchars($loginError) ?></p>
-        <?php endif; ?>
-
-        <form method="POST" action="/processing-system/public/login">
-            <?= \App\Helpers\Csrf::field() ?>
-            <label for="login_email">
-                <span>Email or Username</span>
-                <input 
-                    type="text" id="login_email" name="email"
-                    value="<?= htmlspecialchars($oldEmail) ?>" required autofocus
-                    autocomplete="username"
-                >
-            </label>
-            <label for="login_password">
-                <span>Password</span>
-                <div class="password-wrapper">
-                    <input type="password" id="login_password" name="password" required>
-                    <button type="button" class="toggle-icon" id="toggleBtn" aria-label="Toggle password visibility">
-                        <i data-lucide="eye" id="eyeIcon"></i>
-                    </button>
-                </div>
-            </label>
-            <p class="forgot-pass"><a href="/processing-system/public/forgot-password">Forgot password?</a></p>
-            <button type="submit" class="submit">Sign In</button>
-        </form>
+    <!-- Left branding panel -->
+    <div class="auth-panel">
+        <div class="auth-brand-icon">⚡</div>
+        <div class="auth-brand-name">SysPro</div>
+        <div class="auth-brand-tag">Automated Requesting System</div>
+        <p class="auth-panel-desc">Paperless forms, multi-level approvals, and real-time tracking — all in one place.</p>
+        <ul class="auth-features">
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Advance Payment & Reimbursement
+            </li>
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Leave & Overtime Authorization
+            </li>
+            <li>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Multi-level Approval Workflow
+            </li>
+        </ul>
     </div>
 
-    <!-- Sliding Panel -->
-    <div class="sub-cont">
-        <div class="img">
-            <div class="img__text m--up">
-                <h3>Don't have an account? Please sign up!</h3>
-            </div>
-            <div class="img__text m--in">
-                <h3>Already have an account? Sign in.</h3>
-            </div>
-            <div class="img__btn" role="button" aria-label="Toggle between sign in and sign up">
-                <span class="m--up">Sign Up</span>
-                <span class="m--in">Sign In</span>
-            </div>
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+
+        <!-- Tab switcher -->
+        <div class="auth-tabs" role="tablist">
+            <button class="auth-tab <?= !$showSignup ? 'active' : '' ?>" data-tab="signin" role="tab">Sign In</button>
+            <button class="auth-tab <?= $showSignup  ? 'active' : '' ?>" data-tab="signup" role="tab">Sign Up</button>
         </div>
 
-        <!-- Sign Up -->
-        <div class="form sign-up">
-            <h2>Create Account</h2>
+        <!-- Sign In pane -->
+        <div class="auth-pane <?= !$showSignup ? 'active' : '' ?>" id="pane-signin">
+            <div class="auth-title">Welcome back</div>
+            <div class="auth-subtitle">Sign in to your SysPro account</div>
+
+            <?php if ($success): ?>
+                <p class="form-success" role="alert"><?= htmlspecialchars($success) ?></p>
+            <?php endif; ?>
+            <?php if ($loginError): ?>
+                <p class="form-error" role="alert"><?= htmlspecialchars($loginError) ?></p>
+            <?php endif; ?>
+
+            <form method="POST" action="/processing-system/public/login">
+                <?= \App\Helpers\Csrf::field() ?>
+                <div class="auth-field">
+                    <label for="login_email">Email or Username</label>
+                    <input type="text" id="login_email" name="email"
+                           value="<?= htmlspecialchars($oldEmail) ?>"
+                           required autofocus autocomplete="username"
+                           placeholder="you@company.com">
+                </div>
+                <div class="auth-field">
+                    <label for="login_password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login_password" name="password"
+                               required autocomplete="current-password" placeholder="••••••••">
+                        <button type="button" class="toggle-icon" id="toggleBtn" aria-label="Toggle password visibility">
+                            <i data-lucide="eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="auth-forgot">
+                    <a href="/processing-system/public/forgot-password">Forgot password?</a>
+                </div>
+                <button type="submit" class="auth-btn">Sign In</button>
+            </form>
+        </div>
+
+        <!-- Sign Up pane -->
+        <div class="auth-pane <?= $showSignup ? 'active' : '' ?>" id="pane-signup">
+            <div class="auth-title">Create account</div>
+            <div class="auth-subtitle">Register to access SysPro</div>
 
             <?php if ($registerError): ?>
                 <p class="form-error" role="alert"><?= htmlspecialchars($registerError) ?></p>
@@ -82,51 +105,48 @@
 
             <form method="POST" action="/processing-system/public/register">
                 <?= \App\Helpers\Csrf::field() ?>
-                <label for="reg_firstname">
-                    <span>First Name</span>
-                    <input type="text" id="reg_firstname" name="firstname"
-                           value="<?= htmlspecialchars($oldRegister['firstname'] ?? '') ?>" required>
-                </label>
-                <label for="reg_lastname">
-                    <span>Last Name</span>
-                    <input type="text" id="reg_lastname" name="lastname"
-                           value="<?= htmlspecialchars($oldRegister['lastname'] ?? '') ?>" required>
-                </label>
-                <label for="reg_username">
-                    <span>Username</span>
-                    <input 
-                        type="text" id="reg_username" name="username"
-                        value="<?= htmlspecialchars($oldRegister['username'] ?? '') ?>"
-                    >
-                </label>
-                <label for="reg_email">
-                    <span>Email</span>
+                <div class="auth-field-row">
+                    <div class="auth-field">
+                        <label for="reg_firstname">First Name</label>
+                        <input type="text" id="reg_firstname" name="firstname"
+                               value="<?= htmlspecialchars($oldRegister['firstname'] ?? '') ?>" required>
+                    </div>
+                    <div class="auth-field">
+                        <label for="reg_lastname">Last Name</label>
+                        <input type="text" id="reg_lastname" name="lastname"
+                               value="<?= htmlspecialchars($oldRegister['lastname'] ?? '') ?>" required>
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label for="reg_email">Email</label>
                     <input type="email" id="reg_email" name="email"
-                           value="<?= htmlspecialchars($oldRegister['email'] ?? '') ?>" required>
-                </label>
-                <label for="reg_password">
-                    <span>Password</span>
+                           value="<?= htmlspecialchars($oldRegister['email'] ?? '') ?>"
+                           required placeholder="you@company.com">
+                </div>
+                <div class="auth-field">
+                    <label for="reg_password">Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="reg_password" name="password"
-                               autocomplete="new-password" required>
+                               autocomplete="new-password" required placeholder="Min. 8 characters">
                         <button type="button" class="toggle-icon" id="toggleBtnReg" aria-label="Toggle password visibility">
                             <i data-lucide="eye" id="eyeIconReg"></i>
                         </button>
                     </div>
-                </label>
-                <label for="reg_confirm">
-                    <span>Confirm Password</span>
+                </div>
+                <div class="auth-field">
+                    <label for="reg_confirm">Confirm Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="reg_confirm" name="password_confirmation"
-                               autocomplete="new-password" required>
+                               autocomplete="new-password" required placeholder="Repeat password">
                         <button type="button" class="toggle-icon" id="toggleBtnConfirm" aria-label="Toggle confirm password visibility">
                             <i data-lucide="eye" id="eyeIconConfirm"></i>
                         </button>
                     </div>
-                </label>
-                <button type="submit" class="submit">Sign Up</button>
+                </div>
+                <button type="submit" class="auth-btn">Create Account</button>
             </form>
         </div>
+
     </div>
 </div>
 
