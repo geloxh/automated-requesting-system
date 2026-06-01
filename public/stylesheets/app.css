@@ -1,3 +1,13 @@
+/**
+ *
+ * app.css - Global stylesheets for project UX/UI
+ *
+/
+
+/* ── Google Fonts + Tabler Icons (moved from base.php <link> tags) ── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css');
+
 /* ── CSS Variables ── */
 :root {
     --sidebar-bg: #0f172a;
@@ -756,9 +766,6 @@ textarea { resize: vertical; }
 .vol-bar { flex: 2; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
 .vol-fill { height: 100%; border-radius: 99px; transition: width .4s ease; }
 .vol-count { font-size: 13px; font-weight: 600; color: var(--text-main); min-width: 24px; text-align: right; }
-/* ── Google Fonts + Tabler Icons (moved from base.php <link> tags) ── */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
-@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css');
 
 /* ── Replaces: style="background:var(--warning)" on .notif-dot-sm.notif-dot-warning ── */
 .notif-dot-sm.notif-dot-warning {
