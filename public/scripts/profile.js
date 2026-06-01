@@ -7,6 +7,40 @@ if (avatarEditBtn && avatarInput) {
 }
 
 // ── Smooth scroll + scroll-spy ───────────────────────────────────
+const navItems = document.querySelectorAll('.profile-nav-item');
+
+navItems.forEach(link => {
+    link.addEventListenre('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (!target) return;
+
+        // Immediately update active - don't wait for observer
+        navItems.forEach(n => n.classList.remove('active'));
+        link.classList.add('active');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+});
+
+// Scroll-spy: use rootMargin to trigger only when section hits top area
+const sections = ['account', 'password']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        navItems.forEach(n => n.classList.remove('active'));
+        const active = document.querySelector(`.profile-nav-item[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+    });
+}, {
+    rootMargin: '-30% 0px -60px 0px', // fires when section is in the top 40% of viewport
+    treshold: 0
+})
+
+sections.forEach(s => observer.observe(s));
+
 document.querySelectorAll('.profile-nav-item').forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
