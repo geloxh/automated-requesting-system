@@ -14,91 +14,91 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// ── Mobile sidebar toggle ───────────────────────────────────────
+// ── Sidebar toggle (desktop collapse + mobile overlay) ──────────
 var sidebarToggle = document.getElementById('sidebarToggle');
-var sidebar = document.getElementById('sidebar');
+var sidebar       = document.getElementById('sidebar');
+var SIDEBAR_KEY   = 'sidebar_collapsed';
 
-if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener('click', function () {
-        sidebar.classList.toggle('open');
-    });
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('#sidebar') && !e.target.closest('#sidebarToggle')) {
-            sidebar.classList.remove('open');
-        }
-    });
-}
-
-function checkMobile() {
-    if (sidebarToggle) {
-        sidebarToggle.style.display = window.innerWidth <= 900 ? 'flex' : '';
+// Restore desktop collapsed state on load
+if (sidebar && window.innerWidth > 900) {
+    if (localStorage.getItem(SIDEBAR_KEY) === 'true') {
+        sidebar.classList.add('collapsed');
     }
 }
-checkMobile();
-window.addEventListener('resize', checkMobile);
 
-// ── Sidebar group dropdown + popup ─────────────────────────────
+if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (window.innerWidth <= 900) {
+            sidebar.classList.toggle('open');
+        } else {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem(SIDEBAR_KEY, sidebar.classList.contains('collapsed'));
+            updateToggleIcon();
+        }
+    });
+}
+
+// close mobile overlay on outside click
+document.addEventListener('click', function (e) {
+    if (window.innerWidth <= 900 && sidebar &&
+        !e.target.closest('#sidebar')) {
+        sidebar.classList.remove('open');
+    }
+});
+
+// swap toggle icon based on collapsed state
+function updateToggleIcon() {
+    var icon = document.getElementById('sidebarToggleIcon');
+    if (!icon || !sidebar) return;
+    if (sidebar.classList.contains('collapsed')) {
+        icon.className = 'ti ti-layout-sidebar-left-expand';
+    } else {
+        icon.className = 'ti ti-layout-sidebar-left-collapse';
+    }
+}
+
+// sync icon on page load
+updateToggleIcon();
+
+// on resize: remove collapsed when switching to mobile
+window.addEventListener('resize', function () {
+    if (!sidebar) return;
+    if (window.innerWidth <= 900) {
+        sidebar.classList.remove('collapsed');
+    }
+    updateToggleIcon();
+});
+
+// ── Sidebar group dropdown ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
-    var STORAGE_KEY = 'sidebar_groups';
-
-    // Restore collapsed state from localStorage
+    var GROUPS_KEY = 'sidebar_groups';
     var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+    try { saved = JSON.parse(localStorage.getItem(GROUPS_KEY) || '{}'); } catch (e) {}
 
+    // restore collapsed groups
     document.querySelectorAll('.sidebar-group').forEach(function (group) {
-        var key = group.dataset.group;
-        if (saved[key] === true) group.classList.add('collapsed');
+        if (saved[group.dataset.group] === true) {
+            group.classList.add('collapsed');
+        }
     });
 
-    // Toggle on label click
+    // toggle on label click
     document.querySelectorAll('.sidebar-label--toggle').forEach(function (label) {
         label.addEventListener('click', function () {
-            var key   = label.dataset.toggle;
-            var group = document.querySelector('.sidebar-group[data-group="' + key + '"]');
+            var group = document.querySelector('.sidebar-group[data-group="' + label.dataset.toggle + '"]');
             if (!group) return;
             group.classList.toggle('collapsed');
-            // Persist
             try {
-                var state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-                state[key] = group.classList.contains('collapsed');
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch(e) {}
+                var state = JSON.parse(localStorage.getItem(GROUPS_KEY) || '{}');
+                state[label.dataset.toggle] = group.classList.contains('collapsed');
+                localStorage.setItem(GROUPS_KEY, JSON.stringify(state));
+            } catch (e) {}
         });
-    });
-
-    // Popup flyout — show when group is collapsed and label is hovered
-    document.querySelectorAll('.sidebar-group').forEach(function (group) {
-        var key    = group.dataset.group;
-        var popup  = document.getElementById('popup-' + key);
-        var label  = group.querySelector('.sidebar-label--toggle');
-        if (!popup || !label) return;
-
-        var hideTimer;
-
-        function showPopup() {
-            if (!group.classList.contains('collapsed')) return;
-            clearTimeout(hideTimer);
-            var rect = label.getBoundingClientRect();
-            popup.style.top = rect.top + 'px';
-            popup.classList.add('visible');
-        }
-
-        function hidePopup() {
-            hideTimer = setTimeout(function () {
-                popup.classList.remove('visible');
-            }, 120);
-        }
-
-        label.addEventListener('mouseenter', showPopup);
-        label.addEventListener('mouseleave', hidePopup);
-        popup.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
-        popup.addEventListener('mouseleave', hidePopup);
     });
 });
 
-// ── Topbar search — filter any data table on the page ──────────
-// Mirrors the search term into the first [data-search-input] on the page
-// so the global search bar drives the table filter without a page reload.
+// ── Topbar search ───────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     var topbarSearch = document.getElementById('topbarSearch');
     if (topbarSearch) {
@@ -115,11 +115,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // ── Notification button wiring ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     var notifBtn = document.getElementById('notifBtn');
-    if (notifBtn) {
-        notifBtn.addEventListener('click', toggleNotif);
-    }
+    if (notifBtn) notifBtn.addEventListener('click', toggleNotif);
 
-    // Mark all read
     var markAllBtn = document.getElementById('markAllReadBtn');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function () {
@@ -139,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Clicking a notification item → mark read + navigate
     document.querySelectorAll('.notif-item[data-notif-id]').forEach(function (item) {
         item.addEventListener('click', function () {
             var id   = item.dataset.notifId;
@@ -155,21 +151,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Poll for new notifications every 60s, invalidate session cache server-side
     function pollNotifications() {
         fetch('/processing-system/public/notifications/unread')
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var dot = document.getElementById('notifDot');
                 if (dot) dot.style.display = data.unread_count > 0 ? '' : 'none';
-                // Also update the sidebar badge count if the element exists
                 var badge = document.querySelector('.badge-count');
                 if (badge && data.pending_count !== undefined) {
                     badge.textContent = data.pending_count;
                     badge.style.display = data.pending_count > 0 ? '' : 'none';
                 }
             })
-            .catch(function () { /* ignore network errors */ });
+            .catch(function () {});
     }
     setInterval(pollNotifications, 60000);
 });
@@ -181,8 +175,7 @@ document.querySelectorAll('input[type="date"]:not([value])').forEach(function (e
     }
 });
 
-document.querySelectorAll('.activity-icon-dynamic[data-bg]').forEach(el => {
+document.querySelectorAll('.activity-icon-dynamic[data-bg]').forEach(function (el) {
     el.style.setProperty('--icon-bg', el.dataset.bg);
     el.style.setProperty('--icon-color', el.dataset.color);
 });
-
