@@ -4,8 +4,8 @@
     <div class="sidebar-brand">
         <div class="brand-icon"><i class="ti ti-bolt"></i></div>
         <div class="brand-text">
-            <div class="brand-name">SysPro</div>
-            <div class="brand-tag">Automated Requesting System</div>
+            <div class="brand-name">APS</div>
+            <div class="brand-tag">Automated Processing System</div>
         </div>
         <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle sidebar">
             <i class="ti ti-layout-sidebar-left-collapse" id="sidebarToggleIcon"></i>
