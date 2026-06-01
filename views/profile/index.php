@@ -46,12 +46,9 @@
                 <?= \App\Helpers\Csrf::field() ?>
                 <input type="file" name="avatar" id="avatar-input"
                     accept="image/jpeg, image/jpg, image/png, image/webp, image/gif"
-                    style="display:none"
-                    onchange="document.getElementById('avatar-form').submit()"
+                    class="avatar-file-input"
                 >
-                <button type="button" class="avatar-edit-btn"
-                        onclick="document.getElementById('avatar-input').click()"
-                        title="Change photo">
+                <button type="button" class="avatar-edit-btn" id="avatar-edit-btn" title="Change photo">
                     <i class="ti ti-camera"></i>
                 </button>
             </form>
