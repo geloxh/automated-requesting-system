@@ -46,7 +46,7 @@
                 <td>
                     <form method="POST" action="/processing-system/public/employees/<?= $e['id'] ?>/status">
                         <?= \App\Helpers\Csrf::field() ?>
-                        <select name="employment_status" onchange="this.form.submit()" class="form-select-sm">
+                        <select name="employment_status" class="form-select-sm auto-submit">
                             <?php foreach (['employed', 'resigned', 'floating'] as $s): ?>
                                 <option value="<?= $s ?>" <?= $e['employment_status'] === $s ? 'selected' : '' ?>>
                                     <?= ucfirst($s) ?>
@@ -63,7 +63,7 @@
                         
                         <?php if ($e['id'] != $_SESSION['user_id']): ?>
                         <form method="POST" action="/processing-system/public/employees/<?= $e['id'] ?>/delete"
-                              onsubmit="return confirm('Deactivate <?= htmlspecialchars($e['full_name'], ENT_QUOTES) ?>?')">
+                              data-confirm="Deactivate <?= htmlspecialchars($e['full_name'], ENT_QUOTES) ?>?">
                             <?= \App\Helpers\Csrf::field() ?>
                             <button class="btn btn-danger btn-sm" title="Deactivate">Delete</button>
                         </form>

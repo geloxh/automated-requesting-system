@@ -55,7 +55,7 @@
 
         <div class="card-footer">
             <a href="/processing-system/public/login" class="card-back-link">
-                <i data-lucide="x-circle" style="width:16px;"></i> Cancel and Login
+                <i data-lucide="x-circle" class="icon-sm"></i> Cancel and Login
             </a>
         </div>
     </div>

@@ -110,9 +110,10 @@ $topType      = key($byType) ?? null;
                 data-days="<?= (int)$row['days_pending'] ?>">
                 <td class="td-first">
                     <div class="inbox-form-cell">
-                        <div class="activity-icon activity-icon-dynamic"
-                            style="--icon-bg:<?= $ic['bg'] ?>;--icon-color:<?= $ic['color'] ?>">
-                            <i class="ti <?= $ic['icon'] ?>"></i>
+                        <<div class="activity-icon activity-icon-dynamic"
+                            data-bg="<?= htmlspecialchars($ic['bg']) ?>"
+                            data-color="<?= htmlspecialchars($ic['color']) ?>"
+                        >
                         </div>
                         <div>
                             <div class="inbox-form-name"><?= htmlspecialchars($typeLabel) ?></div>

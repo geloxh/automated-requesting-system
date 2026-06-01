@@ -155,6 +155,18 @@ a { text-decoration: none; color: inherit; }
 }
 
 .notif-dot--hidden { display: none; }
+.notif-count-badge { font-size: 10px; padding: 1px 6px; }
+.ti-xs { font-size: 10px; }
+.icon-sm { width: 16px; }
+.action-cell { display: flex; gap: 4px; align-items: center; }
+.card--draft-alert { border-left: 3px solid var(--warning); margin-bottom: 1rem; }
+.card-header--flex { display: flex; align-items: center; gap: 8px; }
+.td-stage { font-size: 12px; }
+.error-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; text-align: center; gap: 1rem; }
+.error-icon { font-size: 3rem; color: var(--border); }
+.error-code { font-size: 2rem; font-weight: 700; color: var(--text-muted); }
+.error-title { font-size: 1.1rem; font-weight: 600; margin-bottom: .4rem; }
+.error-message { color: var(--text-muted); font-size: 14px; }
 
 /* ── New Request button ── */
 .btn-new-req {
@@ -359,7 +371,12 @@ td.text-end { text-align: right; }
 
 .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .75rem; }
 
-label { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
+.card--draft-alert   { border-left: 3px solid var(--warning); margin-bottom: 1rem; }
+.card-header--flex   { display: flex; align-items: center; gap: 8px; }
+.card-body--flush    { padding: 0; }
+.td-stage            { font-size: 12px; }
+
+.label { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
 
 .form-action {
     display: flex;

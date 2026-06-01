@@ -50,7 +50,7 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group" style="grid-column: span 2;">
+            <div class="form-group g-span-2">
                 <label class="checkbox-label">
                     <input type="checkbox" name="is_active" value="1" <?= $employee['is_active'] ? 'checked' : '' ?>> 
                     Account is active and can login

@@ -118,7 +118,7 @@ for ($seq = 1; $seq <= $maxSeq; $seq++):
             <?php if ($dotClass === 'current'): ?>
                 <div class="step-time">
                     <span class="step-elapsed <?= $diff->days >= 3 ? 'step-elapsed--overdue' : '' ?>">
-                        <i class="ti ti-clock" style="font-size:10px"></i>
+                        <i class="ti ti-clock ti-xs"></i>
                         <?= htmlspecialchars($elapsed) ?>
                     </span>
                 </div>
