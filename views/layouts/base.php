@@ -147,10 +147,7 @@
     <div class="layout-right">
 
         <div id="topbar">
-            <!-- Mobile hamburger -->
-            <button class="icon-btn" id="sidebarToggle">
-                <i class="ti ti-menu-2"></i>
-            </button>
+            <!-- Sidebar toggle -->
 
             <div class="topbar-left">
                 <!-- Breadcrumb (optional — set $breadcrumbs in the calling view) -->
