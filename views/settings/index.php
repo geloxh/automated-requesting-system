@@ -406,6 +406,17 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
                 </div>
             </div>
 
+            <!-- Developer -->
+            <div class="settings-card">
+                <div class="settings-card-header">Developer</div>
+                <div class="settings-card-body settings-card-body--info">
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-code"></i> Developer</span>
+                        <span class="info-row-value">geloxh</span>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </div><!-- /.settings-panels -->

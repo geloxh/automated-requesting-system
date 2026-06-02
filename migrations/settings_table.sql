@@ -25,4 +25,4 @@ INSERT IGNORE INTO settings (`key`, `value`) VALUES
     ('mail_username', ''),
     ('mail_password', ''),
     ('mail_from_address', ''),
-    ('mail_from_name', 'Processing System');
+    ('mail_from_name', 'Automated Processing System');
