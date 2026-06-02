@@ -1,0 +1,68 @@
+<?php
+class DepartmentController {
+    private function requireAdmin(): void {
+        if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+            $_SESSION['error'] = 'Access denied.';
+            header('Location: /processing-system/public/dashboard');
+            exit;
+        }
+    }
+
+    public function index(): void {
+        $this->requireAdmin();
+        $departments = db()->query('SELECT * FROM departments ORDER BY name ASC')->fetchAll();
+        define('BASE_LOADED', true);
+        ob_start();
+        require __DIR__ . '/../../views/departments/index.php';
+        $content = ob_get_clean();
+        $pageTitle = 'Departments';
+        require __DIR__ . '/../../views/layouts/base.php';
+    }
+
+    public function store(): void {
+        \App\Helpers\Csrf::verify();
+        $this->requireAdmin();
+        $name = trim($_POST['name'] ?? '');
+        if ($name === '') {
+            $_SESSION['error'] = 'Department name is required.';
+            header('Location: /processing-system/public/departments');
+            exit;
+        }
+        try {
+            db()->prepare('INSERT INTO departments (name) VALUES (?)')->execute([$name]);
+            $_SESSION['success'] = 'Department added.';
+        } catch (\Throwable) {
+            $_SESSION['error'] = 'Department already exists.';
+        }
+        header('Location: /processing-system/public/departments');
+        exit;
+    }
+
+    public function update(int $id): void {
+        \App\Helpers\Csrf::verify();
+        $this->requireAdmin();
+        $name = trim($_POST['name'] ?? '');
+        if ($name === '') {
+            $_SESSION['error'] = 'Department name is required.';
+            header('Location: /processing-system/public/departments');
+            exit;
+        }
+        try {
+            db()->prepare('UPDATE departments SET name = ? WHERE id = ?')->execute([$name, $id]);
+            $_SESSION['success'] = 'Department updated.';
+        } catch (\Throwable) {
+            $_SESSION['error'] = 'That name is already in use.';
+        }
+        header('Location: /processing-system/public/departments');
+        exit;
+    }
+
+    public function delete(int $id): void {
+        \App\Helpers\Csrf::verify();
+        $this->requireAdmin();
+        db()->prepare('DELETE FROM departments WHERE id = ?')->execute([$id]);
+        $_SESSION['success'] = 'Department deleted.';
+        header('Location: /processing-system/public/departments');
+        exit;
+    }
+}

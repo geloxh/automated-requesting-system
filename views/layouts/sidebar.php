@@ -119,6 +119,18 @@
                     <i class="ti ti-users"></i> <span>Employees</span>
                 </a>
                 <?php endif; ?>
+                <?php if ($roleId === 1): ?>
+                <a href="/processing-system/public/employees"
+                    data-tooltip="Employees"
+                    class="<?= $uri === '/employees' ? 'active' : '' ?>">
+                    <i class="ti ti-users"></i> <span>Employees</span>
+                </a>
+                <a href="/processing-system/public/departments"
+                    data-tooltip="Departments"
+                    class="<?= $uri === '/departments' ? 'active' : '' ?>">
+                    <i class="ti ti-building-community"></i> <span>Departments</span>
+                </a>
+                <?php endif; ?>
             </div>
         </div>
 
