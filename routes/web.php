@@ -1,5 +1,6 @@
 <?php
     require_once __DIR__ . '/../app/controllers/AuthController.php';
+    require_once __DIR__ . '/../app/controllers/SettingsController.php';
     require_once __DIR__ . '/../app/controllers/FormController.php';
     require_once __DIR__ . '/../app/controllers/ApprovalController.php';
     require_once __DIR__ . '/../app/controllers/EmployeeController.php';
@@ -228,6 +229,27 @@
 
     if (preg_match('#^/notifications/(\d+)/read$#', $uri, $m) && $method === 'POST') {
         (new \App\Controllers\NotificationController)->markRead((int)$m[1]);
+        exit;
+    }
+
+    // ---------------------------------------------------------------
+    // Settings (SysAdmin only)
+    // ---------------------------------------------------------------
+    if ($uri === '/settings') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new SettingsController)->index();
+        exit;
+    }
+
+    if ($uri === '/settings/general' && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new SettingsController)->updateGeneral();
+        exit;
+    }
+
+    if ($uri === '/settings/mail' && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new SettingsController)->updateMail();
         exit;
     }
 

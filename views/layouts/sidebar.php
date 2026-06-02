@@ -137,6 +137,13 @@
     </div>
 
     <div class="sidebar-footer">
+        <?php if ($roleId === 1): ?>
+        <a href="/processing-system/public/settings"
+           data-tooltip="Settings"
+           class="sidebar-settings-link <?= $uri === '/settings' ? 'active' : '' ?>">
+            <i class="ti ti-settings"></i> <span>Settings</span>
+        </a>
+        <?php endif; ?>
         <a href="/processing-system/public/profile" class="user-card" data-tooltip="Profile">
             <div class="user-avatar"><?= $initials ?></div>
             <div>
