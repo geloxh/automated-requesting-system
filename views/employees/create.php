@@ -29,7 +29,15 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group"><label>Department</label><input type="text" name="department"></div>
+            <div class="form-group">
+                <label>Department</label>
+                <select name="department">
+                    <option value="">-- Select --</option>
+                    <?php foreach ($departments as $dept): ?>
+                        <option value="<?= htmlspecialchars($dept['name']) ?>"><?= htmlspecialchars($dept['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             <div class="form-group">
                 <label>Supervisor (Immediate Manager)</label>
                 <select name="supervisor_id">

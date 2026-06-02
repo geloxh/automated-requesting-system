@@ -3,6 +3,9 @@
     require_once __DIR__ . '/../app/controllers/FormController.php';
     require_once __DIR__ . '/../app/controllers/ApprovalController.php';
     require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+
+    require_once __DIR__ . '/../app/controllers/DepartmentController.php';
+
     require_once __DIR__ . '/../app/controllers/NotificationController.php';
     require_once __DIR__ . '/../app/Helpers/EmployeeCode.php';
 
@@ -150,6 +153,30 @@
     if (preg_match('#^/forms/(\d+)/admin-(approve|reject)$#', $uri, $m) && $method === 'POST') {
         \App\Middleware\RoleMiddleware::requireRole(1);
         (new EmployeeController)->actAsApprover((int)$m[1], $m[2]  === 'approve' ? 'approved' : 'rejected');
+        exit;
+    }
+
+    // ---------------------------------------------------------------
+    // DEPARTMENTS (SysAdmin only)
+    // ---------------------------------------------------------------
+    if ($uri === '/departments') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new DepartmentController)->index();
+        exit;
+    }
+    if ($uri === '/departments/create' && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new DepartmentController)->store();
+        exit;
+    }
+    if (preg_match('#^/departments/(\d+)/update$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new DepartmentController)->update((int)$m[1]);
+        exit;
+    }
+    if (preg_match('#^/departments/(\d+)/delete$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new DepartmentController)->delete((int)$m[1]);
         exit;
     }
 

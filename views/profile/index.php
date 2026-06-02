@@ -122,7 +122,15 @@
                         </div>
                         <div class="field-group field-full">
                             <label class="field-label">Department</label>
-                            <input type="text" name="department" value="<?= htmlspecialchars($employee['department'] ?? '') ?>">
+                            <select name="department">
+                                <option value="">-- Select --</option>
+                                <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= htmlspecialchars($dept['name']) ?>"
+                                        <?= ($employee['department'] ?? '') === $dept['name'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($dept['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                 </div>

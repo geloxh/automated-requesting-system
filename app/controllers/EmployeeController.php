@@ -37,6 +37,7 @@
 
             $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id = 2 AND is_active = 1 ORDER BY full_name')->fetchAll();
             $roles = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
+            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
@@ -196,6 +197,7 @@
             $stmt = db()->prepare('SELECT * FROM employees WHERE id = ?');
             $stmt->execute([$id]);
             $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
 
             if (!$employee) {
                 $_SESSION['error'] = 'Employee not found.';
@@ -427,6 +429,7 @@
 
             $employee->execute([$_SESSION['user_id']]);
             $employee = $employee->fetch();
+            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();

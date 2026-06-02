@@ -156,9 +156,7 @@ class FormController {
         $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
         $pageTitle = \App\Helpers\FormLabels::get($type);
 
-        $departments = db()->query(
-            'SELECT DISTINCT department FROM employees WHERE department IS NOT NULL ORDER BY department'
-        )->fetchAll(PDO::FETCH_COLUMN);
+        $departments = db()->query('SELECT name FROM departments ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
 
         $currentUser = $_SESSION['user_name'] ?? '';
         $currentDept = $_SESSION['department'] ?? '';

@@ -38,7 +38,18 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group"><label>Department</label><input type="text" name="department" value="<?= htmlspecialchars($employee['department']) ?>"></div>
+            <div class="form-group">
+                <label>Department</label>
+                <select name="department">
+                    <option value="">-- Select --</option>
+                    <?php foreach ($departments as $dept): ?>
+                        <option value="<?= htmlspecialchars($dept['name']) ?>"
+                            <?= $employee['department'] === $dept['name'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($dept['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             <div class="form-group">
                 <label>Supervisor (Immediate Manager)</label>
                 <select name="supervisor_id">
