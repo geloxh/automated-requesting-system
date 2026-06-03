@@ -180,6 +180,11 @@
         (new DepartmentController)->delete((int)$m[1]);
         exit;
     }
+    if (preg_match('#^/departments/(\d+)/members$#', $uri, $m) && $method === 'GET') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new DepartmentController)->members((int)$m[1]);
+        exit;
+    }
 
     // ---------------------------------------------------------------
     // Profile

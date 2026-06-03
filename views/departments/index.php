@@ -90,6 +90,15 @@
                     <i class="ti ti-trash"></i> Delete
                 </button>
             </div>
+            <div class="dept-members-wrap" id="deptMembersWrap">
+            <div class="dept-members-head">
+                <span>Members</span>
+                <span class="dept-members-count" id="deptMembersCount"></span>
+            </div>
+            <ul class="dept-members-list" id="deptMembersList">
+                <li class="dept-members-loading"><i class="ti ti-loader-2 spin"></i> Loading…</li>
+            </ul>
+        </div>;
         </div>
     </div>
 

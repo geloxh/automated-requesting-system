@@ -1,4 +1,4 @@
-const search   = document.getElementById('deptSearch');
+const search = document.getElementById('deptSearch');
 const subTitle = document.querySelector('.dept-panel-sub');
 const allItems = () => document.querySelectorAll('.dept-item');
 
@@ -43,6 +43,30 @@ function selectDept(el, id, name, count = 0) {
     document.getElementById('detailEditBtn').onclick = () => openEdit(id, name);
 
     document.getElementById('detailCount').textContent = count;
+
+    const list = document.getElementById('deptMembersList');
+    const badge = document.getElementById('deptMembersCount');
+    list.innerHTML = '<li class="dept-members-loading"><i class="ti ti-loader-2 spin"></i> Loading...</li>';
+
+   fetch('/processing-system/public/departments/' + id + '/members')
+        .then(r => r.json())
+        .then(members => {
+            badge.textContent = members.length;
+            if (!members.length) {
+                list.innerHTML = '<li class="dept-members-empty">No members yet.</li>';
+                return;
+            }
+            const roleLabels = {1:'Admin',2:'Approver',3:'Staff',4:'Dept. Head',5:'Checker',6:'Final Approver'};
+                list.innerHTML = members.map(m => `
+                    <li class="dept-member-item">
+                        <div class="dept-member-avatar">${m.full_name.charAt(0).toUpperCase()}</div>
+                        <div class="dept-member-body">
+                            <span class="dept-member-name">${m.full_name}</span>
+                            <span class="dept-member-meta">${m.employee_code} · ${roleLabels[m.role_id] ?? 'User'}</span>
+                        </div>
+                    </li>`).join('');
+        })
+        .catch(() => { list.innerHTML = '<li class="dept-members-empty">Failed to load.</li>'; });
 }
 
 // Delete confirm
