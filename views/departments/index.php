@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/processing-system/public/stylesheets/department.css">
+<link rel="stylesheet" href="/processing-system/public/style<mark marker-index=0 reference-tracker>sheets/department.css">
 
 <div class="dept-shell">
 
@@ -32,9 +32,9 @@
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
-        <ul class="dept-list" 
-            id="deptList" 
-            role="listbox" 
+        <ul class="dept-list"
+            id="deptList"
+            role="listbox"
             aria-label="Departments"
             <?php if (!empty($_SESSION['last_dept_id'])): ?>
                 data-auto-select="<?= (int)$_SESSION['last_dept_id'] ?>"
@@ -46,7 +46,7 @@
                     <span>No departments yet.</span>
                 </li>
             <?php else: ?>
-                <?php $i = 1; foreach ($departments as $dept): ?>
+                <?php foreach ($departments as $dept): ?>
                 <li class="dept-item"
                     tabindex="0"
                     role="option"
@@ -58,11 +58,11 @@
                     data-initial="<?= htmlspecialchars(strtoupper(substr($dept['name'], 0, 1))) ?>"
                     data-created="<?= date('M Y', strtotime($dept['created_at'])) ?>"
                 >
-                <div class="dept-item-icon dept-item-icon--letter"><?= strtoupper(substr($dept['name'], 0, 1)) ?></div>
+                    <div class="dept-item-icon dept-item-icon--letter"><?= strtoupper(substr($dept['name'], 0, 1)) ?></div>
                     <div class="dept-item-body">
                         <span class="dept-item-name"><?= htmlspecialchars($dept['name']) ?></span>
                         <span class="dept-item-meta">
-                            <i class="ti ti-users" style="font-size:10px"></i>
+                            <i class="ti ti-users dept-meta-icon"></i>
                             <?= $dept['member_count'] ?? 0 ?> members
                         </span>
                     </div>
@@ -82,12 +82,33 @@
                 <i class="ti ti-plus"></i> Create one
             </button>
         </div>
+
         <div class="dept-detail-content dept-hidden" id="deptDetailContent">
             <div class="dept-detail-icon-wrap">
                 <div class="dept-detail-icon"></div>
             </div>
+
+            <!-- Inline rename bar -->
+            <form method="POST" id="editForm" class="dept-rename-bar dept-hidden">
+                <?= \App\Helpers\Csrf::field() ?>
+                <button type="button" class="dept-rename-cancel" id="renameCancelBtn" title="Cancel (Esc)">
+                    <i class="ti ti-arrow-left"></i>
+                </button>
+                <div class="dept-field-wrap dept-rename-field">
+                    <i class="ti ti-building"></i>
+                    <input type="text" name="name" id="editName"
+                           class="dept-field-input"
+                           placeholder="Department name…"
+                           maxlength="100" required>
+                </div>
+                <button type="submit" class="dept-rename-confirm" title="Rename (Enter)">
+                    <i class="ti ti-check"></i>
+                </button>
+            </form>
+
+            <!-- Normal view -->
             <div class="dept-detail-name" id="detailName"></div>
-            <div class="dept-detail-id" id="detailId"></div>
+            <div class="dept-detail-id"   id="detailId"></div>
 
             <div class="dept-detail-stats">
                 <div class="dept-stat">
@@ -102,7 +123,7 @@
             </div>
 
             <div class="dept-detail-actions">
-                <button class="btn btn-ghost btn-sm" id="detailEditBtn">
+                <button class="btn btn-ghost btn-sm" id="detailEditBtn" disabled>
                     <i class="ti ti-pencil"></i> Edit
                 </button>
                 <div class="dept-overflow-wrap">
@@ -110,21 +131,22 @@
                         <i class="ti ti-dots"></i>
                     </button>
                     <div class="dept-overflow-menu dept-hidden" id="deptOverflowMenu">
-                        <button class="dept-overflow-item dept-overflow-item--danger" id="detailDeleteBtn">
+                        <button type="button" class="dept-overflow-item dept-overflow-item--danger" id="detailDeleteBtn" disabled>
                             <i class="ti ti-trash"></i> Delete department
                         </button>
                     </div>
                 </div>
             </div>
+
             <div class="dept-members-wrap" id="deptMembersWrap">
-            <div class="dept-members-head">
-                <span>Members</span>
-                <span class="dept-members-count" id="deptMembersCount"></span>
+                <div class="dept-members-head">
+                    <span>Members</span>
+                    <span class="dept-members-count" id="deptMembersCount"></span>
+                </div>
+                <ul class="dept-members-list" id="deptMembersList">
+                    <li class="dept-members-loading"><i class="ti ti-loader-2 spin"></i> Loading…</li>
+                </ul>
             </div>
-            <ul class="dept-members-list" id="deptMembersList">
-                <li class="dept-members-loading"><i class="ti ti-loader-2 spin"></i> Loading…</li>
-            </ul>
-        </div>;
         </div>
     </div>
 
@@ -136,12 +158,17 @@
         <form method="POST" action="/processing-system/public/departments/create" class="modal-content">
             <?= \App\Helpers\Csrf::field() ?>
             <div class="modal-header">
-                <h5 class="modal-title">New Department</h5>
+                <h5 class="modal-title"><i class="ti ti-plus"></i> New Department</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <label class="label">Department Name</label>
-                <input type="text" name="name" id="addName" class="form-control form-control-sm" placeholder="e.g. Finance" required autofocus>
+                <div class="dept-field-wrap">
+                    <i class="ti ti-building"></i>
+                    <input type="text" name="name" id="addName"
+                           class="dept-field-input"
+                           placeholder="e.g. Finance"
+                           maxlength="100" required autofocus>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
@@ -151,43 +178,8 @@
     </div>
 </div>
 
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <form method="POST" id="editForm" class="modal-content">
-            <?= \App\Helpers\Csrf::field() ?>
-
-            <div class="modal-header">
-                <div class="dept-modal-icon"><i class="ti ti-pencil"></i></div>
-                <div>
-                    <h5 class="modal-title">Rename Department</h5>
-                    <p class="modal-subtitle">Editing: <span id="editCurrentName"></span></p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <label class="dept-field-label" for="editName">New name</label>
-                <div class="dept-field-wrap">
-                    <i class="ti ti-building"></i>
-                    <input type="text" name="name" id="editName"
-                           class="dept-field-input"
-                           placeholder="e.g. Finance"
-                           maxlength="100" required>
-                </div>
-                <span class="dept-field-hint"><span id="editNameLen">0</span> / 100</span>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary"><i class="ti ti-check"></i> Save</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Hidden delete form — submitted by JS -->
-<form method="POST" id="detailDeleteForm" style="display:none">
+<!-- Hidden delete form -->
+<form method="POST" id="detailDeleteForm" class="dept-hidden">
     <?= \App\Helpers\Csrf::field() ?>
 </form>
 
@@ -196,11 +188,12 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Delete Department?</h5>
+                <h5 class="modal-title"><i class="ti ti-trash dept-icon-danger"></i> Delete Department?</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="font-size:13px">
+            <div class="modal-body modal-body--sm">
                 This will permanently remove <strong id="confirmDeptName"></strong>.
+                This action cannot be undone.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
