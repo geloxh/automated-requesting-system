@@ -9,10 +9,19 @@ class DepartmentController {
     }
 
     public function index(): void {
+
         $this->requireAdmin();
-        $departments = db()->query('SELECT * FROM departments ORDER BY name ASC')->fetchAll();
+
+        $departments = db()->query(
+            'SELECT d.*, COUNT(e.id) AS member_count
+            FROM departments d
+            LEFT JOIN employees e ON e.department = d.name AND e.is_active = 1
+            GROUP BY d.id ORDER BY d.name ASC'
+        )->fetchAll();
+
         define('BASE_LOADED', true);
         ob_start();
+
         require __DIR__ . '/../../views/departments/index.php';
         $content = ob_get_clean();
         $pageTitle = 'Departments';

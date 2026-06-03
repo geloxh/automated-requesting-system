@@ -6,7 +6,7 @@ const allItems = () => document.querySelectorAll('.dept-item');
 document.getElementById('deptList').addEventListener('click', e => {
     const li = e.target.closest('.dept-item');
     if (!li) return;
-    selectDept(li, li.dataset.id, li.dataset.label);
+    selectDept(li, li.dataset.id, li.dataset.label, li.dataset.count);
 });
 
 // Search filter
@@ -29,7 +29,7 @@ document.querySelectorAll('.dept-flash').forEach(el => {
 });
 
 // Right-panel select
-function selectDept(el, id, name) {
+function selectDept(el, id, name, count = 0) {
     allItems().forEach(li => li.classList.remove('dept-item--active'));
     el.classList.add('dept-item--active');
 
@@ -41,14 +41,27 @@ function selectDept(el, id, name) {
     document.getElementById('detailDeleteForm').action =
         '/processing-system/public/departments/' + id + '/delete';
     document.getElementById('detailEditBtn').onclick = () => openEdit(id, name);
+
+    document.getElementById('detailCount').textContent = count;
 }
 
 // Delete confirm
-document.getElementById('detailDeleteForm').addEventListener('submit', e => {
-    if (!confirm('Delete "' + document.getElementById('detailName').textContent + '"?')) {
-        e.preventDefault();
-    }
+const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+const confirmDeptName = document.getElementById('confirmDeptName');
+const deleteForm = document.getElementById('detailDeleteForm');
+
+// Open confirm modal when Delete button clicked
+document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+    confirmDeptName.textContent = document.getElementById('detailName').textContent;
+    confirmModal.show();
 });
+
+// Actually submit when user confirms
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    confirmModal.hide();
+    deleteForm.submit();
+});
+
 
 // Edit modal
 function openEdit(id, name) {

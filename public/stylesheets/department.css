@@ -7,7 +7,7 @@
     border-radius: 12px;
     overflow: hidden;
     min-height: 560px;
-    height: calc(100vh - 140px);
+    height: calc(100vh - 180px); /* ← was 140px; accounts for topbar + padding + page heading */
 }
 
 /* ── Left panel ── */
@@ -52,11 +52,24 @@
 }
 
 .dept-flash {
+    position: relative;
+    overflow: hidden;
     display: flex; align-items: center; gap: 6px;
     font-size: 12px; padding: 7px 12px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
+dept-flash::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: currentColor;
+    opacity: .4;
+    animation: flash-timer 3s linear forwards;
+}
+@keyframes flash-timer { from { width: 100%; } to { width: 0%; } }
+
 .dept-flash--success { background: #f0fdf4; color: #166534; }
 .dept-flash--danger  { background: #fef2f2; color: #7f1d1d; }
 
@@ -107,10 +120,12 @@
 /* ── Right panel ── */
 .dept-detail {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;        /* ← added: stack children vertically */
+    align-items: stretch;
+    justify-content: flex-start;
     background: var(--surface);
-    padding: 2rem;
+    padding: 2.5rem 2rem;
+    overflow-y: auto;              /* ← added: scroll if content overflows */
 }
 .dept-detail-empty {
     display: flex; flex-direction: column;
@@ -120,7 +135,6 @@
 }
 .dept-placeholder-icon { font-size: 2.5rem; color: var(--border); display: block; margin-bottom: 4px; }
 
-/* hidden state — toggled by JS via class, no inline style needed */
 .dept-hidden { display: none !important; }
 
 .dept-detail-content {
@@ -130,10 +144,13 @@
     gap: 10px;
     text-align: center;
     animation: dept-fade-in .2s ease;
+    width: 100%;                   /* ← added: fill right panel width */
+    max-width: 420px;
+    margin: 0 auto;             /* ← added: constrain on wide screens */
 }
 @keyframes dept-fade-in {
     from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(0); }
 }
 .dept-detail-icon-wrap { margin-bottom: 4px; }
 .dept-detail-icon {
@@ -155,13 +172,29 @@
 }
 .dept-detail-actions { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
 
+/* Stats row */
+.dept-detail-stats {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 14px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    margin: 4px 0 8px;
+}
+.dept-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dept-stat-val   { font-size: 20px; font-weight: 700; color: var(--text-main); }
+.dept-stat-label { font-size: 11px; color: var(--text-soft); }
+
 /* ── Responsive ── */
 @media (max-width: 700px) {
     .dept-shell { grid-template-columns: 1fr; height: auto; min-height: unset; }
     .dept-detail { display: none; }
 }
 
-/* ── Modal layout (no Bootstrap CSS loaded) ── */
+/* ── Modal ── */
 .modal-content {
     background: var(--card-bg);
     border: 1px solid var(--border);
