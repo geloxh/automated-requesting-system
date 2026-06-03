@@ -1,68 +1,107 @@
-<div class="page-header">
-    <h5>Departments <span class="badge badge-secondary"><?= count($departments) ?></span></h5>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-        <i class="ti ti-plus"></i> Add Department
-    </button>
-</div>
+<link rel="stylesheet" href="/processing-system/public/stylesheets/department.css">
 
-<?php if (!empty($_SESSION['success'])): ?>
-    <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']) ?></div>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
-<?php if (!empty($_SESSION['error'])): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
+<div class="dept-shell">
 
-<div class="form-card">
-    <div class="filter-bar">
-        <input type="search" id="deptSearch" placeholder="Search departments...">
-        <span class="filter-count" id="deptCount"></span>
-    </div>
-    <table class="table">
-        <thead><tr data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"><th>#</th><th>Name</th><th></th></tr></thead>
-        <tbody>
-        <?php $i = 1; foreach ($departments as $dept): ?>
-            <tr data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>">
-                <td class="muted" style="width:40px"><?= $i++ ?></td>
-                <td><?= htmlspecialchars($dept['name']) ?></td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-ghost"
-                        onclick="openEdit(<?= $dept['id'] ?>, '<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>')">
-                        <i class="ti ti-pencil"></i> Edit
-                    </button>
-                    <form method="POST"
-                        action="/processing-system/public/departments/<?= $dept['id'] ?>/delete"
-                        style="display:inline"
-                        onsubmit="return confirm('Delete this department?')">
-                        <?= \App\Helpers\Csrf::field() ?>
-                        <button class="btn btn-sm btn-danger"><i class="ti ti-trash"></i> Delete</button>
-                    </form>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        <?php if (empty($departments)): ?>
-            <tr data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"><td colspan="3" class="text-center text-muted">No departments yet.</td></tr>
+    <!-- Left panel: list -->
+    <div class="dept-panel">
+        <div class="dept-panel-head">
+            <div>
+                <div class="dept-panel-title">Departments</div>
+                <div class="dept-panel-sub"><?= count($departments) ?> total</div>
+            </div>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="ti ti-plus"></i> New
+            </button>
+        </div>
+
+        <div class="dept-search-wrap">
+            <i class="ti ti-search"></i>
+            <input type="search" id="deptSearch" placeholder="Search departments…">
+        </div>
+
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class="dept-flash dept-flash--success">
+                <i class="ti ti-circle-check"></i> <?= htmlspecialchars($_SESSION['success']) ?>
+            </div>
+            <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
-        </tbody>
-    </table>
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="dept-flash dept-flash--danger">
+                <i class="ti ti-circle-x"></i> <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+        <ul class="dept-list" id="deptList">
+            <?php if (empty($departments)): ?>
+                <li class="dept-empty">
+                    <i class="ti ti-building empty-state-icon"></i>
+                    <span>No departments yet.</span>
+                </li>
+            <?php else: ?>
+                <?php $i = 1; foreach ($departments as $dept): ?>
+                <li class="dept-item" data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
+                    data-id="<?= $dept['id'] ?>"
+                    onclick="selectDept(this, <?= $dept['id'] ?>, '<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>')">
+                    <div class="dept-item-icon">
+                        <i class="ti ti-building"></i>
+                    </div>
+                    <div class="dept-item-body">
+                        <span class="dept-item-name"><?= htmlspecialchars($dept['name']) ?></span>
+                        <span class="dept-item-meta">#<?= $i++ ?></span>
+                    </div>
+                    <i class="ti ti-chevron-right dept-item-arrow"></i>
+                </li>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </ul>
+    </div>
+
+    <!-- Right panel: detail / actions -->
+    <div class="dept-detail" id="deptDetail">
+        <div class="dept-detail-empty" id="deptDetailEmpty">
+            <i class="ti ti-building-skyscraper" style="font-size:2.5rem;color:var(--border)"></i>
+            <p>Select a department</p>
+        </div>
+        <div class="dept-detail-content" id="deptDetailContent" style="display:none">
+            <div class="dept-detail-icon-wrap">
+                <div class="dept-detail-icon"><i class="ti ti-building"></i></div>
+            </div>
+            <div class="dept-detail-name" id="detailName"></div>
+            <div class="dept-detail-id" id="detailId"></div>
+            <div class="dept-detail-actions">
+                <button class="btn btn-ghost btn-sm" id="detailEditBtn">
+                    <i class="ti ti-pencil"></i> Edit
+                </button>
+                <form method="POST" id="detailDeleteForm" style="display:inline"
+                      onsubmit="return confirm('Delete this department?')">
+                    <?= \App\Helpers\Csrf::field() ?>
+                    <button class="btn btn-sm btn-outline-danger">
+                        <i class="ti ti-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-sm">
         <form method="POST" action="/processing-system/public/departments/create" class="modal-content">
             <?= \App\Helpers\Csrf::field() ?>
             <div class="modal-header">
-                <h5 class="modal-title">Add Department</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">New Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" name="name" class="form-control" placeholder="Department name" required autofocus>
+                <label class="label">Department Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Finance" required autofocus>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary">Save</button>
+                <button class="btn btn-primary">Create</button>
             </div>
         </form>
     </div>
@@ -70,16 +109,20 @@
 
 <!-- Edit Modal -->
 <div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-sm">
         <form method="POST" id="editForm" class="modal-content">
             <?= \App\Helpers\Csrf::field() ?>
-            <div class="modal-header"><h5 class="modal-title">Edit Department</h5></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Rename Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <div class="modal-body">
+                <label class="label">Department Name</label>
                 <input type="text" name="name" id="editName" class="form-control" required>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary">Update</button>
+                <button class="btn btn-primary">Save</button>
             </div>
         </form>
     </div>
