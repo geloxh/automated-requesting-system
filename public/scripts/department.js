@@ -141,3 +141,16 @@ function openEdit(id, name) {
         { once: true }
     );
 }
+
+// Auto-select department after page reload
+document.addEventListener('DOMContentLoaded', () => {
+    const list = document.getElementById('deptList');
+    const autoSelectId = list?.dataset.autoSelect;
+    if (autoSelectId) {
+        const li = document.querySelector(`.dept-item[data-id="${autoSelectId}"]`);
+        if (li) {
+            li.click();
+            li.scrollIntoView({ block: 'nearest' });
+        }
+    }
+});
