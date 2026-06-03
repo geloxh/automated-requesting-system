@@ -91,6 +91,7 @@ function selectDept(el, id, name, count = 0) {
     document.getElementById('detailEditBtn').onclick = () => openEdit(id, name);
 
     document.getElementById('detailCount').textContent = count;
+    document.getElementById('detailForms').textContent = el.dataset.forms ?? 0;
 
     const list = document.getElementById('deptMembersList');
     const badge = document.getElementById('deptMembersCount');
