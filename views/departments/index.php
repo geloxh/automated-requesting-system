@@ -32,7 +32,7 @@
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
-        <ul class="dept-list" id="deptList">
+        <ul class="dept-list" id="deptList" role="listbox" aria-label="Departments">
             <?php if (empty($departments)): ?>
                 <li class="dept-empty">
                     <i class="ti ti-building empty-state-icon"></i>
@@ -41,6 +41,8 @@
             <?php else: ?>
                 <?php $i = 1; foreach ($departments as $dept): ?>
                 <li class="dept-item"
+                    tabindex="0"
+                    role="option"
                     data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
                     data-id="<?= $dept['id'] ?>"
                     data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>"

@@ -9,6 +9,30 @@ document.getElementById('deptList').addEventListener('click', e => {
     selectDept(li, li.dataset.id, li.dataset.label, li.dataset.count);
 });
 
+// Keyboard navigation
+document.getElementById('deptList').addEventListener('keydown', e => {
+    if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) return;
+    e.preventDefault();
+
+    const items = [...allItems()].filter(li => li.style.display !== 'none');
+    if (!items.length) return;
+
+    const active = document.querySelector('.dept-item--active');
+    const idx = items.indexOf(active);
+
+    if (e.key === 'ArrowDown') {
+        const next = items[idx + 1] ?? items[0];
+        next.focus();
+        next.click();
+    } else if (e.key === 'ArrowUp') {
+        const prev = items[idx - 1] ?? items[items.length - 1];
+        prev.focus();
+        prev.click();
+    } else if ((e.key === 'Enter' || e.key === ' ') && active) {
+        active.click();
+    }
+});
+
 // Search filter
 search?.addEventListener('input', () => {
     const q = search.value.toLowerCase();
