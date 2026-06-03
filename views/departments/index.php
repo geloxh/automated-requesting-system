@@ -88,9 +88,16 @@
                 <button class="btn btn-ghost btn-sm" id="detailEditBtn">
                     <i class="ti ti-pencil"></i> Edit
                 </button>
-                <button class="btn btn-sm btn-outline-danger" id="detailDeleteBtn">
-                    <i class="ti ti-trash"></i> Delete
-                </button>
+                <div class="dept-overflow-wrap">
+                    <button class="dept-overflow-btn" id="detailMoreBtn" title="More actions" aria-haspopup="true" aria-expanded="false">
+                        <i class="ti ti-dots"></i>
+                    </button>
+                    <div class="dept-overflow-menu dept-hidden" id="deptOverflowMenu">
+                        <button class="dept-overflow-item dept-overflow-item--danger" id="detailDeleteBtn">
+                            <i class="ti ti-trash"></i> Delete department
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="dept-members-wrap" id="deptMembersWrap">
             <div class="dept-members-head">
