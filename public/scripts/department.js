@@ -1,8 +1,8 @@
-const search = document.getElementById('deptSearch');
+const search   = document.getElementById('deptSearch');
 const subTitle = document.querySelector('.dept-panel-sub');
 const allItems = () => document.querySelectorAll('.dept-item');
 
-// Delegate clicks on list items
+// Delegate clicks — no inline handlers needed
 document.getElementById('deptList').addEventListener('click', e => {
     const li = e.target.closest('.dept-item');
     if (!li) return;
@@ -33,10 +33,10 @@ function selectDept(el, id, name) {
     allItems().forEach(li => li.classList.remove('dept-item--active'));
     el.classList.add('dept-item--active');
 
-    document.getElementById('deptDetailEmpty').style.display   = 'none';
-    document.getElementById('deptDetailContent').style.display = 'flex';
+    document.getElementById('deptDetailEmpty').classList.add('dept-hidden');
+    document.getElementById('deptDetailContent').classList.remove('dept-hidden');
     document.getElementById('detailName').textContent = name;
-    document.getElementById('detailId').textContent   = 'ID · ' + id;
+    document.getElementById('detailId').textContent   = 'Dept · #' + id;
 
     document.getElementById('detailDeleteForm').action =
         '/processing-system/public/departments/' + id + '/delete';
@@ -45,7 +45,9 @@ function selectDept(el, id, name) {
 
 // Delete confirm
 document.getElementById('detailDeleteForm').addEventListener('submit', e => {
-    if (!confirm('Delete this department?')) e.preventDefault();
+    if (!confirm('Delete "' + document.getElementById('detailName').textContent + '"?')) {
+        e.preventDefault();
+    }
 });
 
 // Edit modal

@@ -2,7 +2,7 @@
 
 <div class="dept-shell">
 
-    <!-- Left panel: list -->
+    <!-- Left panel -->
     <div class="dept-panel">
         <div class="dept-panel-head">
             <div>
@@ -40,13 +40,11 @@
                 </li>
             <?php else: ?>
                 <?php $i = 1; foreach ($departments as $dept): ?>
-                <li class="dept-item" data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
-                data-id="<?= $dept['id'] ?>"
-                data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>"
-                >
-                    <div class="dept-item-icon">
-                        <i class="ti ti-building"></i>
-                    </div>
+                <li class="dept-item"
+                    data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
+                    data-id="<?= $dept['id'] ?>"
+                    data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>">
+                    <div class="dept-item-icon"><i class="ti ti-building"></i></div>
                     <div class="dept-item-body">
                         <span class="dept-item-name"><?= htmlspecialchars($dept['name']) ?></span>
                         <span class="dept-item-meta">#<?= $i++ ?></span>
@@ -58,13 +56,13 @@
         </ul>
     </div>
 
-    <!-- Right panel: detail / actions -->
+    <!-- Right panel -->
     <div class="dept-detail" id="deptDetail">
         <div class="dept-detail-empty" id="deptDetailEmpty">
             <i class="ti ti-building-skyscraper dept-placeholder-icon"></i>
             <p>Select a department</p>
         </div>
-        <div class="dept-detail-content" id="deptDetailContent" style="display:none">
+        <div class="dept-detail-content dept-hidden" id="deptDetailContent">
             <div class="dept-detail-icon-wrap">
                 <div class="dept-detail-icon"><i class="ti ti-building"></i></div>
             </div>
@@ -74,9 +72,9 @@
                 <button class="btn btn-ghost btn-sm" id="detailEditBtn">
                     <i class="ti ti-pencil"></i> Edit
                 </button>
-                <form method="POST" id="detailDeleteForm" id="detailDeleteForm">
+                <form method="POST" id="detailDeleteForm">
                     <?= \App\Helpers\Csrf::field() ?>
-                    <button class="btn btn-sm btn-outline-danger">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
                         <i class="ti ti-trash"></i> Delete
                     </button>
                 </form>
@@ -97,7 +95,7 @@
             </div>
             <div class="modal-body">
                 <label class="label">Department Name</label>
-                <input type="text" name="name" id="editName" required>
+                <input type="text" name="name" id="addName" placeholder="e.g. Finance" required autofocus>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
@@ -118,7 +116,7 @@
             </div>
             <div class="modal-body">
                 <label class="label">Department Name</label>
-                <input type="text" name="name" id="editName" class="form-control" required>
+                <input type="text" name="name" id="editName" required>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
