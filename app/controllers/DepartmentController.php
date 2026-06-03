@@ -55,6 +55,7 @@ class DepartmentController {
         try {
             db()->prepare('INSERT INTO departments (name) VALUES (?)')->execute([$name]);
             $_SESSION['success'] = 'Department added.';
+            $_SESSION['last_dept_id'] = (int) db()->lastInsertId();
         } catch (\Throwable) {
             $_SESSION['error'] = 'Department already exists.';
         }
@@ -68,6 +69,7 @@ class DepartmentController {
         $name = trim($_POST['name'] ?? '');
         if ($name === '') {
             $_SESSION['error'] = 'Department name is required.';
+            $_SESSION['last_dept_id'] = $id;
             header('Location: /processing-system/public/departments');
             exit;
         }
@@ -77,6 +79,7 @@ class DepartmentController {
         } catch (\Throwable) {
             $_SESSION['error'] = 'That name is already in use.';
         }
+        $_SESSION['last_dept_id'] = $id;
         header('Location: /processing-system/public/departments');
         exit;
     }

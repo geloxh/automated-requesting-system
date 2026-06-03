@@ -32,7 +32,14 @@
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
-        <ul class="dept-list" id="deptList" role="listbox" aria-label="Departments">
+        <ul class="dept-list" 
+            id="deptList" 
+            role="listbox" 
+            aria-label="Departments"
+            <?php if (!empty($_SESSION['last_dept_id'])): ?>
+                data-auto-select="<?= (int)$_SESSION['last_dept_id'] ?>"
+            <?php unset($_SESSION['last_dept_id']); endif; ?>
+        >
             <?php if (empty($departments)): ?>
                 <li class="dept-empty">
                     <i class="ti ti-building empty-state-icon"></i>
