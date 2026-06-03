@@ -2,28 +2,27 @@ const search = document.getElementById('deptSearch');
 const subTitle = document.querySelector('.dept-panel-sub');
 const allItems = () => document.querySelectorAll('.dept-item');
 
-// Delegate clicks — no inline handlers needed
+// ── List item click ──────────────────────────────────────────
 document.getElementById('deptList').addEventListener('click', e => {
     const li = e.target.closest('.dept-item');
-
-    const moreBtn = document.getElementById('detailMoreBtn');
-    const overflowMenu = document.getElementById('deptOverflowMenu');
-
     if (!li) return;
     selectDept(li, li.dataset.id, li.dataset.label, li.dataset.count);
+});
 
-    moreBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        const open = !overflowMenu.classList.contains('dept-hidden');
-        overflowMenu.classList.toggle('dept-hidden', open);
-        moreBtn.setAttribute('aria-expanded', String(!open));
-    });
+// ── ⋯ Overflow menu toggle (top-level, attached once) ────────
+const moreBtn = document.getElementById('detailMoreBtn');
+const overflowMenu = document.getElementById('deptOverflowMenu');
 
-    // close on outside click
-    document.addEventListener('click', () => {
-        overflowMenu.classList.add('dept-hidden');
-        moreBtn.setAttribute('aria-expanded', 'false');
-    });
+moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = !overflowMenu.classList.contains('dept-hidden');
+    overflowMenu.classList.toggle('dept-hidden', open);
+    moreBtn.setAttribute('aria-expanded', String(!open));
+});
+
+document.addEventListener('click', () => {
+    overflowMenu.classList.add('dept-hidden');
+    moreBtn.setAttribute('aria-expanded', 'false');
 });
 
 // Keyboard navigation
