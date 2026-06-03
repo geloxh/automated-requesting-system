@@ -59,7 +59,7 @@
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
-dept-flash::after {
+.dept-flash::after {
     content: '';
     position: absolute;
     bottom: 0; left: 0;
