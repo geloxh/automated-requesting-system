@@ -156,17 +156,31 @@
     <div class="modal-dialog modal-sm">
         <form method="POST" id="editForm" class="modal-content">
             <?= \App\Helpers\Csrf::field() ?>
+
             <div class="modal-header">
-                <h5 class="modal-title">partment</h5>
+                <div class="dept-modal-icon"><i class="ti ti-pencil"></i></div>
+                <div>
+                    <h5 class="modal-title">Rename Department</h5>
+                    <p class="modal-subtitle">Editing: <span id="editCurrentName"></span></p>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
-                <label class="label">Department Name</label>
-                <input type="text" name="name" id="editName" class="form-control form-control-sm" required>
+                <label class="dept-field-label" for="editName">New name</label>
+                <div class="dept-field-wrap">
+                    <i class="ti ti-building"></i>
+                    <input type="text" name="name" id="editName"
+                           class="dept-field-input"
+                           placeholder="e.g. Finance"
+                           maxlength="100" required>
+                </div>
+                <span class="dept-field-hint"><span id="editNameLen">0</span> / 100</span>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary">Save</button>
+                <button class="btn btn-primary"><i class="ti ti-check"></i> Save</button>
             </div>
         </form>
     </div>
