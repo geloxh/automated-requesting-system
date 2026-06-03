@@ -16,7 +16,20 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative; /* ← add */
 }
+
+.dept-flash {
+    position: absolute;  /* ← was relative */
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    overflow: hidden;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
 .dept-panel-head {
     display: flex;
     align-items: center;
@@ -100,10 +113,19 @@
 .dept-item--active .dept-item-icon  { background: var(--accent-glow); border-color: #0ea5e930; color: var(--accent); }
 
 .dept-item-icon {
-    width: 30px; height: 30px; border-radius: 7px;
-    background: var(--surface); border: 1px solid var(--border);
+    width: 68px; height: 68px; border-radius: 18px;
+    background: var(--accent-glow); border: 1px solid #0ea5e930;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; color: var(--text-muted); flex-shrink: 0;
+    font-size: 28px; font-weight: 700; font-family: var(--font-display);
+    color: var(--accent);
+}
+.dept-item-icon--letter {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--accent);
+    background: var(--accent-glow);
+    border-color: #0ea5e930;
 }
 .dept-item-body   { flex: 1; min-width: 0; }
 .dept-item-name   { font-size: 13px; font-weight: 500; color: var(--text-main); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
