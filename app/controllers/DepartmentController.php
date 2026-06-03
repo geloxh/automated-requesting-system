@@ -28,6 +28,21 @@ class DepartmentController {
         require __DIR__ . '/../../views/layouts/base.php';
     }
 
+    public function members(int $id): void {
+        $this->requireAdmin();
+        header('Content-Type: application/json');
+        $rows = db()->prepare(
+            'SELECT id, full_name, employee_code, role_id
+            FROM employees
+            WHERE department = (SELECT name FROM departments WHERE id = ?)
+            AND is_active = 1
+            ORDER BY full_name ASC'
+        );
+        $rows->execute([$id]);
+        echo json_encode($rows->fetchAll(PDO::FETCH_ASSOC));
+        exit;
+    }
+
     public function store(): void {
         \App\Helpers\Csrf::verify();
         $this->requireAdmin();
