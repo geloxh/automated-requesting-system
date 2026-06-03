@@ -1,0 +1,114 @@
+/* ── Departments desktop layout ── */
+.dept-shell {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 520px;
+}
+
+/* Left panel */
+.dept-panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+.dept-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+}
+.dept-panel-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-main); }
+.dept-panel-sub   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+.dept-search-wrap {
+    position: relative;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+.dept-search-wrap i {
+    position: absolute; left: 22px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-soft); font-size: 15px; pointer-events: none;
+}
+.dept-search-wrap input {
+    width: 100%; padding: 6px 10px 6px 30px;
+    border: 1px solid var(--border); border-radius: 7px;
+    font-size: 13px; background: var(--surface);
+}
+
+.dept-flash {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+}
+.dept-flash--success { background: #f0fdf4; color: #166534; }
+.dept-flash--danger  { background: #fef2f2; color: #7f1d1d; }
+
+.dept-list { list-style: none; flex: 1; overflow-y: auto; }
+
+.dept-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+}
+.dept-item:last-child { border-bottom: none; }
+.dept-item:hover { background: var(--surface); }
+.dept-item--active { background: var(--accent-glow) !important; border-left: 2px solid var(--accent); }
+.dept-item--active .dept-item-name { color: var(--accent); }
+.dept-item--active .dept-item-arrow { color: var(--accent); }
+
+.dept-item-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: var(--text-muted); flex-shrink: 0;
+}
+.dept-item--active .dept-item-icon {
+    background: var(--accent-glow); border-color: #0ea5e930; color: var(--accent);
+}
+.dept-item-body { flex: 1; min-width: 0; }
+.dept-item-name { font-size: 13px; font-weight: 500; color: var(--text-main); display: block; }
+.dept-item-meta { font-size: 11px; color: var(--text-soft); }
+.dept-item-arrow { font-size: 13px; color: var(--border); flex-shrink: 0; }
+
+.dept-empty {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 8px; padding: 3rem 1rem;
+    color: var(--text-muted); font-size: 13px;
+}
+
+/* Right panel */
+.dept-detail {
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem; background: var(--surface);
+}
+.dept-detail-empty {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px; color: var(--text-muted); font-size: 13px;
+}
+.dept-detail-content {
+    flex-direction: column; align-items: center;
+    gap: 10px; text-align: center;
+}
+.dept-detail-icon-wrap { margin-bottom: 6px; }
+.dept-detail-icon {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: var(--accent-glow); border: 1px solid #0ea5e930;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: var(--accent);
+}
+.dept-detail-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-main); }
+.dept-detail-id   { font-size: 12px; color: var(--text-soft); margin-bottom: 8px; }
+.dept-detail-actions { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+
+@media (max-width: 700px) {
+    .dept-shell { grid-template-columns: 1fr; }
+    .dept-detail { display: none; }
+}
