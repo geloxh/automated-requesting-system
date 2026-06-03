@@ -177,17 +177,19 @@
     display: flex;
     gap: 1.5rem;
     justify-content: center;
-    padding: 14px 20px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    align-items: center;
+    padding: 10px 0;
     width: 100%;
-    margin: 4px 0 8px;
+    margin: 2px 0 6px;
 }
 .dept-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .dept-stat-val   { font-size: 20px; font-weight: 700; color: var(--text-main); }
 .dept-stat-label { font-size: 11px; color: var(--text-soft); }
-
+.dept-stat-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
+}
 /* ── Detail actions ── */
 .dept-detail-actions {
     display: flex;

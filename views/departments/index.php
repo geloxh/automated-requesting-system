@@ -53,7 +53,8 @@
                     data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
                     data-id="<?= $dept['id'] ?>"
                     data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>"
-                    data-count="<?= $dept['member_count'] ?? 0 ?>">    
+                    data-count="<?= $dept['member_count'] ?? 0 ?>"
+                    data-forms="<?= $dept['form_count'] ?? 0 ?>"  
                 >
                     <div class="dept-item-icon"><i class="ti ti-building"></i></div>
                     <div class="dept-item-body">
@@ -75,7 +76,9 @@
         <div class="dept-detail-empty" id="deptDetailEmpty">
             <i class="ti ti-building-skyscraper dept-placeholder-icon"></i>
             <p>Pick a department to view details</p>
-            <span style="font-size:11px; color:var(--text-soft)">or create a new one →</span>
+            <button class="btn btn-ghost btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="ti ti-plus"></i> Create one
+            </button>
         </div>
         <div class="dept-detail-content dept-hidden" id="deptDetailContent">
             <div class="dept-detail-icon-wrap">
@@ -88,6 +91,11 @@
                 <div class="dept-stat">
                     <span class="dept-stat-val" id="detailCount">0</span>
                     <span class="dept-stat-label">Members</span>
+                </div>
+                <div class="dept-stat-divider"></div>
+                <div class="dept-stat">
+                    <span class="dept-stat-val" id="detailForms">0</span>
+                    <span class="dept-stat-label">Active Forms</span>
                 </div>
             </div>
 

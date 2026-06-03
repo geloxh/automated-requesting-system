@@ -13,12 +13,15 @@ class DepartmentController {
         $this->requireAdmin();
 
         $departments = db()->query(
-            'SELECT d.*, COUNT(e.id) AS member_count
+            'SELECT d.*, COUNT(DISTINCT e.id) AS member_count,
+                    COUNT(DISTINCT f.id) AS form_count
             FROM departments d
             LEFT JOIN employees e ON e.department = d.name AND e.is_active = 1
+            LEFT JOIN forms f ON f.submitted_by = e.id
+                            AND f.status NOT IN ("draft","cancelled","completed","rejected")
             GROUP BY d.id ORDER BY d.name ASC'
         )->fetchAll();
-
+        
         define('BASE_LOADED', true);
         ob_start();
 
