@@ -45,6 +45,7 @@
                 Multi-level Approval Workflow
             </li>
         </ul>
+        <p class="dev-sys">&copy; 2026 &middot; <span class="dev-name">geloxh</span></p>
     </div>
 
     <!-- Right form panel -->
