@@ -247,6 +247,26 @@ body {
 }
 .auth-forgot a:hover { color: var(--accent); }
 
+/* ── Dev Name ── */
+.dev-sys {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    margin: 0;
+    font-size: .72rem;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    letter-spacing: .03em;
+    user-select: none;
+}
+
+.dev-name {
+    color: #6b7280;
+    font-weight: 500;
+}
+
 /* ── Alerts ── */
 .form-error, .form-success {
     border-radius: 8px;

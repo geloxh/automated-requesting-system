@@ -1,5 +1,5 @@
 <?php
-    $error  = $_SESSION['error']  ?? null;
+    $error = $_SESSION['error'] ?? null;
     $status = $_SESSION['status'] ?? null;
     unset($_SESSION['error'], $_SESSION['status']);
 ?>

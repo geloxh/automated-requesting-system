@@ -1,5 +1,5 @@
 <div class="page-header">
-    <h5>Departments</h5>
+    <h5>Departments <span class="badge badge-secondary"><?= count($departments) ?></span></h5>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
         <i class="ti ti-plus"></i> Add Department
     </button>
@@ -15,12 +15,16 @@
 <?php endif; ?>
 
 <div class="form-card">
+    <div class="filter-bar">
+        <input type="search" id="deptSearch" placeholder="Search departments...">
+        <span class="filter-count" id="deptCount"></span>
+    </div>
     <table class="table">
-        <thead><tr><th>#</th><th>Name</th><th></th></tr></thead>
+        <thead><tr data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"><th>#</th><th>Name</th><th></th></tr></thead>
         <tbody>
-        <?php foreach ($departments as $dept): ?>
-            <tr>
-                <td><?= $dept['id'] ?></td>
+        <?php $i = 1; foreach ($departments as $dept): ?>
+            <tr data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>">
+                <td class="muted" style="width:40px"><?= $i++ ?></td>
                 <td><?= htmlspecialchars($dept['name']) ?></td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-ghost"
@@ -38,7 +42,7 @@
             </tr>
         <?php endforeach; ?>
         <?php if (empty($departments)): ?>
-            <tr><td colspan="3" class="text-center text-muted">No departments yet.</td></tr>
+            <tr data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"><td colspan="3" class="text-center text-muted">No departments yet.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>
@@ -49,7 +53,10 @@
     <div class="modal-dialog">
         <form method="POST" action="/processing-system/public/departments/create" class="modal-content">
             <?= \App\Helpers\Csrf::field() ?>
-            <div class="modal-header"><h5 class="modal-title">Add Department</h5></div>
+            <div class="modal-header">
+                <h5 class="modal-title">Add Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body">
                 <input type="text" name="name" class="form-control" placeholder="Department name" required autofocus>
             </div>
