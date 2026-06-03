@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/processing-system/public/style<mark marker-index=0 reference-tracker>sheets/department.css">
+<link rel="stylesheet" href="/processing-system/public/stylesheets/department.css">
 
 <div class="dept-shell">
 
@@ -9,7 +9,7 @@
                 <div class="dept-panel-title">Departments</div>
                 <div class="dept-panel-sub"><?= count($departments) ?> total</div>
             </div>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+            <button class="btn btn-primary btn-sm" id="openAddModalBtn">
                 <i class="ti ti-plus"></i> New
             </button>
         </div>
@@ -78,7 +78,7 @@
         <div class="dept-detail-empty" id="deptDetailEmpty">
             <i class="ti ti-building-skyscraper dept-placeholder-icon"></i>
             <p>Pick a department to view details</p>
-            <button class="btn btn-ghost btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+            <button class="btn btn-ghost btn-sm" id="emptyCreateBtn">
                 <i class="ti ti-plus"></i> Create one
             </button>
         </div>
@@ -152,55 +152,49 @@
 
 </div>
 
-<!-- Add Modal -->
-<div class="modal fade" id="addModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <form method="POST" action="/processing-system/public/departments/create" class="modal-content">
-            <?= \App\Helpers\Csrf::field() ?>
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="ti ti-plus"></i> New Department</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Add dialog -->
+<dialog id="addDialog" class="dept-dialog">
+    <form method="POST" action="/processing-system/public/departments/create" id="addForm">
+        <?= \App\Helpers\Csrf::field() ?>
+        <div class="dept-dialog-header">
+            <i class="ti ti-plus dept-icon-accent"></i>
+            <h5>New Department</h5>
+        </div>
+        <div class="dept-dialog-body">
+            <div class="dept-field-wrap">
+                <i class="ti ti-building"></i>
+                <input type="text" name="name" id="addName"
+                       class="dept-field-input"
+                       placeholder="e.g. Finance"
+                       maxlength="100" required autofocus>
             </div>
-            <div class="modal-body">
-                <div class="dept-field-wrap">
-                    <i class="ti ti-building"></i>
-                    <input type="text" name="name" id="addName"
-                           class="dept-field-input"
-                           placeholder="e.g. Finance"
-                           maxlength="100" required autofocus>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary">Create</button>
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
+        <div class="dept-dialog-footer">
+            <button type="button" class="btn btn-ghost" id="addCancelBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+    </form>
+</dialog>
 
 <!-- Hidden delete form -->
 <form method="POST" id="detailDeleteForm" class="dept-hidden">
     <?= \App\Helpers\Csrf::field() ?>
 </form>
 
-<!-- Confirm Delete Modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="ti ti-trash dept-icon-danger"></i> Delete Department?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body modal-body--sm">
-                This will permanently remove <strong id="confirmDeptName"></strong>.
-                This action cannot be undone.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteBtn">Delete</button>
-            </div>
-        </div>
+<!-- Confirm delete dialog -->
+<dialog id="confirmDeleteDialog" class="dept-dialog">
+    <div class="dept-dialog-header">
+        <i class="ti ti-trash dept-icon-danger"></i>
+        <h5>Delete Department?</h5>
     </div>
-</div>
+    <p class="dept-dialog-body">
+        This will permanently remove <strong id="confirmDeptName"></strong>.
+        This action cannot be undone.
+    </p>
+    <div class="dept-dialog-footer">
+        <button type="button" class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteBtn">Delete</button>
+    </div>
+</dialog>
 
 <script src="/processing-system/public/scripts/department.js"></script>
