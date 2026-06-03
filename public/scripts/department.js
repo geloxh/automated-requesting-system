@@ -140,15 +140,21 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
 
 // Edit modal
 function openEdit(id, name) {
-    document.getElementById('editName').value = name;
+    document.getElementById('editName').value        = name;
+    document.getElementById('editCurrentName').textContent = name;  // ← subtitle
+    document.getElementById('editNameLen').textContent     = name.length; // ← counter
     document.getElementById('editForm').action =
         '/processing-system/public/departments/' + id + '/update';
+
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
+
+    const input = document.getElementById('editName');
+    // update counter on type
+    input.oninput = () => document.getElementById('editNameLen').textContent = input.value.length;
+
     document.getElementById('editModal').addEventListener(
-        'shown.bs.modal',
-        () => document.getElementById('editName').focus(),
-        { once: true }
+        'shown.bs.modal', () => input.select(), { once: true }  // ← select all on open
     );
 }
 
