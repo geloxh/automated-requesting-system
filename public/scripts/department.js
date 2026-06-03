@@ -58,6 +58,13 @@ search?.addEventListener('input', () => {
         const match = li.dataset.name.includes(q);
         li.style.display = match ? '' : 'none';
         if (match) visible++;
+
+        // if the active item just got hidden, reset the right panel
+        if (li.classList.contains('dept-item--active') && !match) {
+            li.classList.remove('dept-item--active');
+            document.getElementById('deptDetailContent').classList.add('dept-hidden');
+            document.getElementById('deptDetailEmpty').classList.remove('dept-hidden');
+        }
     });
     subTitle.textContent = visible + ' total';
 });
