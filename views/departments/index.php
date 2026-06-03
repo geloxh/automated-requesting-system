@@ -43,11 +43,16 @@
                 <li class="dept-item"
                     data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
                     data-id="<?= $dept['id'] ?>"
-                    data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>">
+                    data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>"
+                    data-count="<?= $dept['member_count'] ?? 0 ?>">    
+                >
                     <div class="dept-item-icon"><i class="ti ti-building"></i></div>
                     <div class="dept-item-body">
                         <span class="dept-item-name"><?= htmlspecialchars($dept['name']) ?></span>
-                        <span class="dept-item-meta">#<?= $i++ ?></span>
+                        <span class="dept-item-meta">
+                            <i class="ti ti-users" style="font-size:10px"></i>
+                            <?= $dept['member_count'] ?? 0 ?> members
+                        </span>
                     </div>
                     <i class="ti ti-chevron-right dept-item-arrow"></i>
                 </li>
@@ -60,7 +65,8 @@
     <div class="dept-detail" id="deptDetail">
         <div class="dept-detail-empty" id="deptDetailEmpty">
             <i class="ti ti-building-skyscraper dept-placeholder-icon"></i>
-            <p>Select a department</p>
+            <p>Pick a department to view details</p>
+            <span style="font-size:11px; color:var(--text-soft)">or create a new one →</span>
         </div>
         <div class="dept-detail-content dept-hidden" id="deptDetailContent">
             <div class="dept-detail-icon-wrap">
@@ -68,16 +74,21 @@
             </div>
             <div class="dept-detail-name" id="detailName"></div>
             <div class="dept-detail-id" id="detailId"></div>
+
+            <div class="dept-detail-stats">
+                <div class="dept-stat">
+                    <span class="dept-stat-val" id="detailCount">0</span>
+                    <span class="dept-stat-label">Members</span>
+                </div>
+            </div>
+
             <div class="dept-detail-actions">
                 <button class="btn btn-ghost btn-sm" id="detailEditBtn">
                     <i class="ti ti-pencil"></i> Edit
                 </button>
-                <form method="POST" id="detailDeleteForm">
-                    <?= \App\Helpers\Csrf::field() ?>
-                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                        <i class="ti ti-trash"></i> Delete
-                    </button>
-                </form>
+                <button class="btn btn-sm btn-outline-danger" id="detailDeleteBtn">
+                    <i class="ti ti-trash"></i> Delete
+                </button>
             </div>
         </div>
     </div>
@@ -123,6 +134,30 @@
                 <button class="btn btn-primary">Save</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Hidden delete form — submitted by JS -->
+<form method="POST" id="detailDeleteForm" style="display:none">
+    <?= \App\Helpers\Csrf::field() ?>
+</form>
+
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Department?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="font-size:13px">
+                This will permanently remove <strong id="confirmDeptName"></strong>.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
     </div>
 </div>
 
