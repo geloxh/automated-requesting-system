@@ -54,9 +54,11 @@
                     data-id="<?= $dept['id'] ?>"
                     data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>"
                     data-count="<?= $dept['member_count'] ?? 0 ?>"
-                    data-forms="<?= $dept['form_count'] ?? 0 ?>"  
+                    data-forms="<?= $dept['form_count'] ?? 0 ?>"
+                    data-initial="<?= htmlspecialchars(strtoupper(substr($dept['name'], 0, 1))) ?>"
+                    data-created="<?= date('M Y', strtotime($dept['created_at'])) ?>"
                 >
-                    <div class="dept-item-icon"><i class="ti ti-building"></i></div>
+                <div class="dept-item-icon dept-item-icon--letter"><?= strtoupper(substr($dept['name'], 0, 1)) ?></div>
                     <div class="dept-item-body">
                         <span class="dept-item-name"><?= htmlspecialchars($dept['name']) ?></span>
                         <span class="dept-item-meta">
@@ -82,7 +84,7 @@
         </div>
         <div class="dept-detail-content dept-hidden" id="deptDetailContent">
             <div class="dept-detail-icon-wrap">
-                <div class="dept-detail-icon"><i class="ti ti-building"></i></div>
+                <div class="dept-detail-icon"></div>
             </div>
             <div class="dept-detail-name" id="detailName"></div>
             <div class="dept-detail-id" id="detailId"></div>
@@ -139,7 +141,7 @@
             </div>
             <div class="modal-body">
                 <label class="label">Department Name</label>
-                <input type="text" name="name" id="addName" placeholder="e.g. Finance" required autofocus>
+                <input type="text" name="name" id="addName" class="form-control form-control-sm" placeholder="e.g. Finance" required autofocus>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
@@ -155,12 +157,12 @@
         <form method="POST" id="editForm" class="modal-content">
             <?= \App\Helpers\Csrf::field() ?>
             <div class="modal-header">
-                <h5 class="modal-title">Rename Department</h5>
+                <h5 class="modal-title">partment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <label class="label">Department Name</label>
-                <input type="text" name="name" id="editName" required>
+                <input type="text" name="name" id="editName" class="form-control form-control-sm" required>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>

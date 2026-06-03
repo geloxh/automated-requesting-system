@@ -80,11 +80,13 @@ document.querySelectorAll('.dept-flash').forEach(el => {
 function selectDept(el, id, name, count = 0) {
     allItems().forEach(li => li.classList.remove('dept-item--active'));
     el.classList.add('dept-item--active');
+    
+    document.querySelector('.dept-detail-icon').textContent = el.dataset.initial;
 
     document.getElementById('deptDetailEmpty').classList.add('dept-hidden');
     document.getElementById('deptDetailContent').classList.remove('dept-hidden');
     document.getElementById('detailName').textContent = name;
-    document.getElementById('detailId').textContent   = 'Dept · #' + id;
+    document.getElementById('detailId').textContent = 'Since ' + (el.dataset.created ?? '—');
 
     document.getElementById('detailDeleteForm').action =
         '/processing-system/public/departments/' + id + '/delete';
