@@ -41,8 +41,9 @@
             <?php else: ?>
                 <?php $i = 1; foreach ($departments as $dept): ?>
                 <li class="dept-item" data-name="<?= strtolower(htmlspecialchars($dept['name'])) ?>"
-                    data-id="<?= $dept['id'] ?>"
-                    onclick="selectDept(this, <?= $dept['id'] ?>, '<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>')">
+                data-id="<?= $dept['id'] ?>"
+                data-label="<?= htmlspecialchars($dept['name'], ENT_QUOTES) ?>"
+                >
                     <div class="dept-item-icon">
                         <i class="ti ti-building"></i>
                     </div>
@@ -60,7 +61,7 @@
     <!-- Right panel: detail / actions -->
     <div class="dept-detail" id="deptDetail">
         <div class="dept-detail-empty" id="deptDetailEmpty">
-            <i class="ti ti-building-skyscraper" style="font-size:2.5rem;color:var(--border)"></i>
+            <i class="ti ti-building-skyscraper dept-placeholder-icon"></i>
             <p>Select a department</p>
         </div>
         <div class="dept-detail-content" id="deptDetailContent" style="display:none">
@@ -73,8 +74,7 @@
                 <button class="btn btn-ghost btn-sm" id="detailEditBtn">
                     <i class="ti ti-pencil"></i> Edit
                 </button>
-                <form method="POST" id="detailDeleteForm" style="display:inline"
-                      onsubmit="return confirm('Delete this department?')">
+                <form method="POST" id="detailDeleteForm" id="detailDeleteForm">
                     <?= \App\Helpers\Csrf::field() ?>
                     <button class="btn btn-sm btn-outline-danger">
                         <i class="ti ti-trash"></i> Delete
@@ -97,7 +97,7 @@
             </div>
             <div class="modal-body">
                 <label class="label">Department Name</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g. Finance" required autofocus>
+                <input type="text" name="name" id="editName" required>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>

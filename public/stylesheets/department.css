@@ -90,12 +90,24 @@
     padding: 2rem; background: var(--surface);
 }
 .dept-detail-empty {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 10px; color: var(--text-muted); font-size: 13px;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    gap: 10px; color: var(--text-muted); 
+    font-size: 13px;
 }
+
+.dept-placeholder-icon {
+    font-size: 2.5rem;
+    color: var(--border);
+}
+
 .dept-detail-content {
-    flex-direction: column; align-items: center;
-    gap: 10px; text-align: center;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    gap: 10px;
+    text-align: center;
 }
 .dept-detail-icon-wrap { margin-bottom: 6px; }
 .dept-detail-icon {
