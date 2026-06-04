@@ -16,8 +16,8 @@ document.addEventListener('click', function (e) {
 
 // ── Sidebar toggle (desktop collapse + mobile overlay) ──────────
 var sidebarToggle = document.getElementById('sidebarToggle');
-var sidebar       = document.getElementById('sidebar');
-var SIDEBAR_KEY   = 'sidebar_collapsed';
+var sidebar = document.getElementById('sidebar');
+var SIDEBAR_KEY = 'sidebar_collapsed';
 
 // Restore desktop collapsed state on load
 if (sidebar && window.innerWidth > 900) {
@@ -98,18 +98,99 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ── Topbar search ───────────────────────────────────────────────
+// ── Topbar search ── //
 document.addEventListener('DOMContentLoaded', function () {
-    var topbarSearch = document.getElementById('topbarSearch');
-    if (topbarSearch) {
-        topbarSearch.addEventListener('input', function () {
-            var target = document.querySelector('[data-search-input]');
-            if (target) {
-                target.value = topbarSearch.value;
-                target.dispatchEvent(new Event('input'));
-            }
-        });
+    const input = document.getElementById('topbarSearch');
+    const dropdown = document.getElementById('searchDropdown');
+    if (!input || !dropdown) return;
+
+    const formLabels = {
+        advance_payment: 'Advance Payment',
+        overtime_authorization: 'Overtime Auth.',
+        request_for_payment: 'Request for Payment',
+        leave_application: 'Leave Application',
+        reimbursement: 'Reimbursement',
+        liquidation: 'Liquidation',
+        vehicle_request: 'Vehicle Request',
+    };
+    const statusColors = {
+        draft:'#94a3b8', submitted:'#3b82f6', completed:'#22c55e',
+        rejected:'#ef4444', cancelled:'#94a3b8',
+        checker_approved:'#f59e0b', process_approved:'#f59e0b',
+        department_reviewed:'#f59e0b', finance_reviewed:'#f59e0b',
+        final_approved:'#22c55e',
+    };
+
+    let debounce, activeIdx = -1, results = [];
+
+    const esc = s => String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+
+    function open() { dropdown.classList.remove('dept-hidden'); input.setAttribute('aria-expanded','true'); }
+    function close() { dropdown.classList.add('dept-hidden');    input.setAttribute('aria-expanded','false'); activeIdx = -1; }
+
+    function render(items) {
+        results = items;
+        activeIdx = -1;
+        if (!items.length) {
+            dropdown.innerHTML = '<div class="search-empty">No results found</div>';
+            open(); return;
+        }
+        dropdown.innerHTML = items.map((r, i) => `
+            <a href="/processing-system/public/forms/view/${r.id}"
+               class="search-item" role="option" data-idx="${i}">
+                <span class="search-item-type">${esc(formLabels[r.form_type] ?? r.form_type)}</span>
+                <span class="search-item-id">#${r.id}</span>
+                <span class="search-item-status" style="color:${statusColors[r.status] ?? '#94a3b8'}">${esc(r.status)}</span>
+                <span class="search-item-who">${esc(r.submitted_by)}</span>
+            </a>`).join('');
+        open();
     }
+
+    function setActive(idx) {
+        dropdown.querySelectorAll('.search-item').forEach((el, i) => {
+            el.classList.toggle('search-item--active', i === idx);
+        });
+        activeIdx = idx;
+    }
+
+    input.addEventListener('input', function () {
+        clearTimeout(debounce);
+        const q = input.value.trim();
+        if (q.length < 2) { close(); return; }
+        debounce = setTimeout(() => {
+            fetch('/processing-system/public/search?q=' + encodeURIComponent(q))
+                .then(r => r.json()).then(render).catch(() => close());
+        }, 200);
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { close(); input.blur(); return; }
+        if (dropdown.classList.contains('dept-hidden')) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx + 1, results.length - 1)); }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
+        if (e.key === 'Enter' && activeIdx >= 0) {
+            e.preventDefault();
+            window.location.href = '/processing-system/public/forms/view/' + results[activeIdx].id;
+        }
+        // Enter with no selection — navigate to search page
+        if (e.key === 'Enter' && activeIdx < 0 && input.value.trim()) {
+            window.location.href = '/processing-system/public/my-submissions?q=' + encodeURIComponent(input.value.trim());
+        }
+    });
+
+    // close on outside click
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#topbarSearchWrap')) close();
+    });
+
+    // Ctrl+K / Cmd+K global shortcut
+    document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            input.focus();
+            input.select();
+        }
+    });
 });
 
 // ── Notification button wiring ──────────────────────────────────

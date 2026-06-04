@@ -214,6 +214,43 @@ class FormController {
         ));
     }
 
+    private function search(): void {
+        header('Content-Type: application/json');
+        $q = trim($_GET['q'] ?? '');
+        $uid = (int)$_SESSION['user_id'];
+        $role = (int)$_SESSION['role_id'];
+
+        if (strlen($q) < 2) { echo json_encode([]); exit; }
+
+        $like = '%' . $q . '%';
+
+        // admins see all forms, others see only their own
+        if ($role === 1) {
+            $ps = db()->prepare(
+                "SELECT f.id, f.form_type, f.status, f.created_at,
+                e.full_name AS submitted_by
+                FROM forms f
+                JOIN employees e ON e.id = f.submitted_by
+                WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
+                ORDER BY f.created_at DESC LIMIT 8"
+            );
+            $ps->execute([$like, $like, $like]);
+        } else {
+            $ps = db()->prepare(
+                "SELECT f.id, f.form_type, f.status, f.created_at,
+                e.full_name AS submitted_by
+                FROM forms f
+                JOIN employees e ON e.id = f.submitted_by
+                WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
+                ORDER BY f.created_at DESC LIMIT 8"
+            );
+            $ps->execute([$uid, $like, $like]);
+        } 
+
+        echo json_encode($ps->fetchAll(PDO::FETCH_ASSOC));
+        exit;
+    }
+
     // ----------------------------------------------------------------
     // POST /forms/{id}/approve/{action}
     // ----------------------------------------------------------------
