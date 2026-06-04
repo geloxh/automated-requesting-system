@@ -49,7 +49,7 @@
 
             db()->prepare('UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0')->execute([$userId]);
             header('Content-Type: application/json');
-            echo json_encoe(['ok' => true]);
+            echo json_encode(['ok' => true]);
             exit;
         }
 

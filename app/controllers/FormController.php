@@ -214,7 +214,7 @@ class FormController {
         ));
     }
 
-    private function search(): void {
+    public function search(): void {
         header('Content-Type: application/json');
         $q = trim($_GET['q'] ?? '');
         $uid = (int)$_SESSION['user_id'];
@@ -244,7 +244,7 @@ class FormController {
                 WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
                 ORDER BY f.created_at DESC LIMIT 8"
             );
-            $ps->execute([$uid, $like, $like]);
+            $ps->execute([$like, $like, $like]);
         } 
 
         echo json_encode($ps->fetchAll(PDO::FETCH_ASSOC));
