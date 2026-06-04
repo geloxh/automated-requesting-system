@@ -170,9 +170,17 @@
 
             <div class="topbar-right">
                 <!-- Search -->
-                <div class="topbar-search">
+                <div class="topbar-search" id="topbarSearchWrap">
                     <i class="ti ti-search"></i>
-                    <input type="text" placeholder="Search requests…" id="topbarSearch">
+                    <input type="text" 
+                        placeholder="Search requests… (Ctrl + K)" 
+                        id="topbarSearch"
+                        autocomplete="off"
+                        aria-label="Search"
+                        aria-expanded="false"
+                        aria-controls="searchDropdown"
+                    >
+                    <div class="search-dropdown dept-hidden" id="searchDropdown" role="listbox"></div>
                 </div>
 
                 <!-- Notification bell -->
