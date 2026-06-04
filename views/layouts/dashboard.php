@@ -199,7 +199,7 @@
                 $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
             ?>
             <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="activity-item activity-link">
-                <div class="activity-icon activity-icon-dynamic" style="--icon-bg:<?= $ic['bg'] ?>;--icon-color:<?= $ic['color'] ?>">
+                <div class="activity-icon activity-icon-dynamic" data-bg="<?= $ic['bg'] ?>" data-color="<?= $ic['color'] ?>">
                     <i class="ti <?= $ic['icon'] ?>"></i>
                 </div>
                 <div class="activity-text-wrap">
@@ -229,7 +229,7 @@
                 <?php foreach ($quickForms as $i => $qf): ?>
                 <a href="/processing-system/public/forms/<?= $qf['slug'] ?>/create"
                    class="quick-form-btn <?= ($i % 2 === 0) ? 'border-right' : '' ?> <?= ($i < count($quickForms) - 2) ? 'border-bottom' : '' ?>">
-                    <span class="qf-icon" style="--qf-color:<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
+                    <span class="qf-icon" data-color="<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
                     <span class="qf-label"><?= $qf['label'] ?></span>
                     <span class="qf-desc"><?= $qf['desc'] ?></span>
                 </a>
@@ -241,7 +241,7 @@
         <div class="card-panel">
             <div class="card-panel-header">
                 <span class="card-panel-title">Form Volume</span>
-                <span class="card-panel-link" style="font-size:11px;color:var(--text-muted)">Last 30 days</span>
+                <span class="card-panel-hint">Last 30 days</span>
             </div>
             <?php if (empty($typeCounts)): ?>
                 <div class="empty-state empty-state-padded">No data yet.</div>
@@ -254,7 +254,7 @@
             <div class="vol-row">
                 <span class="vol-label"><?= $formLabel[$type] ?? $type ?></span>
                 <div class="vol-bar">
-                    <div class="vol-fill" style="width:<?= $pct ?>%;background:<?= $barColor ?>"></div>
+                    <div class="vol-fill" data-pct="<?= $pct ?>" data-color="<?= $barColor ?>"></div>
                 </div>
                 <span class="vol-count"><?= $count ?></span>
             </div>
