@@ -260,3 +260,12 @@ document.querySelectorAll('.activity-icon-dynamic[data-bg]').forEach(function (e
     el.style.setProperty('--icon-bg', el.dataset.bg);
     el.style.setProperty('--icon-color', el.dataset.color);
 });
+
+document.querySelectorAll('.qf-icon[data-color]').forEach(function (el) {
+    el.style.setProperty('--qf-color', el.dataset.color);
+});
+
+document.querySelectorAll('.vol-fill[data-pct]').forEach(function (el) {
+    el.style.width = el.dataset.pct + '%';
+    el.style.background = el.dataset.color;
+});
