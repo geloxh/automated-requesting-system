@@ -414,6 +414,10 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
                         <span class="info-row-label"><i class="ti ti-code"></i> Developer</span>
                         <span class="info-row-value">geloxh</span>
                     </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-code"></i> Contributor</span>
+                        <span class="info-row-value">JHN PHL</span>
+                    </div>
                 </div>
             </div>
 
