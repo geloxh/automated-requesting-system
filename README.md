@@ -70,7 +70,7 @@ System for SMEs for paperless and make the indicated features below automated, g
     ├── routes/
     │   └── web.php
     ├── migrations/             # DB schema versioning
-    └── .env                    # Environment config (never commit)
+    └── .env # Environment config (never commit)
 ```
 ### System Process Flow
 ![Flow](images/Flow.png)
