@@ -328,6 +328,21 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                     </div>
                 </div>
             </div>
+            
+            <!-- Developer -->
+            <div class="settings-card">
+                <div class="settings-card-header">Developer</div>
+                <div class="settings-card-body settings-card-body--info">
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-code"></i> Developer</span>
+                        <span class="info-row-value">geloxh</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-code"></i> Contributor</span>
+                        <span class="info-row-value">JHN PHL</span>
+                    </div>
+                </div>
+            </div>
         </div><!-- /tab-sysinfo -->
 
 
