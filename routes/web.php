@@ -238,29 +238,41 @@
     }
 
     // ---------------------------------------------------------------
-    // Settings (SysAdmin only)
+    // Settings
+    // GET /settings — all authenticated users (tabs filtered by role in view)
+    // POST /settings/general — SysAdmin only
+    // POST /settings/mail — SysAdmin only
+    // POST /settings/storage — SysAdmin only
+    // POST /settings/appearance — all authenticated users
+    // POST /settings/notifications — all authenticated users
     // ---------------------------------------------------------------
     if ($uri === '/settings') {
-        \App\Middleware\RoleMiddleware::requireRole(1);
         (new SettingsController)->index();
         exit;
     }
 
     if ($uri === '/settings/general' && $method === 'POST') {
-        \App\Middleware\RoleMiddleware::requireRole(1);
         (new SettingsController)->updateGeneral();
         exit;
     }
 
     if ($uri === '/settings/mail' && $method === 'POST') {
-        \App\Middleware\RoleMiddleware::requireRole(1);
         (new SettingsController)->updateMail();
         exit;
     }
 
-    // GET /search?q= - typeahead JSON endpoint
-    if ($uri === '/search' && $method === 'GET') {
-        (new FormController)->search();
+    if ($uri === '/settings/appearance' && $method === 'POST') {
+        (new SettingsController)->updateAppearance();
+        exit;
+    }
+
+    if ($uri === '/settings/notifications' && $method === 'POST') {
+        (new SettingsController)->updateNotifications();
+        exit;
+    }
+
+    if ($uri === '/settings/storage' && $method === 'POST') {
+        (new SettingsController)->updateStorage();
         exit;
     }
 
