@@ -1069,3 +1069,88 @@ textarea { resize: vertical; }
     border-radius: 3px;
     transition: width .4s ease;
 }
+
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+/*
+   The <html> element gets data-theme="dark" from base.php when the DB
+   setting theme_mode = 'dark'. Every rule below overrides the light-mode
+   variables defined in :root{} at the top of app.css.
+*/
+ 
+[data-theme="dark"] {
+    --surface:#0f172a;
+    --card-bg:#1e293b;
+    --border:#334155;
+    --text-main:#f1f5f9;
+    --text-muted:#94a3b8;
+    --text-soft:#475569;
+}
+ 
+/* Body / layout background */
+[data-theme="dark"] body {
+    background: var(--surface);
+    color: var(--text-main);
+}
+ 
+/* Cards, panels */
+[data-theme="dark"] .settings-card,
+[data-theme="dark"] .settings-nav,
+[data-theme="dark"] .card-panel,
+[data-theme="dark"] .notif-panel,
+[data-theme="dark"] #topbar {
+    background: var(--card-bg);
+    border-color: var(--border);
+}
+ 
+/* Inputs */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .input-addon {
+    background: #0f172a;
+    color: var(--text-main);
+    border-color: var(--border);
+}
+ 
+[data-theme="dark"] .form-control::placeholder {
+    color: var(--text-soft);
+}
+ 
+/* Surface backgrounds */
+[data-theme="dark"] .settings-card-header,
+[data-theme="dark"] .settings-row,
+[data-theme="dark"] .info-row,
+[data-theme="dark"] .surface,
+[data-theme="dark"] select.form-control option {
+    background: var(--card-bg);
+    color: var(--text-main);
+}
+ 
+/* Topbar search */
+[data-theme="dark"] .topbar-search {
+    background: #1e293b;
+    border-color: var(--border);
+    color: var(--text-main);
+}
+ 
+[data-theme="dark"] .topbar-search input {
+    background: transparent;
+    color: var(--text-main);
+}
+ 
+/* Active nav item in settings sidebar */
+[data-theme="dark"] .settings-nav-item.active {
+    background: #1e3a5f;
+    color: var(--accent);
+}
+ 
+/* Alerts */
+[data-theme="dark"] .alert-success {
+    background: #064e3b;
+    border-color: #059669;
+    color: #6ee7b7;
+}
+ 
+[data-theme="dark"] .alert-danger {
+    background: #450a0a;
+    border-color: #dc2626;
+    color: #fca5a5;
+}

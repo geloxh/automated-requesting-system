@@ -19,11 +19,20 @@ var sidebarToggle = document.getElementById('sidebarToggle');
 var sidebar = document.getElementById('sidebar');
 var SIDEBAR_KEY = 'sidebar_collapsed';
 
-// Restore desktop collapsed state on load
+// Restore sidebar collapsed state.
+// base.php adds the 'collapsed' class server-side when sidebar_collapsed=1
+// in the DB, which avoids the localStorage-only flash. The toggle button
+// still writes to localStorage so manual toggles survive page navigation.
 if (sidebar && window.innerWidth > 900) {
-    if (localStorage.getItem(SIDEBAR_KEY) === 'true') {
+    // If user toggled manually this session, localStorage takes precedence.
+    // Otherwise the server-rendered class is already set correctly.
+    var lsVal = localStorage.getItem(SIDEBAR_KEY);
+    if (lsVal === 'true') {
         sidebar.classList.add('collapsed');
+    } else if (lsVal === 'false') {
+        sidebar.classList.remove('collapsed');
     }
+    // lsVal === null means first visit or cleared — DB value (class already set) wins.
 }
 
 if (sidebarToggle && sidebar) {
@@ -219,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.notif-item[data-notif-id]').forEach(function (item) {
         item.addEventListener('click', function () {
-            var id   = item.dataset.notifId;
+            var id = item.dataset.notifId;
             var href = item.dataset.href;
             if (item.classList.contains('notif-item--unread')) {
                 item.classList.remove('notif-item--unread');
