@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- Seed with .env defaults so the form is pre-populated on first visit.
 INSERT IGNORE INTO settings (`key`, `value`) VALUES
-    ('app_name', 'AutomatedProcessingSystem'),
+    ('app_name', 'AutomatedRequestingSystem'),
     ('app_url', 'https://localhost/processing-system/public'),
     ('app_env', 'local'),
     ('app_timezone', 'Asia/Manila'),
@@ -25,4 +25,4 @@ INSERT IGNORE INTO settings (`key`, `value`) VALUES
     ('mail_username', ''),
     ('mail_password', ''),
     ('mail_from_address', ''),
-    ('mail_from_name', 'Automated Processing System');
+    ('mail_from_name', 'Automated Requesting System');
