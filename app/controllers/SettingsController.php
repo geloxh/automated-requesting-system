@@ -1,14 +1,22 @@
 <?php
     class SettingsController {
 
-        // ── GET /settings ────────────────────────────────────────────────────────── //
+        // ── GET /settings ── //
         public function index(): void {
-            // All authenticated users can view settings; sensitive tabs are
-            // hidden in the view for non-admins (role guard per POST action).
             \App\Middleware\AuthMiddleware::require();
 
-            $settings = $this->getAllSettings();
+            $userId = (int)($_SESSION['user_id'] ?? 0);
             $isSysAdmin = ($_SESSION['role_id'] ?? 0) == 1;
+
+            // Global settings (admin-managed)
+            $globalSettings = $this->getAllSettings();
+
+            // Per-user overrides for appearance + notifications
+            $userSettings = $this->getUserSettings($userId);
+
+            // Merge: user values take precedence for their own keys;
+            // everything else falls back to global defaults.
+            $settings = array_merge($globalSettings, $userSettings);
 
             define('BASE_LOADED', true);
             ob_start();
@@ -18,8 +26,8 @@
             require __DIR__ . '/../../views/layouts/base.php';
         }
 
-        // ── POST /settings/general ───────────────────────────────────────────────── //
-        // SysAdmin only: app_name, app_url, timezone, env, pagination, session
+        // ── POST /settings/general ── //
+        // SysAdmin only
         public function updateGeneral(): void {
             \App\Middleware\RoleMiddleware::requireRole(1);
             \App\Helpers\Csrf::verify();
@@ -34,7 +42,7 @@
             ];
 
             foreach ($fields as $key => $value) {
-                $this->upsertSetting($key, (string)$value);
+                $this->upsertGlobalSetting($key, (string)$value);
             }
 
             $_SESSION['success'] = 'General settings saved successfully.';
@@ -42,7 +50,7 @@
             exit;
         }
 
-        // ── POST /settings/mail ──────────────────────────────────────────────────── //
+        // ── POST /settings/mail ── //
         // SysAdmin only
         public function updateMail(): void {
             \App\Middleware\RoleMiddleware::requireRole(1);
@@ -62,7 +70,7 @@
             }
 
             foreach ($fields as $key => $value) {
-                $this->upsertSetting($key, (string)$value);
+                $this->upsertGlobalSetting($key, (string)$value);
             }
 
             $_SESSION['success'] = 'Mail settings saved successfully.';
@@ -70,11 +78,13 @@
             exit;
         }
 
-        // ── POST /settings/appearance ────────────────────────────────────────────── //
-        // All authenticated users (theme preferences)
+        // ── POST /settings/appearance ── //
+        // All authenticated users — saved to user_settings (per-account)
         public function updateAppearance(): void {
             \App\Middleware\AuthMiddleware::require();
             \App\Helpers\Csrf::verify();
+
+            $userId = (int)($_SESSION['user_id'] ?? 0);
 
             $allowed_colors = ['blue', 'purple', 'green', 'orange'];
             $color = trim($_POST['theme_color'] ?? 'blue');
@@ -86,7 +96,7 @@
             ];
 
             foreach ($fields as $key => $value) {
-                $this->upsertSetting($key, $value);
+                $this->upsertUserSetting($userId, $key, $value);
             }
 
             $_SESSION['success'] = 'Appearance settings saved.';
@@ -94,21 +104,23 @@
             exit;
         }
 
-        // ── POST /settings/notifications ─────────────────────────────────────────── //
-        // All authenticated users
+        // ── POST /settings/notifications ── //
+        // All authenticated users — saved to user_settings (per-account)
         public function updateNotifications(): void {
             \App\Middleware\AuthMiddleware::require();
             \App\Helpers\Csrf::verify();
 
+            $userId = (int)($_SESSION['user_id'] ?? 0);
+
             $fields = [
-                'notify_on_submit' => isset($_POST['notify_on_submit']) ? '1' : '0',
-                'notify_on_approval' => isset($_POST['notify_on_approval']) ? '1' : '0',
-                'notify_on_rejection' => isset($_POST['notify_on_rejection']) ? '1' : '0',
+                'notify_on_submit' => isset($_POST['notify_on_submit'])     ? '1' : '0',
+                'notify_on_approval' => isset($_POST['notify_on_approval'])   ? '1' : '0',
+                'notify_on_rejection' => isset($_POST['notify_on_rejection'])  ? '1' : '0',
                 'notify_on_completion' => isset($_POST['notify_on_completion']) ? '1' : '0',
             ];
 
             foreach ($fields as $key => $value) {
-                $this->upsertSetting($key, $value);
+                $this->upsertUserSetting($userId, $key, $value);
             }
 
             $_SESSION['success'] = 'Notification preferences saved.';
@@ -116,18 +128,16 @@
             exit;
         }
 
-        // ── POST /settings/storage ───────────────────────────────────────────────── //
-        // SysAdmin only (path changes are sensitive)
+        // ── POST /settings/storage ── //
+        // SysAdmin only
         public function updateStorage(): void {
             \App\Middleware\RoleMiddleware::requireRole(1);
             \App\Helpers\Csrf::verify();
 
             $uploadPath = trim($_POST['upload_path'] ?? 'public/uploads');
-            // Strip any leading slash / path traversal
             $uploadPath = ltrim(str_replace(['..', '//'], '', $uploadPath), '/');
 
             $rawTypes = trim($_POST['allowed_file_types'] ?? 'pdf,jpg,png,docx');
-            // Normalise: lowercase, strip spaces, remove dots
             $types = implode(',', array_filter(array_map(
                 fn($t) => preg_replace('/[^a-z0-9]/', '', strtolower(trim($t))),
                 explode(',', $rawTypes)
@@ -140,7 +150,7 @@
             ];
 
             foreach ($fields as $key => $value) {
-                $this->upsertSetting($key, (string)$value);
+                $this->upsertGlobalSetting($key, (string)$value);
             }
 
             $_SESSION['success'] = 'Storage settings saved.';
@@ -148,11 +158,11 @@
             exit;
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────────── //
+        // ── Private helpers ── //
 
+        /** All rows from the global settings table (key => value). */
         private function getAllSettings(): array {
             try {
-                // Fixed typo: fetchAlll → fetchAll
                 $rows = db()->query('SELECT `key`, `value` FROM settings')->fetchAll(\PDO::FETCH_ASSOC);
                 return array_column($rows, 'value', 'key');
             } catch (\Throwable $e) {
@@ -160,11 +170,36 @@
             }
         }
 
-        private function upsertSetting(string $key, string $value): void {
+        /** Per-user rows from user_settings (key => value) for one user. */
+        private function getUserSettings(int $userId): array {
+            if ($userId === 0) return [];
+            try {
+                $stmt = db()->prepare(
+                    'SELECT `key`, `value` FROM user_settings WHERE user_id = ?'
+                );
+                $stmt->execute([$userId]);
+                return array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'value', 'key');
+            } catch (\Throwable $e) {
+                // Table may not exist yet (migration not run)
+                return [];
+            }
+        }
+
+        /** Write/update a row in the global settings table. */
+        private function upsertGlobalSetting(string $key, string $value): void {
             $stmt = db()->prepare(
                 'INSERT INTO settings (`key`, `value`) VALUES (?, ?)
                  ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), updated_at = CURRENT_TIMESTAMP'
             );
             $stmt->execute([$key, $value]);
+        }
+
+        /** Write/update a row in user_settings for the given user. */
+        private function upsertUserSetting(int $userId, string $key, string $value): void {
+            $stmt = db()->prepare(
+                'INSERT INTO user_settings (user_id, `key`, `value`) VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), updated_at = CURRENT_TIMESTAMP'
+            );
+            $stmt->execute([$userId, $key, $value]);
         }
     }

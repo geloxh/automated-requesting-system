@@ -57,14 +57,14 @@
                  ORDER BY created_at DESC LIMIT 10'
             );
             $ns->execute([$userId]);
-            $notifItems  = $ns->fetchAll(PDO::FETCH_ASSOC);
+            $notifItems = $ns->fetchAll(PDO::FETCH_ASSOC);
             $notifUnread = array_reduce($notifItems, fn($c, $r) => $c + (int)!$r['is_read'], 0);
         } catch (\Throwable $e) {}
     }
     $typeIcon = [
         'success' => ['dot' => '', 'color' => 'var(--success)'],
         'warning' => ['dot' => 'notif-dot-warning', 'color' => 'var(--warning)'],
-        'danger' => ['dot' => 'notif-dot-danger',  'color' => 'var(--danger)'],
+        'danger' => ['dot' => 'notif-dot-danger', 'color' => 'var(--danger)'],
         'info' => ['dot' => '', 'color' => 'var(--primary)'],
     ];
 
@@ -81,14 +81,28 @@
         'cancelled' => 'Cancelled',
     ];
 
-    // ── Theme settings — loaded from DB once per request ──────────────────────
+    // ── Theme settings — read per-user from user_settings, fall back to global ──
     $themeSettings = [];
     try {
-        $tq = db()->query("SELECT `key`, `value` FROM settings WHERE `key` IN ( 'theme_color', 'theme_mode', 'sidebar_collapsed' )");
+        $themeUserId = (int)($_SESSION['user_id'] ?? 0);
+        if ($themeUserId > 0) {
+            // Try user-specific preferences first
+            $tq = db()->prepare(
+                "SELECT `key`, `value` FROM user_settings
+                  WHERE user_id = ? AND `key` IN ( 'theme_color', 'theme_mode', 'sidebar_collapsed' )"
+            );
+            $tq->execute([$themeUserId]);
+        } else {
+            // Fallback: read from global settings
+            $tq = db()->query(
+                "SELECT `key`, `value` FROM settings
+                  WHERE `key` IN ( 'theme_color', 'theme_mode', 'sidebar_collapsed' )"
+            );
+        }
         foreach ($tq->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $themeSettings[$row['key']] = $row['value'];
         }
-    } catch (\Throwable $e) { /* settings table not migrated yet — use defaults */ }
+    } catch (\Throwable $e) { /* user_settings table not yet migrated — use defaults */ }
 
     $themeColor = $themeSettings['theme_color'] ?? 'blue';
     $themeMode = $themeSettings['theme_mode'] ?? 'light';
