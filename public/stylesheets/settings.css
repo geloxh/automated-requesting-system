@@ -420,6 +420,7 @@ select.form-control {
     }
 }
 
+
 /* ── Toggle switch (used in Appearance & Notifications) ── */
 .toggle-switch {
     display: inline-flex;
@@ -474,3 +475,22 @@ select.form-control {
     border-top: 1px solid var(--border);
     margin: .4rem 0;
 }
+ 
+/* ── CSP-safe replacements for inline styles in settings/index.php ── */
+ 
+/* Nav divider (replaces <hr style="margin:.4rem 0;border:none;border-top:..."> ) */
+.settings-nav-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: .4rem 0;
+}
+ 
+/* Card bottom margin (replaces style="margin-bottom:1.25rem;") */
+.settings-card--mb {
+    margin-bottom: 1.25rem;
+}
+ 
+/* Disk icon colours (replaces style="color:var(--danger/success)") */
+.icon-danger { color: var(--danger); }
+.icon-success { color: var(--success); }
+.icon-soft { color: var(--text-soft); }

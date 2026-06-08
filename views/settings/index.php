@@ -46,7 +46,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
 
         <!-- SysAdmin-only tabs -->
         <?php if ($isSysAdmin): ?>
-            <hr style="margin:.4rem 0;border:none;border-top:1px solid var(--border);">
+            <hr class="settings-nav-divider">
             <button class="settings-nav-item" data-tab="general">
                 <i class="ti ti-settings"></i> General
             </button>
@@ -88,7 +88,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                             </div>
                             <div class="settings-row-control">
                                 <select id="theme_color" name="theme_color" class="form-control">
-                                    <option value="blue" <?= $selected('theme_color', 'blue') ?>>🔵 Blue (default)</option>
+                                    <option value="blue"   <?= $selected('theme_color', 'blue')   ?>>🔵 Blue (default)</option>
                                     <option value="purple" <?= $selected('theme_color', 'purple') ?>>🟣 Purple</option>
                                     <option value="green" <?= $selected('theme_color', 'green')  ?>>🟢 Green</option>
                                     <option value="orange" <?= $selected('theme_color', 'orange') ?>>🟠 Orange</option>
@@ -239,7 +239,8 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 $diskFree = disk_free_space('/');
                 $diskUsed = $diskTotal - $diskFree;
                 $diskPct = $diskTotal > 0 ? round($diskUsed / $diskTotal * 100) : 0;
-                $barClass = $diskPct >= 90 ? 'disk-usage-bar--danger' : ($diskPct >= 70 ? 'disk-usage-bar--warning' : '');
+                $barClass = $diskPct >= 90 ? 'disk-usage-bar--danger'
+                           : ($diskPct >= 70 ? 'disk-usage-bar--warning' : '');
 
                 $fmtBytes = fn(int $b): string => match(true) {
                     $b >= 1_073_741_824 => round($b / 1_073_741_824, 1) . ' GB',
@@ -249,12 +250,12 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
             ?>
 
             <!-- Application -->
-            <div class="settings-card" style="margin-bottom:1.25rem;">
+            <div class="settings-card settings-card--mb">
                 <div class="settings-card-header">Application</div>
                 <div class="settings-card-body settings-card-body--info">
                     <div class="info-row">
                         <span class="info-row-label"><i class="ti ti-tag"></i> App name</span>
-                        <span class="info-row-value"><?= $s('app_name', 'AutomatedRequestingSystem') ?></span>
+                        <span class="info-row-value"><?= $s('app_name', 'AutomatedProcessingSystem') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="info-row-label"><i class="ti ti-link"></i> App URL</span>
@@ -272,7 +273,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
             </div>
 
             <!-- Server -->
-            <div class="settings-card" style="margin-bottom:1.25rem;">
+            <div class="settings-card settings-card--mb">
                 <div class="settings-card-header">Server</div>
                 <div class="settings-card-body settings-card-body--info">
                     <div class="info-row">
@@ -311,35 +312,20 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <div class="settings-card-header">Disk usage</div>
                 <div class="settings-card-body settings-card-body--info">
                     <div class="disk-usage-bar-wrap">
-                        <div class="disk-usage-bar <?= $barClass ?>" style="--pct:<?= $diskPct ?>%"></div>
+                        <div class="disk-usage-bar <?= $barClass ?>" data-pct="<?= $diskPct ?>"></div>
                         <span class="disk-usage-label"><?= $diskPct ?>% used</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-circle-filled" style="color:var(--danger)"></i> Used</span>
+                        <span class="info-row-label"><i class="ti ti-circle-filled icon-danger"></i> Used</span>
                         <span class="info-row-value"><?= $fmtBytes($diskUsed) ?></span>
                     </div>
                     <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-circle-filled" style="color:var(--success)"></i> Free</span>
+                        <span class="info-row-label"><i class="ti ti-circle-filled icon-success"></i> Free</span>
                         <span class="info-row-value"><?= $fmtBytes($diskFree) ?></span>
                     </div>
                     <div class="info-row">
                         <span class="info-row-label"><i class="ti ti-circle"></i> Total</span>
                         <span class="info-row-value"><?= $fmtBytes($diskTotal) ?></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Developer -->
-            <div class="settings-card">
-                <div class="settings-card-header">Developer</div>
-                <div class="settings-card-body settings-card-body--info">
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-code"></i> Developer</span>
-                        <span class="info-row-value">geloxh</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-code"></i> Contributor</span>
-                        <span class="info-row-value">JHN PHL</span>
                     </div>
                 </div>
             </div>
@@ -543,7 +529,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                             <div class="settings-row-label"><label for="mail_from_name">From name</label></div>
                             <div class="settings-row-control">
                                 <input type="text" id="mail_from_name" name="mail_from_name"
-                                       value="<?= $s('mail_from_name', 'Automated Requesting System') ?>" class="form-control">
+                                       value="<?= $s('mail_from_name', 'Automated Processing System') ?>" class="form-control">
                             </div>
                         </div>
 

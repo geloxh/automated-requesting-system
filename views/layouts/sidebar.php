@@ -1,6 +1,6 @@
 <?php if (!defined('BASE_LOADED')) die('Direct access not allowed'); ?>
 
-<nav id="sidebar">
+<nav id="sidebar" class="<?= ($GLOBALS['sidebar_collapsed'] ?? false) ? 'collapsed' : '' ?>">
     <div class="sidebar-brand">
         <div class="brand-icon"><i class="ti ti-bolt"></i></div>
         <div class="brand-text">

@@ -1,7 +1,7 @@
 <?php
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
     $uri = $uri ?? '/';
-    $roleLabels = [1 => 'Admin', 2 => 'Approver', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Checker', 6 => 'Final Approver'];
+    $roleLabels = [ 1 => 'Admin', 2 => 'Approver', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Checker', 6 => 'Final Approver' ];
     $roleName = $roleLabels[$_SESSION['role_id']] ?? 'User';
     $initials = strtoupper(substr($_SESSION['user_name'], 0, 2));
     $roleId = (int) $_SESSION['role_id'];
@@ -26,7 +26,7 @@
                         'SELECT COUNT(*) FROM approvals a
                          JOIN forms f ON f.id = a.form_id
                          WHERE a.status = "pending"
-                         AND f.status NOT IN ("draft","cancelled","completed","rejected")'
+                         AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )'
                     );
                     $ps->execute();
                 } else {
@@ -34,7 +34,7 @@
                         'SELECT COUNT(*) FROM approvals a
                          JOIN forms f ON f.id = a.form_id
                          WHERE a.approver_id = ? AND a.status = "pending"
-                         AND f.status NOT IN ("draft","cancelled","completed","rejected")'
+                         AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )'
                     );
                     $ps->execute([$userId]);
                 }
@@ -46,7 +46,7 @@
     }
 
     // ── Notifications ─────────────────────────────────────────────────────────
-    $notifItems  = [];
+    $notifItems = [];
     $notifUnread = 0;
     if ($userId) {
         try {
@@ -64,7 +64,7 @@
     $typeIcon = [
         'success' => ['dot' => '', 'color' => 'var(--success)'],
         'warning' => ['dot' => 'notif-dot-warning', 'color' => 'var(--warning)'],
-        'danger' => ['dot' => 'notif-dot-danger', 'color' => 'var(--danger)'],
+        'danger' => ['dot' => 'notif-dot-danger',  'color' => 'var(--danger)'],
         'info' => ['dot' => '', 'color' => 'var(--primary)'],
     ];
 
@@ -84,7 +84,7 @@
     // ── Theme settings — loaded from DB once per request ──────────────────────
     $themeSettings = [];
     try {
-        $tq = db()->query("SELECT `key`, `value` FROM settings WHERE `key` IN ('theme_color','theme_mode','sidebar_collapsed')");
+        $tq = db()->query("SELECT `key`, `value` FROM settings WHERE `key` IN ( 'theme_color', 'theme_mode', 'sidebar_collapsed' )");
         foreach ($tq->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $themeSettings[$row['key']] = $row['value'];
         }
@@ -102,6 +102,7 @@
         'orange' => '--accent:#ea580c;--accent-glow:#ea580c20;--accent-alt:#f97316',
     ];
     $accentVars = $palettes[$themeColor] ?? $palettes['blue'];
+    $GLOBALS['sidebar_collapsed'] = $sidebarCollapsed; // read by sidebar.php
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="<?= $themeMode === 'dark' ? 'dark' : 'light' ?>">
@@ -111,12 +112,9 @@
     <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · APS') ?></title>
     <link rel="stylesheet" href="/processing-system/public/stylesheets/app.css">
     <!-- Accent colour overrides — injected before first paint, no flash -->
-    <style>:root{<?= $accentVars ?>}</style>
+    <style nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">:root{<?= $accentVars ?>}</style>
 </head>
 <body>
-<?php if ($sidebarCollapsed): ?>
-<script>document.getElementById('sidebar')?.classList.add('collapsed');</script>
-<?php endif; ?>
 <div class="layout">
 
     <?php require __DIR__ . '/sidebar.php'; ?>

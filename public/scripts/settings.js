@@ -28,4 +28,11 @@
             btn.querySelector('i').className = isText ? 'ti ti-eye' : 'ti ti-eye-off';
         });
     });
+
+
+    // Disk usage bar — apply --pct CSS custom property from data attribute.
+    // This avoids an inline style="--pct:X%" which is blocked by CSP style-src-attr.
+    document.querySelectorAll('.disk-usage-bar[data-pct]').forEach(el => {
+        el.style.setProperty('--pct', el.dataset.pct + '%');
+    });
 })();
