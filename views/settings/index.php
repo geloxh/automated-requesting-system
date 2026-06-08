@@ -328,7 +328,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                     </div>
                 </div>
             </div>
-            
+
             <!-- Developer -->
             <div class="settings-card">
                 <div class="settings-card-header">Developer</div>
@@ -403,8 +403,8 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                             </div>
                             <div class="settings-row-control">
                                 <select id="app_env" name="app_env" class="form-control">
-                                    <option value="local"      <?= $selected('app_env', 'local') ?>>Local</option>
-                                    <option value="staging"    <?= $selected('app_env', 'staging') ?>>Staging</option>
+                                    <option value="local" <?= $selected('app_env', 'local') ?>>Local</option>
+                                    <option value="staging" <?= $selected('app_env', 'staging') ?>>Staging</option>
                                     <option value="production" <?= $selected('app_env', 'production') ?>>Production</option>
                                 </select>
                             </div>

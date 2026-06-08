@@ -8,14 +8,11 @@
     $userId = (int) $_SESSION['user_id'];
 
     // ── Pending count — computed once per request, cached in session for 60s ─
-    // FIX: previously this was computed twice per page (sidebar + dashboard banner)
-    //      and the sidebar version used string-interpolated SQL (SQL-injection risk).
-    //      Now: single prepared-statement helper, result cached in session.
     $pendingCount = 0;
     if ($roleId !== 3) {
         $cacheKey = "pending_count_{$userId}";
         $cacheTs = "pending_count_ts_{$userId}";
-        $ttl = 60; // seconds
+        $ttl = 60;
 
         if (
             isset($_SESSION[$cacheKey], $_SESSION[$cacheTs]) &&
@@ -43,10 +40,8 @@
                 }
                 $pendingCount = (int) $ps->fetchColumn();
                 $_SESSION[$cacheKey] = $pendingCount;
-                $_SESSION[$cacheTs]  = time();
-            } catch (\Throwable $e) {
-                // DB not ready — fail silently
-            }
+                $_SESSION[$cacheTs] = time();
+            } catch (\Throwable $e) {}
         }
     }
 
@@ -64,18 +59,15 @@
             $ns->execute([$userId]);
             $notifItems  = $ns->fetchAll(PDO::FETCH_ASSOC);
             $notifUnread = array_reduce($notifItems, fn($c, $r) => $c + (int)!$r['is_read'], 0);
-        } catch (\Throwable $e) {
-            // migration not run yet — fail silently
-        }
+        } catch (\Throwable $e) {}
     }
     $typeIcon = [
         'success' => ['dot' => '', 'color' => 'var(--success)'],
         'warning' => ['dot' => 'notif-dot-warning', 'color' => 'var(--warning)'],
-        'danger' => ['dot' => 'notif-dot-danger',  'color' => 'var(--danger)'],
+        'danger' => ['dot' => 'notif-dot-danger', 'color' => 'var(--danger)'],
         'info' => ['dot' => '', 'color' => 'var(--primary)'],
     ];
 
-    // ── Status label map (human-readable badge text) ──────────────────────────
     $statusLabels = [
         'draft' => 'Draft',
         'submitted' => 'Submitted',
@@ -88,16 +80,43 @@
         'rejected' => 'Rejected',
         'cancelled' => 'Cancelled',
     ];
+
+    // ── Theme settings — loaded from DB once per request ──────────────────────
+    $themeSettings = [];
+    try {
+        $tq = db()->query("SELECT `key`, `value` FROM settings WHERE `key` IN ('theme_color','theme_mode','sidebar_collapsed')");
+        foreach ($tq->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $themeSettings[$row['key']] = $row['value'];
+        }
+    } catch (\Throwable $e) { /* settings table not migrated yet — use defaults */ }
+
+    $themeColor = $themeSettings['theme_color'] ?? 'blue';
+    $themeMode = $themeSettings['theme_mode'] ?? 'light';
+    $sidebarCollapsed = ($themeSettings['sidebar_collapsed'] ?? '0') === '1';
+
+    // Accent palette map
+    $palettes = [
+        'blue' => '--accent:#2563eb;--accent-glow:#2563eb20;--accent-alt:#3b82f6',
+        'purple' => '--accent:#7c3aed;--accent-glow:#7c3aed20;--accent-alt:#8b5cf6',
+        'green' => '--accent:#059669;--accent-glow:#05966920;--accent-alt:#10b981',
+        'orange' => '--accent:#ea580c;--accent-glow:#ea580c20;--accent-alt:#f97316',
+    ];
+    $accentVars = $palettes[$themeColor] ?? $palettes['blue'];
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= $themeMode === 'dark' ? 'dark' : 'light' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · APS') ?></title>
     <link rel="stylesheet" href="/processing-system/public/stylesheets/app.css">
+    <!-- Accent colour overrides — injected before first paint, no flash -->
+    <style>:root{<?= $accentVars ?>}</style>
 </head>
 <body>
+<?php if ($sidebarCollapsed): ?>
+<script>document.getElementById('sidebar')?.classList.add('collapsed');</script>
+<?php endif; ?>
 <div class="layout">
 
     <?php require __DIR__ . '/sidebar.php'; ?>
@@ -147,10 +166,7 @@
     <div class="layout-right">
 
         <div id="topbar">
-            <!-- Sidebar toggle -->
-
             <div class="topbar-left">
-                <!-- Breadcrumb (optional — set $breadcrumbs in the calling view) -->
                 <?php if (!empty($breadcrumbs)): ?>
                     <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
                         <?php foreach ($breadcrumbs as $idx => $crumb): ?>
@@ -169,11 +185,10 @@
             </div>
 
             <div class="topbar-right">
-                <!-- Search -->
                 <div class="topbar-search" id="topbarSearchWrap">
                     <i class="ti ti-search"></i>
-                    <input type="text" 
-                        placeholder="Search requests… (Ctrl + K)" 
+                    <input type="text"
+                        placeholder="Search requests… (Ctrl + K)"
                         id="topbarSearch"
                         autocomplete="off"
                         aria-label="Search"
@@ -183,18 +198,15 @@
                     <div class="search-dropdown dept-hidden" id="searchDropdown" role="listbox"></div>
                 </div>
 
-                <!-- Notification bell -->
                 <button class="icon-btn" id="notifBtn" title="Notifications">
                     <i class="ti ti-bell"></i>
                     <span class="notif-dot <?= $notifUnread === 0 ? 'notif-dot--hidden' : '' ?>" id="notifDot"></span>
                 </button>
 
-                <!-- New Request -->
                 <a href="/processing-system/public/forms/advance-payment/create" class="btn-new-req">
                     <i class="ti ti-plus"></i> New Request
                 </a>
 
-                <!-- Logout -->
                 <form method="POST" action="/processing-system/public/logout">
                     <?= \App\Helpers\Csrf::field() ?>
                     <button class="icon-btn" title="Logout">
