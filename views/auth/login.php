@@ -28,7 +28,7 @@
     <!-- Left branding panel -->
     <div class="auth-panel">
         <div class="auth-brand-icon">⚡</div>
-        <div class="auth-brand-name">APS</div>
+        <div class="auth-brand-name">ARS</div>
         <div class="auth-brand-tag">Automated Requesting System</div>
         <p class="auth-panel-desc">Paperless forms, multi-level approvals, and real-time tracking — all in one place.</p>
         <ul class="auth-features">

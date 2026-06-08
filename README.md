@@ -1,4 +1,4 @@
-### AUTOMATED-PROCESSING-SYSTEM (APS)
+### AUTOMATED-REQUESTING-SYSTEM (ARS)
 System for SMEs for paperless and make the indicated features below automated, get record online and easy.
 
 ## FEATURES
