@@ -3,7 +3,7 @@
    Depends on app.css variables
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Layout ──────────────── */
+/* ── Layout ── */
 .settings-layout {
     display: flex;
     gap: 1.5rem;
@@ -11,7 +11,7 @@
     max-width: 960px;
 }
 
-/* ── Left nav ──────────────── */
+/* ── Left nav ── */
 .settings-nav {
     flex: 0 0 180px;
     background: var(--card-bg);
@@ -58,7 +58,7 @@
     font-weight: 600;
 }
 
-/* ── Panels ──────────────── */
+/* ── Panels ── */
 .settings-panels {
     flex: 1;
     min-width: 0;
@@ -72,7 +72,7 @@
     display: block;
 }
 
-/* ── Section header ──────────────── */
+/* ── Section header ── */
 .settings-section-header {
     margin-bottom: 1.25rem;
 }
@@ -99,7 +99,7 @@
     margin: 0;
 }
 
-/* ── Card ──────────────── */
+/* ── Card ── */
 .settings-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -123,7 +123,7 @@
     padding: 0;
 }
 
-/* ── Row ──────────────── */
+/* ── Row ── */
 .settings-row {
     display: flex;
     align-items: flex-start;
@@ -165,7 +165,7 @@
     flex: 0 0 160px;
 }
 
-/* ── Inputs ──────────────── */
+/* ── Inputs ── */
 .form-control {
     width: 100%;
     padding: .5rem .75rem;
@@ -250,7 +250,7 @@ select.form-control {
     color: var(--text-main);
 }
 
-/* ── Save footer ──────────────── */
+/* ── Save footer ── */
 .settings-footer {
     display: flex;
     justify-content: flex-end;
@@ -282,7 +282,7 @@ select.form-control {
     border-color: #1d4ed8;
 }
 
-/* ── Info rows (System Info tab) ──────────────── */
+/* ── Info rows (System Info tab) ── */
 .settings-card-body--info {
     padding: 0;
 }
@@ -362,7 +362,7 @@ select.form-control {
     white-space: nowrap;
 }
 
-/* ── Alerts ──────────────── */
+/* ── Alerts ── */
 .alert {
     display: flex;
     align-items: center;
@@ -386,7 +386,7 @@ select.form-control {
     border: 1px solid #fca5a5;
 }
 
-/* ── Responsive ────────────────────────────────────────────────────────────── */
+/* ── Responsive ── */
 @media (max-width: 768px) {
     .settings-layout {
         flex-direction: column;
@@ -418,4 +418,59 @@ select.form-control {
     .info-row-value {
         text-align: left;
     }
+}
+
+/* ── Toggle switch (used in Appearance & Notifications) ── */
+.toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    margin-top: .2rem;
+}
+ 
+.toggle-switch input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+ 
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 99px;
+    transition: background .2s;
+    flex-shrink: 0;
+}
+ 
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    transition: transform .2s;
+}
+ 
+.toggle-switch input:checked + .toggle-slider {
+    background: #2563eb;
+}
+ 
+.toggle-switch input:checked + .toggle-slider::after {
+    transform: translateX(18px);
+}
+ 
+/* ── Nav divider ── */
+.settings-nav hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: .4rem 0;
 }

@@ -1,151 +1,396 @@
 <?php
 /**
- * Settings Page  –  /settings
- * Tabs: General | System Info
- * Admin-only view rendered inside base.php
+ * views/settings/index.php
+ *
+ * $settings – associative array of all settings rows (key => value)
+ * $isSysAdmin – bool, true when role_id === 1
  */
-
-$timezones = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
-
-// Helper: read a saved setting with a fallback to the .env value
-function cfg(array $settings, string $key, string $envKey = '', string $default = ''): string {
-    if (isset($settings[$key])) return htmlspecialchars($settings[$key]);
-    if ($envKey && isset($_ENV[$envKey])) return htmlspecialchars($_ENV[$envKey]);
-    return htmlspecialchars($default);
-}
-
-// ── PHP / system info ─────────────────────────────────────────────────────────
-$phpVersion = PHP_VERSION;
-$phpSapi = PHP_SAPI;
-$osInfo = php_uname('s') . ' ' . php_uname('r');
-$serverSw = $_SERVER['SERVER_SOFTWARE'] ?? 'N/A';
-$dbVersion = 'N/A';
-try { $dbVersion = db()->query('SELECT VERSION()')->fetchColumn(); } catch (\Throwable) {}
-$loadedExt = implode(', ', array_filter(get_loaded_extensions(), fn($e) => in_array($e, ['pdo','pdo_mysql','mbstring','openssl','curl','json','zip','gd','imagick','intl'])));
-$memoryLimit = ini_get('memory_limit');
-$uploadMax = ini_get('upload_max_filesize');
-$postMax = ini_get('post_max_size');
-$maxExecTime = ini_get('max_execution_time') . 's';
-$timezone = date_default_timezone_get();
-$diskTotal = function_exists('disk_total_space') ? round(disk_total_space('/') / 1073741824, 1) . ' GB' : 'N/A';
-$diskFree = function_exists('disk_free_space')  ? round(disk_free_space('/')  / 1073741824, 1) . ' GB' : 'N/A';
-$sessionSave = session_save_path() ?: sys_get_temp_dir();
+$s = fn(string $key, string $default = '') => htmlspecialchars($settings[$key] ?? $default);
+$checked = fn(string $key, string $on = '1') => ($settings[$key] ?? '0') === $on ? 'checked' : '';
+$selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match ? 'selected' : '';
 ?>
 
 <link rel="stylesheet" href="/processing-system/public/stylesheets/settings.css">
 
-<div class="page-header">
-    <div class="page-title-group">
-        <h5 class="page-heading">Settings</h5>
-        <p class="page-subheading">Manage application configuration and view system information.</p>
-    </div>
-</div>
-
 <?php if (!empty($_SESSION['success'])): ?>
-    <div class="alert alert-success mb-4">
+    <div class="alert alert-success">
         <i class="ti ti-circle-check"></i>
         <?= htmlspecialchars($_SESSION['success']) ?>
     </div>
     <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
+
 <?php if (!empty($_SESSION['error'])): ?>
-    <div class="alert alert-danger mb-4">
+    <div class="alert alert-danger">
         <i class="ti ti-alert-circle"></i>
         <?= htmlspecialchars($_SESSION['error']) ?>
     </div>
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 
-<!-- ── Settings Layout ─────────────────────────────────────────────────────── -->
 <div class="settings-layout">
 
-    <!-- Left nav -->
-    <aside class="settings-nav">
-        <button class="settings-nav-item active" data-tab="general">
-            <i class="ti ti-settings-2"></i> General
+    <!-- ── Left nav ── -->
+    <nav class="settings-nav">
+
+        <!-- Tabs available to ALL authenticated users -->
+        <button class="settings-nav-item active" data-tab="appearance">
+            <i class="ti ti-palette"></i> Appearance
         </button>
-        <button class="settings-nav-item" data-tab="mail">
-            <i class="ti ti-mail"></i> Mail
+        <button class="settings-nav-item" data-tab="notifications">
+            <i class="ti ti-bell"></i> Notifications
         </button>
         <button class="settings-nav-item" data-tab="sysinfo">
-            <i class="ti ti-cpu"></i> System Info
+            <i class="ti ti-info-circle"></i> System Info
         </button>
-    </aside>
 
-    <!-- Right panels -->
+        <!-- SysAdmin-only tabs -->
+        <?php if ($isSysAdmin): ?>
+            <hr style="margin:.4rem 0;border:none;border-top:1px solid var(--border);">
+            <button class="settings-nav-item" data-tab="general">
+                <i class="ti ti-settings"></i> General
+            </button>
+            <button class="settings-nav-item" data-tab="mail">
+                <i class="ti ti-mail"></i> Mail
+            </button>
+            <button class="settings-nav-item" data-tab="storage">
+                <i class="ti ti-folder"></i> Storage
+            </button>
+        <?php endif; ?>
+    </nav>
+
+    <!-- ── Panels ── -->
     <div class="settings-panels">
 
-        <!-- ══ TAB: GENERAL ═══════════════════════════════════════════════════ -->
-        <section class="settings-panel active" id="tab-general">
-
+        <!-- ════════════════════════════════════════════
+             APPEARANCE  (all users)
+             ════════════════════════════════════════════ -->
+        <div class="settings-panel active" id="tab-appearance">
             <div class="settings-section-header">
-                <h6 class="settings-section-title">
-                    <i class="ti ti-settings-2"></i> General
-                </h6>
-                <p class="settings-section-sub">Core application settings and preferences.</p>
+                <h2 class="settings-section-title">
+                    <i class="ti ti-palette"></i> Appearance
+                </h2>
+                <p class="settings-section-sub">Personalise the look of the application.</p>
+            </div>
+
+            <form method="POST" action="/processing-system/public/settings/appearance">
+                <?= \App\Helpers\Csrf::field() ?>
+
+                <div class="settings-card">
+                    <div class="settings-card-header">Theme</div>
+                    <div class="settings-card-body">
+
+                        <!-- Accent colour -->
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="theme_color">Accent colour</label>
+                                <span class="settings-row-hint">Highlights buttons and active nav items.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <select id="theme_color" name="theme_color" class="form-control">
+                                    <option value="blue" <?= $selected('theme_color', 'blue') ?>>🔵 Blue (default)</option>
+                                    <option value="purple" <?= $selected('theme_color', 'purple') ?>>🟣 Purple</option>
+                                    <option value="green" <?= $selected('theme_color', 'green')  ?>>🟢 Green</option>
+                                    <option value="orange" <?= $selected('theme_color', 'orange') ?>>🟠 Orange</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Dark mode -->
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="theme_mode">Colour mode</label>
+                                <span class="settings-row-hint">Light or dark interface.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <select id="theme_mode" name="theme_mode" class="form-control">
+                                    <option value="light" <?= $selected('theme_mode', 'light') ?>>☀️ Light</option>
+                                    <option value="dark" <?= $selected('theme_mode', 'dark')  ?>>🌙 Dark</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar collapsed -->
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="sidebar_collapsed">Compact sidebar</label>
+                                <span class="settings-row-hint">Collapse sidebar to icon-only by default.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="sidebar_collapsed" name="sidebar_collapsed" value="1"
+                                           <?= $checked('sidebar_collapsed', '1') ?>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="settings-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy"></i> Save appearance
+                    </button>
+                </div>
+            </form>
+        </div><!-- /tab-appearance -->
+
+
+        <!-- ════════════════════════════════════════════
+             NOTIFICATIONS  (all users)
+             ════════════════════════════════════════════ -->
+        <div class="settings-panel" id="tab-notifications">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="ti ti-bell"></i> Notifications
+                </h2>
+                <p class="settings-section-sub">Choose which events trigger an email notification.</p>
+            </div>
+
+            <form method="POST" action="/processing-system/public/settings/notifications">
+                <?= \App\Helpers\Csrf::field() ?>
+
+                <div class="settings-card">
+                    <div class="settings-card-header">Email events</div>
+                    <div class="settings-card-body">
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="notify_on_submit">Form submitted</label>
+                                <span class="settings-row-hint">Notify when a new form is submitted.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notify_on_submit" name="notify_on_submit" value="1"
+                                           <?= $checked('notify_on_submit') ?>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="notify_on_approval">Step approved</label>
+                                <span class="settings-row-hint">Notify on each approval step.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notify_on_approval" name="notify_on_approval" value="1"
+                                           <?= $checked('notify_on_approval') ?>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="notify_on_rejection">Form rejected</label>
+                                <span class="settings-row-hint">Notify when a form is rejected.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notify_on_rejection" name="notify_on_rejection" value="1"
+                                           <?= $checked('notify_on_rejection') ?>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="notify_on_completion">Form completed</label>
+                                <span class="settings-row-hint">Notify on final sign-off.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notify_on_completion" name="notify_on_completion" value="1"
+                                           <?= $checked('notify_on_completion') ?>>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="settings-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy"></i> Save notifications
+                    </button>
+                </div>
+            </form>
+        </div><!-- /tab-notifications -->
+
+
+        <!-- ════════════════════════════════════════════
+             SYSTEM INFO  (all users — read-only)
+             ════════════════════════════════════════════ -->
+        <div class="settings-panel" id="tab-sysinfo">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="ti ti-info-circle"></i> System Info
+                </h2>
+                <p class="settings-section-sub">Read-only snapshot of the current environment.</p>
+            </div>
+
+            <?php
+                $diskTotal = disk_total_space('/');
+                $diskFree = disk_free_space('/');
+                $diskUsed = $diskTotal - $diskFree;
+                $diskPct = $diskTotal > 0 ? round($diskUsed / $diskTotal * 100) : 0;
+                $barClass = $diskPct >= 90 ? 'disk-usage-bar--danger' : ($diskPct >= 70 ? 'disk-usage-bar--warning' : '');
+
+                $fmtBytes = fn(int $b): string => match(true) {
+                    $b >= 1_073_741_824 => round($b / 1_073_741_824, 1) . ' GB',
+                    $b >= 1_048_576 => round($b / 1_048_576, 1) . ' MB',
+                    default => round($b / 1_024, 1) . ' KB',
+                };
+            ?>
+
+            <!-- Application -->
+            <div class="settings-card" style="margin-bottom:1.25rem;">
+                <div class="settings-card-header">Application</div>
+                <div class="settings-card-body settings-card-body--info">
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-tag"></i> App name</span>
+                        <span class="info-row-value"><?= $s('app_name', 'AutomatedProcessingSystem') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-link"></i> App URL</span>
+                        <span class="info-row-value"><?= $s('app_url', '—') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-world"></i> Timezone</span>
+                        <span class="info-row-value"><?= $s('app_timezone', 'Asia/Manila') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-code"></i> Environment</span>
+                        <span class="info-row-value"><?= $s('app_env', 'local') ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server -->
+            <div class="settings-card" style="margin-bottom:1.25rem;">
+                <div class="settings-card-header">Server</div>
+                <div class="settings-card-body settings-card-body--info">
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-brand-php"></i> PHP version</span>
+                        <span class="info-row-value"><?= htmlspecialchars(PHP_VERSION) ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-server"></i> Server software</span>
+                        <span class="info-row-value"><?= htmlspecialchars($_SERVER['SERVER_SOFTWARE'] ?? '—') ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-cpu"></i> OS</span>
+                        <span class="info-row-value"><?= htmlspecialchars(PHP_OS_FAMILY) ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-clock"></i> Server time</span>
+                        <span class="info-row-value"><?= htmlspecialchars(date('Y-m-d H:i:s T')) ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-clock-bolt"></i> Max execution</span>
+                        <span class="info-row-value"><?= ini_get('max_execution_time') ?>s</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-upload"></i> Upload limit</span>
+                        <span class="info-row-value"><?= htmlspecialchars(ini_get('upload_max_filesize')) ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-database"></i> Memory limit</span>
+                        <span class="info-row-value"><?= htmlspecialchars(ini_get('memory_limit')) ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disk -->
+            <div class="settings-card">
+                <div class="settings-card-header">Disk usage</div>
+                <div class="settings-card-body settings-card-body--info">
+                    <div class="disk-usage-bar-wrap">
+                        <div class="disk-usage-bar <?= $barClass ?>" style="--pct:<?= $diskPct ?>%"></div>
+                        <span class="disk-usage-label"><?= $diskPct ?>% used</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-circle-filled" style="color:var(--danger)"></i> Used</span>
+                        <span class="info-row-value"><?= $fmtBytes($diskUsed) ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-circle-filled" style="color:var(--success)"></i> Free</span>
+                        <span class="info-row-value"><?= $fmtBytes($diskFree) ?></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-row-label"><i class="ti ti-circle"></i> Total</span>
+                        <span class="info-row-value"><?= $fmtBytes($diskTotal) ?></span>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /tab-sysinfo -->
+
+
+        <!-- ════════════════════════════════════════════
+             GENERAL  (SysAdmin only)
+             ════════════════════════════════════════════ -->
+        <?php if ($isSysAdmin): ?>
+        <div class="settings-panel" id="tab-general">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="ti ti-settings"></i> General
+                </h2>
+                <p class="settings-section-sub">Core application configuration. SysAdmin only.</p>
             </div>
 
             <form method="POST" action="/processing-system/public/settings/general">
                 <?= \App\Helpers\Csrf::field() ?>
 
-                <!-- Application -->
                 <div class="settings-card">
                     <div class="settings-card-header">Application</div>
                     <div class="settings-card-body">
 
                         <div class="settings-row">
                             <div class="settings-row-label">
-                                <label for="app_name">App Name</label>
-                                <span class="settings-row-hint">Displayed in the browser tab and emails.</span>
+                                <label for="app_name">App name</label>
                             </div>
                             <div class="settings-row-control">
-                                <input type="text" id="app_name" name="app_name" class="form-control"
-                                       value="<?= cfg($settings, 'app_name', 'APP_NAME', 'ProcessingSystem') ?>"
-                                       placeholder="ProcessingSystem" required>
+                                <input type="text" id="app_name" name="app_name"
+                                       value="<?= $s('app_name') ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="settings-row">
                             <div class="settings-row-label">
                                 <label for="app_url">App URL</label>
-                                <span class="settings-row-hint">Base URL used for links in emails and redirects.</span>
+                                <span class="settings-row-hint">No trailing slash.</span>
                             </div>
                             <div class="settings-row-control">
-                                <input type="url" id="app_url" name="app_url" class="form-control"
-                                       value="<?= cfg($settings, 'app_url', 'APP_URL', 'https://localhost/processing-system/public') ?>"
-                                       placeholder="https://yourdomain.com/processing-system/public">
-                            </div>
-                        </div>
-
-                        <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="app_env">Environment</label>
-                                <span class="settings-row-hint">Affects error reporting and caching.</span>
-                            </div>
-                            <div class="settings-row-control">
-                                <select id="app_env" name="app_env" class="form-control">
-                                    <?php foreach (['local' => 'Local (Development)', 'staging' => 'Staging', 'production' => 'Production'] as $val => $label): ?>
-                                        <option value="<?= $val ?>" <?= cfg($settings, 'app_env', 'APP_ENV', 'local') === $val ? 'selected' : '' ?>>
-                                            <?= $label ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <input type="url" id="app_url" name="app_url"
+                                       value="<?= $s('app_url') ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="settings-row">
                             <div class="settings-row-label">
                                 <label for="app_timezone">Timezone</label>
-                                <span class="settings-row-hint">Used for all date/time display.</span>
                             </div>
                             <div class="settings-row-control">
-                                <select id="app_timezone" name="app_timezone" class="form-control">
-                                    <?php
-                                    $currentTz = cfg($settings, 'app_timezone', 'APP_TIMEZONE', 'Asia/Manila');
-                                    foreach ($timezones as $tz):
-                                    ?>
-                                        <option value="<?= $tz ?>" <?= $currentTz === $tz ? 'selected' : '' ?>><?= $tz ?></option>
-                                    <?php endforeach; ?>
+                                <input type="text" id="app_timezone" name="app_timezone"
+                                       value="<?= $s('app_timezone', 'Asia/Manila') ?>" class="form-control"
+                                       placeholder="Asia/Manila">
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="app_env">Environment</label>
+                            </div>
+                            <div class="settings-row-control">
+                                <select id="app_env" name="app_env" class="form-control">
+                                    <option value="local"      <?= $selected('app_env', 'local') ?>>Local</option>
+                                    <option value="staging"    <?= $selected('app_env', 'staging') ?>>Staging</option>
+                                    <option value="production" <?= $selected('app_env', 'production') ?>>Production</option>
                                 </select>
                             </div>
                         </div>
@@ -153,33 +398,31 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
                     </div>
                 </div>
 
-                <!-- Pagination & Sessions -->
                 <div class="settings-card">
-                    <div class="settings-card-header">Pagination &amp; Sessions</div>
+                    <div class="settings-card-header">Session &amp; pagination</div>
                     <div class="settings-card-body">
 
                         <div class="settings-row">
                             <div class="settings-row-label">
-                                <label for="items_per_page">Items Per Page</label>
-                                <span class="settings-row-hint">Default row count for tables.</span>
+                                <label for="items_per_page">Items per page</label>
                             </div>
                             <div class="settings-row-control settings-row-control--short">
-                                <input type="number" id="items_per_page" name="items_per_page"
-                                       class="form-control" min="5" max="200" step="5"
-                                       value="<?= cfg($settings, 'items_per_page', '', '20') ?>">
+                                <div class="input-addon">
+                                    <input type="number" id="items_per_page" name="items_per_page" min="5" max="200"
+                                           value="<?= $s('items_per_page', '20') ?>" class="form-control">
+                                    <span class="input-addon-text">rows</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="settings-row">
                             <div class="settings-row-label">
-                                <label for="session_lifetime">Session Lifetime</label>
-                                <span class="settings-row-hint">Minutes before an idle session expires.</span>
+                                <label for="session_lifetime">Session lifetime</label>
                             </div>
                             <div class="settings-row-control settings-row-control--short">
                                 <div class="input-addon">
-                                    <input type="number" id="session_lifetime" name="session_lifetime"
-                                           class="form-control" min="5" max="1440"
-                                           value="<?= cfg($settings, 'session_lifetime', '', '120') ?>">
+                                    <input type="number" id="session_lifetime" name="session_lifetime" min="5"
+                                           value="<?= $s('session_lifetime', '120') ?>" class="form-control">
                                     <span class="input-addon-text">min</span>
                                 </div>
                             </div>
@@ -190,64 +433,54 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
 
                 <div class="settings-footer">
                     <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-device-floppy"></i> Save General Settings
+                        <i class="ti ti-device-floppy"></i> Save general
                     </button>
                 </div>
             </form>
-        </section>
+        </div><!-- /tab-general -->
 
-        <!-- ══ TAB: MAIL ══════════════════════════════════════════════════════ -->
-        <section class="settings-panel" id="tab-mail">
 
+        <!-- ════════════════════════════════════════════
+             MAIL  (SysAdmin only)
+             ════════════════════════════════════════════ -->
+        <div class="settings-panel" id="tab-mail">
             <div class="settings-section-header">
-                <h6 class="settings-section-title">
+                <h2 class="settings-section-title">
                     <i class="ti ti-mail"></i> Mail
-                </h6>
-                <p class="settings-section-sub">SMTP configuration used for notifications and password resets.</p>
+                </h2>
+                <p class="settings-section-sub">SMTP configuration for outgoing emails. SysAdmin only.</p>
             </div>
 
             <form method="POST" action="/processing-system/public/settings/mail">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
-                    <div class="settings-card-header">SMTP Server</div>
+                    <div class="settings-card-header">SMTP server</div>
                     <div class="settings-card-body">
 
                         <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="mail_host">SMTP Host</label>
-                                <span class="settings-row-hint">e.g. smtp.gmail.com</span>
-                            </div>
+                            <div class="settings-row-label"><label for="mail_host">Host</label></div>
                             <div class="settings-row-control">
-                                <input type="text" id="mail_host" name="mail_host" class="form-control"
-                                       value="<?= cfg($settings, 'mail_host', 'MAIL_HOST', 'smtp.gmail.com') ?>"
-                                       placeholder="smtp.gmail.com">
+                                <input type="text" id="mail_host" name="mail_host"
+                                       value="<?= $s('mail_host', 'smtp.gmail.com') ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="mail_port">Port</label>
-                                <span class="settings-row-hint">465 (SSL) or 587 (TLS)</span>
-                            </div>
+                            <div class="settings-row-label"><label for="mail_port">Port</label></div>
                             <div class="settings-row-control settings-row-control--short">
-                                <input type="number" id="mail_port" name="mail_port" class="form-control"
-                                       min="1" max="65535"
-                                       value="<?= cfg($settings, 'mail_port', 'MAIL_PORT', '587') ?>">
+                                <input type="number" id="mail_port" name="mail_port"
+                                       value="<?= $s('mail_port', '587') ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="mail_encryption">Encryption</label>
-                            </div>
+                            <div class="settings-row-label"><label for="mail_encryption">Encryption</label></div>
                             <div class="settings-row-control settings-row-control--short">
                                 <select id="mail_encryption" name="mail_encryption" class="form-control">
-                                    <?php foreach (['tls' => 'TLS', 'ssl' => 'SSL', 'none' => 'None'] as $val => $label): ?>
-                                        <option value="<?= $val ?>" <?= cfg($settings, 'mail_encryption', 'MAIL_ENCRYPTION', 'tls') === $val ? 'selected' : '' ?>>
-                                            <?= $label ?>
-                                        </option>
-                                    <?php endforeach; ?>
+                                    <option value="tls" <?= $selected('mail_encryption', 'tls') ?>>TLS</option>
+                                    <option value="ssl" <?= $selected('mail_encryption', 'ssl') ?>>SSL</option>
+                                    <option value=""    <?= $selected('mail_encryption', '') ?>>None</option>
                                 </select>
                             </div>
                         </div>
@@ -256,32 +489,27 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
                 </div>
 
                 <div class="settings-card">
-                    <div class="settings-card-header">Credentials &amp; Sender</div>
+                    <div class="settings-card-header">Credentials</div>
                     <div class="settings-card-body">
 
                         <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="mail_username">Username</label>
-                                <span class="settings-row-hint">Usually your email address.</span>
-                            </div>
+                            <div class="settings-row-label"><label for="mail_username">Username</label></div>
                             <div class="settings-row-control">
-                                <input type="email" id="mail_username" name="mail_username" class="form-control"
-                                       value="<?= cfg($settings, 'mail_username', 'MAIL_USERNAME', '') ?>"
-                                       placeholder="you@example.com">
+                                <input type="email" id="mail_username" name="mail_username"
+                                       value="<?= $s('mail_username') ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="settings-row">
                             <div class="settings-row-label">
-                                <label for="mail_password">Password / App Key</label>
-                                <span class="settings-row-hint">Leave blank to keep the existing value.</span>
+                                <label for="mail_password">Password</label>
+                                <span class="settings-row-hint">Leave blank to keep current.</span>
                             </div>
                             <div class="settings-row-control">
                                 <div class="input-password-wrap">
                                     <input type="password" id="mail_password" name="mail_password"
-                                           class="form-control" placeholder="••••••••••••"
-                                           autocomplete="new-password">
-                                    <button type="button" class="toggle-password" title="Show/hide password">
+                                           placeholder="••••••••" class="form-control">
+                                    <button type="button" class="toggle-password">
                                         <i class="ti ti-eye"></i>
                                     </button>
                                 </div>
@@ -289,24 +517,18 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
                         </div>
 
                         <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="mail_from_address">From Address</label>
-                            </div>
+                            <div class="settings-row-label"><label for="mail_from_address">From address</label></div>
                             <div class="settings-row-control">
-                                <input type="email" id="mail_from_address" name="mail_from_address" class="form-control"
-                                       value="<?= cfg($settings, 'mail_from_address', 'MAIL_FROM_ADDRESS', '') ?>"
-                                       placeholder="noreply@example.com">
+                                <input type="email" id="mail_from_address" name="mail_from_address"
+                                       value="<?= $s('mail_from_address') ?>" class="form-control">
                             </div>
                         </div>
 
                         <div class="settings-row">
-                            <div class="settings-row-label">
-                                <label for="mail_from_name">From Name</label>
-                            </div>
+                            <div class="settings-row-label"><label for="mail_from_name">From name</label></div>
                             <div class="settings-row-control">
-                                <input type="text" id="mail_from_name" name="mail_from_name" class="form-control"
-                                       value="<?= cfg($settings, 'mail_from_name', 'MAIL_FROM_NAME', 'Processing System') ?>"
-                                       placeholder="Processing System">
+                                <input type="text" id="mail_from_name" name="mail_from_name"
+                                       value="<?= $s('mail_from_name', 'Automated Processing System') ?>" class="form-control">
                             </div>
                         </div>
 
@@ -315,113 +537,80 @@ $sessionSave = session_save_path() ?: sys_get_temp_dir();
 
                 <div class="settings-footer">
                     <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-device-floppy"></i> Save Mail Settings
+                        <i class="ti ti-device-floppy"></i> Save mail
                     </button>
                 </div>
             </form>
-        </section>
+        </div><!-- /tab-mail -->
 
-        <!-- ══ TAB: SYSTEM INFO ═══════════════════════════════════════════════ -->
-        <section class="settings-panel" id="tab-sysinfo">
 
+        <!-- ════════════════════════════════════════════
+             STORAGE  (SysAdmin only)
+             ════════════════════════════════════════════ -->
+        <div class="settings-panel" id="tab-storage">
             <div class="settings-section-header">
-                <h6 class="settings-section-title">
-                    <i class="ti ti-cpu"></i> System Info
-                </h6>
-                <p class="settings-section-sub">Read-only runtime diagnostics for this server environment.</p>
+                <h2 class="settings-section-title">
+                    <i class="ti ti-folder"></i> Storage
+                </h2>
+                <p class="settings-section-sub">Upload path and file-type restrictions. SysAdmin only.</p>
             </div>
 
-            <!-- PHP Runtime -->
-            <div class="settings-card">
-                <div class="settings-card-header">PHP Runtime</div>
-                <div class="settings-card-body settings-card-body--info">
-                    <?php
-                    $infoRows = [
-                        ['PHP Version', $phpVersion, 'ti-brand-php'],
-                        ['SAPI', $phpSapi, 'ti-terminal'],
-                        ['OS', $osInfo, 'ti-device-desktop'],
-                        ['Web Server', $serverSw, 'ti-server'],
-                        ['DB Version', $dbVersion, 'ti-database'],
-                        ['Loaded Extensions', $loadedExt, 'ti-puzzle'],
-                    ];
-                    foreach ($infoRows as [$label, $val, $icon]):
-                    ?>
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti <?= $icon ?>"></i> <?= $label ?></span>
-                        <span class="info-row-value"><?= htmlspecialchars($val) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            <form method="POST" action="/processing-system/public/settings/storage">
+                <?= \App\Helpers\Csrf::field() ?>
 
-            <!-- PHP Limits -->
-            <div class="settings-card">
-                <div class="settings-card-header">PHP Limits &amp; Paths</div>
-                <div class="settings-card-body settings-card-body--info">
-                    <?php
-                    $limitRows = [
-                        ['Memory Limit', $memoryLimit, 'ti-stack'],
-                        ['Upload Max Size', $uploadMax, 'ti-upload'],
-                        ['POST Max Size', $postMax, 'ti-file-upload'],
-                        ['Max Execution Time',$maxExecTime, 'ti-clock'],
-                        ['Timezone', $timezone,'ti-world'],
-                        ['Session Save Path', $sessionSave, 'ti-folder'],
-                    ];
-                    foreach ($limitRows as [$label, $val, $icon]):
-                    ?>
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti <?= $icon ?>"></i> <?= $label ?></span>
-                        <span class="info-row-value"><?= htmlspecialchars($val) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+                <div class="settings-card">
+                    <div class="settings-card-header">Upload configuration</div>
+                    <div class="settings-card-body">
 
-            <!-- Disk -->
-            <div class="settings-card">
-                <div class="settings-card-header">Storage</div>
-                <div class="settings-card-body settings-card-body--info">
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-device-floppy"></i> Total Disk Space</span>
-                        <span class="info-row-value"><?= $diskTotal ?></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-device-floppy"></i> Free Disk Space</span>
-                        <span class="info-row-value"><?= $diskFree ?></span>
-                    </div>
-                    <?php
-                    // Show disk usage bar if both values are available
-                    if ($diskTotal !== 'N/A' && $diskFree !== 'N/A'):
-                        $total = disk_total_space('/');
-                        $free = disk_free_space('/');
-                        $used = $total - $free;
-                        $pct = $total > 0 ? round($used / $total * 100) : 0;
-                        $barClass = $pct > 85 ? 'disk-bar--danger' : ($pct > 65 ? 'disk-bar--warning' : '');
-                    ?>
-                    <div class="disk-usage-bar-wrap">
-                        <div class="disk-usage-bar <?= $barClass ?>" style="--pct: <?= $pct ?>%"></div>
-                        <span class="disk-usage-label"><?= $pct ?>% used</span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="upload_path">Upload path</label>
+                                <span class="settings-row-hint">Relative to project root. No leading slash.</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <input type="text" id="upload_path" name="upload_path"
+                                       value="<?= $s('upload_path', 'public/uploads') ?>" class="form-control"
+                                       placeholder="public/uploads">
+                            </div>
+                        </div>
 
-            <!-- Developer -->
-            <div class="settings-card">
-                <div class="settings-card-header">Developer</div>
-                <div class="settings-card-body settings-card-body--info">
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-code"></i> Developer</span>
-                        <span class="info-row-value">geloxh</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-row-label"><i class="ti ti-code"></i> Contributor</span>
-                        <span class="info-row-value">JHN PHL</span>
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="max_file_size_mb">Max file size</label>
+                            </div>
+                            <div class="settings-row-control settings-row-control--short">
+                                <div class="input-addon">
+                                    <input type="number" id="max_file_size_mb" name="max_file_size_mb"
+                                           min="1" max="100"
+                                           value="<?= $s('max_file_size_mb', '10') ?>" class="form-control">
+                                    <span class="input-addon-text">MB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="settings-row-label">
+                                <label for="allowed_file_types">Allowed types</label>
+                                <span class="settings-row-hint">Comma-separated extensions, e.g. pdf,jpg,png,docx</span>
+                            </div>
+                            <div class="settings-row-control">
+                                <input type="text" id="allowed_file_types" name="allowed_file_types"
+                                       value="<?= $s('allowed_file_types', 'pdf,jpg,png,docx') ?>" class="form-control"
+                                       placeholder="pdf,jpg,png,docx">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
 
-        </section>
+                <div class="settings-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy"></i> Save storage
+                    </button>
+                </div>
+            </form>
+        </div><!-- /tab-storage -->
+        <?php endif; ?>
 
     </div><!-- /.settings-panels -->
 </div><!-- /.settings-layout -->
