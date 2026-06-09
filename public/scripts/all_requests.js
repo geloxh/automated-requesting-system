@@ -21,7 +21,7 @@ function filterByStatusAll(sel) {
 }
 
 (function () {
-    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
+    var inApproval = [ 'submitted', 'checker_approved', 'process_approved', 'department_reviewed', 'finance_reviewed', 'final_approved'];
 
     function refilter() {
         var deptVal = (document.getElementById('deptFilter')?.value || '').toLowerCase();
