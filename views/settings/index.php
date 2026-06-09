@@ -10,7 +10,7 @@ $checked = fn(string $key, string $on = '1') => ($settings[$key] ?? '0') === $on
 $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match ? 'selected' : '';
 ?>
 
-<link rel="stylesheet" href="/processing-system/public/stylesheets/settings.css">
+<link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/settings.css">
 
 <?php if (!empty($_SESSION['success'])): ?>
     <div class="alert alert-success">
@@ -73,7 +73,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <p class="settings-section-sub">Personalise the look of the application.</p>
             </div>
 
-            <form method="POST" action="/processing-system/public/settings/appearance">
+            <form method="POST" action="/automated-requesting-system/public/settings/appearance">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -148,7 +148,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <p class="settings-section-sub">Choose which events trigger an email notification.</p>
             </div>
 
-            <form method="POST" action="/processing-system/public/settings/notifications">
+            <form method="POST" action="/automated-requesting-system/public/settings/notifications">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -344,7 +344,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <p class="settings-section-sub">Core application configuration. SysAdmin only.</p>
             </div>
 
-            <form method="POST" action="/processing-system/public/settings/general">
+            <form method="POST" action="/automated-requesting-system/public/settings/general">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -452,7 +452,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <p class="settings-section-sub">SMTP configuration for outgoing emails. SysAdmin only.</p>
             </div>
 
-            <form method="POST" action="/processing-system/public/settings/mail">
+            <form method="POST" action="/automated-requesting-system/public/settings/mail">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -556,7 +556,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <p class="settings-section-sub">Upload path and file-type restrictions. SysAdmin only.</p>
             </div>
 
-            <form method="POST" action="/processing-system/public/settings/storage">
+            <form method="POST" action="/automated-requesting-system/public/settings/storage">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -616,4 +616,4 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
     </div><!-- /.settings-panels -->
 </div><!-- /.settings-layout -->
 
-<script src="/processing-system/public/scripts/settings.js"></script>
+<script src="/automated-requesting-system/public/scripts/settings.js"></script>

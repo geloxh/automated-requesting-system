@@ -8,7 +8,7 @@ Liquidation Form
 Vehicle Request Form
 
 -- Initialize Composer & Install Dependencies --
-composer init --name="sme/processing-system" --type=project --no-interaction
+composer init --name="sme/automated-requesting-system" --type=project --no-interaction
 composer require vlucas/phpdotenv phpmailer/phpmailer
 
 -- Account Security
@@ -34,11 +34,11 @@ Typical values:
 .env
 APP_NAME=ProcessingSystem
 APP_ENV=local
-APP_URL=http://localhost/processing-system/public
+APP_URL=http://localhost/automated-requesting-system/public
 
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=psdb
+DB_DATABASE=arsb
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -64,7 +64,7 @@ RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 .env File
-APP_URL=https://localhost/processing-system/public
+APP_URL=https://localhost/automated-requesting-system/public
 
 app.php
 ini_set('session.cookie_secure', 1);

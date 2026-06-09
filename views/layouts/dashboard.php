@@ -132,7 +132,7 @@
 <div class="page-subheading"><?= date('l, F j, Y') ?> — here's your current activity.</div>
 
 <?php if ($dashPending > 0): ?>
-    <a href="/processing-system/public/approvals" class="dash-alert">
+    <a href="/automated-requesting-system/public/approvals" class="dash-alert">
         <i class="ti ti-bell-ringing"></i>
         <span>You have <strong><?= $dashPending ?> pending approval<?= $dashPending > 1 ? 's' : '' ?></strong> waiting for your action.</span>
         <span class="dash-alert-cta">Go to Inbox <i class="ti ti-arrow-right"></i></span>
@@ -142,25 +142,25 @@
 <!-- ── KPI Cards (last 30 days) ── -->
 <!-- FIX: previously only "In Approval" was a link; all four are now clickable -->
 <div class="kpi-grid">
-    <a href="/processing-system/public/my-submissions?status=in_approval" class="kpi-card blue kpi-card--link">
+    <a href="/automated-requesting-system/public/my-submissions?status=in_approval" class="kpi-card blue kpi-card--link">
         <div class="kpi-icon blue"><i class="ti ti-hourglass"></i></div>
         <div class="kpi-label">In Approval</div>
         <div class="kpi-value"><?= $counts['in_approval'] ?></div>
         <div class="kpi-delta kpi-delta--period">Last 30 days · Submitted &amp; pending</div>
     </a>
-    <a href="/processing-system/public/my-submissions?status=approved" class="kpi-card green kpi-card--link">
+    <a href="/automated-requesting-system/public/my-submissions?status=approved" class="kpi-card green kpi-card--link">
         <div class="kpi-icon green"><i class="ti ti-circle-check"></i></div>
         <div class="kpi-label">Approved</div>
         <div class="kpi-value"><?= $counts['approved'] ?></div>
         <div class="kpi-delta kpi-delta--period">Last 30 days · Final approved &amp; completed</div>
     </a>
-    <a href="/processing-system/public/my-submissions?status=draft" class="kpi-card amber kpi-card--link">
+    <a href="/automated-requesting-system/public/my-submissions?status=draft" class="kpi-card amber kpi-card--link">
         <div class="kpi-icon amber"><i class="ti ti-file-pencil"></i></div>
         <div class="kpi-label">Drafts</div>
         <div class="kpi-value"><?= $counts['draft'] ?></div>
         <div class="kpi-delta kpi-delta--period">Last 30 days · Not yet submitted</div>
     </a>
-    <a href="/processing-system/public/my-submissions?status=rejected" class="kpi-card purple kpi-card--link">
+    <a href="/automated-requesting-system/public/my-submissions?status=rejected" class="kpi-card purple kpi-card--link">
         <div class="kpi-icon purple"><i class="ti ti-circle-x"></i></div>
         <div class="kpi-label">Rejected</div>
         <div class="kpi-value"><?= $counts['rejected'] ?></div>
@@ -176,10 +176,10 @@
         <div class="card-panel-header">
             <span class="card-panel-title">Recent Activity</span>
             <?php $allLink = ($roleId === 1)
-                ? '/processing-system/public/requests'
+                ? '/automated-requesting-system/public/requests'
                 : (in_array($roleId, [2, 4, 5, 6], true)
-                    ? '/processing-system/public/approvals'
-                    : '/processing-system/public/my-submissions');
+                    ? '/automated-requesting-system/public/approvals'
+                    : '/automated-requesting-system/public/my-submissions');
             ?>
             <a href="<?= $allLink ?>" class="card-panel-link">View all →</a>
         </div>
@@ -198,7 +198,7 @@
                 // FIX: use human label map instead of ucfirst(str_replace)
                 $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
             ?>
-            <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="activity-item activity-link">
+            <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="activity-item activity-link">
                 <div class="activity-icon activity-icon-dynamic" data-bg="<?= $ic['bg'] ?>" data-color="<?= $ic['color'] ?>">
                     <i class="ti <?= $ic['icon'] ?>"></i>
                 </div>
@@ -227,7 +227,7 @@
             </div>
             <div class="quick-form-grid">
                 <?php foreach ($quickForms as $i => $qf): ?>
-                <a href="/processing-system/public/forms/<?= $qf['slug'] ?>/create"
+                <a href="/automated-requesting-system/public/forms/<?= $qf['slug'] ?>/create"
                    class="quick-form-btn <?= ($i % 2 === 0) ? 'border-right' : '' ?> <?= ($i < count($quickForms) - 2) ? 'border-bottom' : '' ?>">
                     <span class="qf-icon" data-color="<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
                     <span class="qf-label"><?= $qf['label'] ?></span>

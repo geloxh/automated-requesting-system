@@ -8,7 +8,7 @@ class AuthMiddleware
         if (session_status() === PHP_SESSION_NONE) session_start();
 
         if (empty($_SESSION['user_id'])) {
-            header('Location: /processing-system/public/login');
+            header('Location: /automated-requesting-system/public/login');
             exit;
         }
     }

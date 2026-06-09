@@ -3,7 +3,7 @@
         <h5 class="page-heading">Edit Employee</h5>
         <p class="page-subheading">Update profile and system permissions for <?= htmlspecialchars($employee['full_name']) ?></p>
     </div>
-    <a href="/processing-system/public/employees" class="btn btn-ghost">
+    <a href="/automated-requesting-system/public/employees" class="btn btn-ghost">
         <i class="ti ti-arrow-left"></i> Back to List
     </a>
 </div>
@@ -14,7 +14,7 @@
 <?php endif; ?>
 
 <div class="form-card">
-    <form method="POST" action="/processing-system/public/employees/update/<?= $employee['id'] ?>">
+    <form method="POST" action="/automated-requesting-system/public/employees/update/<?= $employee['id'] ?>">
         <?= \App\Helpers\Csrf::field() ?>
         
         <div class="form-grid g-2">
@@ -70,7 +70,7 @@
         </div>
         <div class="form-action">
             <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy"></i> Save Changes</button>
-            <a href="/processing-system/public/employees" class="btn btn-ghost">Cancel</a>
+            <a href="/automated-requesting-system/public/employees" class="btn btn-ghost">Cancel</a>
         </div>
     </form>
 </div>

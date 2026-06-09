@@ -11,7 +11,7 @@
     require_once __DIR__ . '/../app/Helpers/EmployeeCode.php';
 
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $uri = str_replace('/processing-system/public', '', $uri) ?: '/';
+    $uri = str_replace('/automated-requesting-system/public', '', $uri) ?: '/';
     $method = $_SERVER['REQUEST_METHOD'];
 
     // PUBLIC - Auth routes (No auth required)

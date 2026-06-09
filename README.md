@@ -52,7 +52,7 @@ System for SMEs for paperless and make the indicated features below automated, g
 
 ## PROJECT-STRUCTURE
 ```
-    processing-system/
+    automated-requesting-system/
     ├── app/
     │   ├── Controllers/        # Business logic per form
     │   ├── Models/             # DB interactions
@@ -61,7 +61,7 @@ System for SMEs for paperless and make the indicated features below automated, g
     ├── config/
     │   ├── database.php
     │   └── app.php
-    |   └── psdb.sql
+    |   └── arsdb.sql
     ├── public/                 # Entry point, assets
     │   └── index.php
     ├── views/
@@ -92,7 +92,7 @@ is a type of approach iterative and incremental process models.
 
 ### Workflow Schema Design
 ```
-    processing-system
+    automated-requesting-system
     ├── app/
     │   ├── controllers/        # Business logic per form
     |   |   ├── ApprovalController.php
@@ -120,7 +120,7 @@ is a type of approach iterative and incremental process models.
     ├── config/
     |   ├── app.php
     |   ├── database.php
-    |   └── psdb.sql
+    |   └── arsdb.sql
     |
     ├── public/
     |   ├── scripts

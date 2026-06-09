@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
             open(); return;
         }
         dropdown.innerHTML = items.map((r, i) => `
-            <a href="/processing-system/public/forms/view/${r.id}"
+            <a href="/automated-requesting-system/public/forms/view/${r.id}"
                class="search-item" role="option" data-idx="${i}">
                 <span class="search-item-type">${esc(formLabels[r.form_type] ?? r.form_type)}</span>
                 <span class="search-item-id">#${r.id}</span>
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const q = input.value.trim();
         if (q.length < 2) { close(); return; }
         debounce = setTimeout(() => {
-            fetch('/processing-system/public/search?q=' + encodeURIComponent(q))
+            fetch('/automated-requesting-system/public/search?q=' + encodeURIComponent(q))
                 .then(r => r.json()).then(render).catch(() => close());
         }, 200);
     });
@@ -179,11 +179,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'ArrowUp')   { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
         if (e.key === 'Enter' && activeIdx >= 0) {
             e.preventDefault();
-            window.location.href = '/processing-system/public/forms/view/' + results[activeIdx].id;
+            window.location.href = '/automated-requesting-system/public/forms/view/' + results[activeIdx].id;
         }
         // Enter with no selection — navigate to search page
         if (e.key === 'Enter' && activeIdx < 0 && input.value.trim()) {
-            window.location.href = '/processing-system/public/my-submissions?q=' + encodeURIComponent(input.value.trim());
+            window.location.href = '/automated-requesting-system/public/my-submissions?q=' + encodeURIComponent(input.value.trim());
         }
     });
 
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var markAllBtn = document.getElementById('markAllReadBtn');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function () {
-            fetch('/processing-system/public/notifications/read-all', {
+            fetch('/automated-requesting-system/public/notifications/read-all', {
                 method: 'POST',
                 headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
             }).then(function () {
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var href = item.dataset.href;
             if (item.classList.contains('notif-item--unread')) {
                 item.classList.remove('notif-item--unread');
-                fetch('/processing-system/public/notifications/' + id + '/read', {
+                fetch('/automated-requesting-system/public/notifications/' + id + '/read', {
                     method: 'POST',
                     headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
                 });
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function pollNotifications() {
-        fetch('/processing-system/public/notifications/unread')
+        fetch('/automated-requesting-system/public/notifications/unread')
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var dot = document.getElementById('notifDot');

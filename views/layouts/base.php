@@ -124,7 +124,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · APS') ?></title>
-    <link rel="stylesheet" href="/processing-system/public/stylesheets/app.css">
+    <link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/app.css">
     <!-- Accent colour overrides — injected before first paint, no flash -->
     <style nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">:root{<?= $accentVars ?>}</style>
 </head>
@@ -215,11 +215,11 @@
                     <span class="notif-dot <?= $notifUnread === 0 ? 'notif-dot--hidden' : '' ?>" id="notifDot"></span>
                 </button>
 
-                <a href="/processing-system/public/forms/advance-payment/create" class="btn-new-req">
+                <a href="/automated-requesting-system/public/forms/advance-payment/create" class="btn-new-req">
                     <i class="ti ti-plus"></i> New Request
                 </a>
 
-                <form method="POST" action="/processing-system/public/logout">
+                <form method="POST" action="/automated-requesting-system/public/logout">
                     <?= \App\Helpers\Csrf::field() ?>
                     <button class="icon-btn" title="Logout">
                         <i class="ti ti-logout"></i>
@@ -234,9 +234,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/processing-system/public/scripts/form_table.js"></script>
-<script src="/processing-system/public/scripts/table-filter.js"></script>
-<script src="/processing-system/public/scripts/app.js"></script>
+<script src="/automated-requesting-system/public/scripts/form_table.js"></script>
+<script src="/automated-requesting-system/public/scripts/table-filter.js"></script>
+<script src="/automated-requesting-system/public/scripts/app.js"></script>
 
 </body>
 </html>

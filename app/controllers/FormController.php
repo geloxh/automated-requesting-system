@@ -204,7 +204,7 @@ class FormController {
 
         // Breadcrumb
         $breadcrumbs = [
-            ['label' => $typeLabel, 'url' => '/processing-system/public/forms/' . array_search($form['form_type'], $this->typeMap)],
+            ['label' => $typeLabel, 'url' => '/automated-requesting-system/public/forms/' . array_search($form['form_type'], $this->typeMap)],
             ['label' => '#' . $id],
         ];
 
@@ -226,7 +226,7 @@ class FormController {
 
         // admins see all forms, others see only their own
         if ($role === 1) {
-            $ps = db()->prepare(
+            $ars = db()->prepare(
                 "SELECT f.id, f.form_type, f.status, f.created_at,
                 e.full_name AS submitted_by
                 FROM forms f
@@ -234,9 +234,9 @@ class FormController {
                 WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
                 ORDER BY f.created_at DESC LIMIT 8"
             );
-            $ps->execute([$like, $like, $like]);
+            $ars->execute([$like, $like, $like]);
         } else {
-            $ps = db()->prepare(
+            $ars = db()->prepare(
                 "SELECT f.id, f.form_type, f.status, f.created_at,
                 e.full_name AS submitted_by
                 FROM forms f
@@ -244,10 +244,10 @@ class FormController {
                 WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
                 ORDER BY f.created_at DESC LIMIT 8"
             );
-            $ps->execute([$like, $like, $like]);
+            $ars->execute([$like, $like, $like]);
         } 
 
-        echo json_encode($ps->fetchAll(PDO::FETCH_ASSOC));
+        echo json_encode($ars->fetchAll(PDO::FETCH_ASSOC));
         exit;
     }
 
@@ -272,7 +272,7 @@ class FormController {
         $allowedRoles = [1, 2, 4, 5, 6];
         if (!in_array($roleId, $allowedRoles, true)) {
             $_SESSION['error'] = 'You are not authorised to reject this form.';
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
@@ -287,27 +287,27 @@ class FormController {
 
             if (!$step) {
                 $_SESSION['error'] = 'No pending approval step found for this form.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
 
             // FIX: verify both role AND assigned approver_id
             if ((int)$step['approver_id'] !== $userId) {
                 $_SESSION['error'] = 'You are not the assigned approver for the current stage.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
         }
 
         if (in_array($form['status'], ['completed', 'rejected'], true)) {
             $_SESSION['error'] = 'This form is already finalised.';
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
         if ($remarks === '') {
             $_SESSION['error'] = 'A rejection reason is required.';
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
@@ -338,7 +338,7 @@ class FormController {
             $_SESSION['error'] = 'Rejection failed. Please try again.';
         }
 
-        header("Location: /processing-system/public/forms/view/{$id}");
+        header("Location: /automated-requesting-system/public/forms/view/{$id}");
         exit;
     }
 
@@ -371,7 +371,7 @@ class FormController {
     public function allRequests(): void {
         if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
             $_SESSION['error'] = 'Access denied. You do not have permission to view all requests.';
-            header('Location: /processing-system/public/dashboard'); exit;
+            header('Location: /automated-requesting-system/public/dashboard'); exit;
         }
 
         $stmt = db()->prepare(
@@ -409,7 +409,7 @@ class FormController {
         $pipeline = $this->getPipeline($form['form_type']);
         if (!isset($pipeline[$action])) {
             $_SESSION['error'] = "Unknown approval action: '{$action}'.";
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
@@ -420,13 +420,13 @@ class FormController {
                 "Cannot perform '%s': form is currently '%s', expected '%s'.",
                 $action, $form['status'], $step['from']
             );
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
         if (in_array($form['status'], ['completed', 'rejected'], true)) {
             $_SESSION['error'] = 'This form is already finalized.';
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
@@ -443,7 +443,7 @@ class FormController {
             // Must have a row AND it must be assigned to this user
             if (!$approval || (int)$approval['approver_id'] !== $userId) {
                 $_SESSION['error'] = 'No pending approval step found for you at this stage.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
         }
@@ -452,13 +452,13 @@ class FormController {
         $actorAllowed = $isAdmin || $action === 'submit' || $roleId === $step['role_id'];
         if (!$actorAllowed) {
             $_SESSION['error'] = 'You are not authorized to perform this action.';
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
         if ($action === 'submit' && !$isAdmin && (int)$form['submitted_by'] !== $userId) {
             $_SESSION['error'] = 'Only the form owner can submit this form.';
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 
@@ -473,12 +473,12 @@ class FormController {
 
             if (!in_array($mimeType, $allowed, true)) {
                 $_SESSION['error'] = 'Only images and PDF files are allowed.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
             if ($file['size'] > $maxBytes) {
                 $_SESSION['error'] = 'File must be under 5 MB.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -487,7 +487,7 @@ class FormController {
             $fileName = sprintf('%d_%d_%s.%s', $id, time(), bin2hex(random_bytes(4)), $ext);
             if (!move_uploaded_file($file['tmp_name'], $destDir . $fileName)) {
                 $_SESSION['error'] = 'File upload failed. Please try again.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
             $uploadedFilePath = 'storage/approvals/' . $fileName;
@@ -531,7 +531,7 @@ class FormController {
             $_SESSION['error'] = 'Action failed. Please try again.';
         }
 
-        header("Location: /processing-system/public/forms/view/{$id}");
+        header("Location: /automated-requesting-system/public/forms/view/{$id}");
         exit;
     }
 
@@ -548,7 +548,7 @@ class FormController {
                 if (is_string($val)) $val = trim($val);
                 if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
                     $_SESSION['error'] = "Field '{$field}' is required.";
-                    header("Location: /processing-system/public/forms/{$slug}/create");
+                    header("Location: /automated-requesting-system/public/forms/{$slug}/create");
                     exit;
                 }
             }
@@ -582,13 +582,13 @@ class FormController {
             $_SESSION['success'] = $isSavingDraft
                 ? 'Draft saved. You can continue editing or submit when ready.'
                 : 'Form saved as draft. Review and submit it for approval.';
-            header("Location: /processing-system/public/forms/view/{$formId}");
+            header("Location: /automated-requesting-system/public/forms/view/{$formId}");
             exit;
 
         } catch (\Throwable $e) {
             $pdo->rollBack();
             $_SESSION['error'] = 'Submission failed: ' . $e->getMessage();
-            header("Location: /processing-system/public/forms/{$slug}/create");
+            header("Location: /automated-requesting-system/public/forms/{$slug}/create");
             exit;
         }
     }

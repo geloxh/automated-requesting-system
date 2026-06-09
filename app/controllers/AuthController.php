@@ -22,7 +22,7 @@
 
             if ($_SESSION[$key]['count'] >= 5) {
                 $_SESSION['login_error'] = 'Too many login attempts. Try again in 15 minutes.';
-                header('Location: /processing-system/public/login');
+                header('Location: /automated-requesting-system/public/login');
                 exit;
             }
 
@@ -45,7 +45,7 @@
                 $_SESSION[$key]['count']++;
                 $_SESSION['login_error'] = 'Invalid credentials or account inactive.';
                 $_SESSION['old_email'] = htmlspecialchars($input);
-                header('Location: /processing-system/public/login');
+                header('Location: /automated-requesting-system/public/login');
                 exit;
             }
 
@@ -56,13 +56,13 @@
             $_SESSION['role_id']   = $employee['role_id'];
             unset($_SESSION['csrf_token']); // Rotate CSRF token on successful login
 
-            header('Location: /processing-system/public/dashboard');
+            header('Location: /automated-requesting-system/public/dashboard');
             exit;
         }
 
         public function logout(): void {
             session_destroy();
-            header('Location: /processing-system/public/login');
+            header('Location: /automated-requesting-system/public/login');
             exit;
         }
 
@@ -89,7 +89,7 @@
                 $_SESSION['register_error'] = $msg;
                 $_SESSION['show_signup'] = true;
                 $_SESSION['old_register'] = $old;
-                header('Location: /processing-system/public/login');
+                header('Location: /automated-requesting-system/public/login');
                 exit;
             };
 
@@ -132,7 +132,7 @@
             }
 
             $_SESSION['success'] = 'Registration successful. You can now log in.';
-            header('Location: /processing-system/public/login');
+            header('Location: /automated-requesting-system/public/login');
             exit;
         }
 
@@ -185,7 +185,7 @@
                 }
             }
 
-            header('Location: /processing-system/public/forgot-password');
+            header('Location: /automated-requesting-system/public/forgot-password');
             exit;
         }
 
@@ -200,19 +200,19 @@
 
             if (empty($token) || empty($password)) {
                 $_SESSION['error'] = 'Invalid request.';
-                header('Location: /processing-system/public/login');
+                header('Location: /automated-requesting-system/public/login');
                 exit;
             }
 
             if ($password !== $confirm) {
                 $_SESSION['error'] = 'Passwords do not match.';
-                header("Location: /processing-system/public/reset-password?token=" . urlencode($token));
+                header("Location: /automated-requesting-system/public/reset-password?token=" . urlencode($token));
                 exit;
             }
 
             if (strlen($password) < 8) {
                 $_SESSION['error'] = 'Password must be at least 8 characters.';
-                header("Location: /processing-system/public/reset-password?token=" . urlencode($token));
+                header("Location: /automated-requesting-system/public/reset-password?token=" . urlencode($token));
                 exit;
             }
 
@@ -225,7 +225,7 @@
 
             if (!$row) {
                 $_SESSION['login_error'] = 'Reset link is invalid or has expired.';
-                header('Location: /processing-system/public/forgot-password');
+                header('Location: /automated-requesting-system/public/forgot-password');
                 exit;
             }
 
@@ -236,7 +236,7 @@
             ->execute([$row['id']]);
 
             $_SESSION['success'] = 'Password updated. You can now log in.';
-            header('Location: /processing-system/public/login');
+            header('Location: /automated-requesting-system/public/login');
             exit;
         }
     }
