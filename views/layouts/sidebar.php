@@ -114,13 +114,6 @@
                 </a>
                 <?php if ($roleId === 1): ?>
                 <a href="/processing-system/public/employees"
-                   data-tooltip="Employees"
-                   class="<?= $uri === '/employees' ? 'active' : '' ?>">
-                    <i class="ti ti-users"></i> <span>Employees</span>
-                </a>
-                <?php endif; ?>
-                <?php if ($roleId === 1): ?>
-                <a href="/processing-system/public/employees"
                     data-tooltip="Employees"
                     class="<?= $uri === '/employees' ? 'active' : '' ?>">
                     <i class="ti ti-users"></i> <span>Employees</span>
