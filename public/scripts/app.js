@@ -280,7 +280,7 @@ document.querySelectorAll('.vol-fill[data-pct]').forEach(function (el) {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
+    var inApproval = [ 'submitted', 'checker_approved', 'process_approved', 'department_reviewed', 'finance_reviewed', 'final_approved' ];
 
     function applyStatusFilter(val) {
         var rows = document.querySelectorAll('table[data-filterable] tbody tr');
