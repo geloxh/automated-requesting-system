@@ -1,74 +1,73 @@
-services: 
+services:
 
-# ── PHP + Apache ──
-app:
-  build:
-    context: .
-    dockerfile: docker/Dockerfile
-  container_name: ars_app
-  restart: unless-stopped
-  depends_on:
-    db:
-      condition: service_healthy
-  env_file: .env.docker
-  ports:
-    - "80:80"
-    - "443:443"
-  volumes:
-    # Mount the entire project into the container's web root
-    - .:/var/www/automated-requesting-system
-    # Persist uploaded files across container restarts
-    - uploads_data:/var/www/automated-requesting-system/public/uploads
-  networks:
-    - ars_net
+  # ── PHP + Apache ──
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: ps_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env.docker
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Mount the entire project into the container's web root
+      - .:/var/www/processing-system
+      # Persist uploaded files across container restarts
+      - uploads_data:/var/www/processing-system/public/uploads
+    networks:
+      - ps_net
 
-# ── MariaDB ──
-db: 
-  image: mariadb:11
-  container_name: ars_db
-  restart: unless-stopped
-  environment:
-    MARIADB_ROOT_PASSWORD: root
-    MARIADB_DATABASE: arsdb
-    MARIADB_USER: ars_user
-    MARIADB_PASSWORD: ars_pass
-  ports:
-    - "3307:3306" # exposed on 3307 so it doesn't clash with a local MySQL
-  volumes:
-    # Seed the DB on first run - runs every .sql file in alphabetical order
-    - ./docker/initdb:/docker-entrypoint-initdb.d
-    - db_data:/var/lib/mysql
-  healthcheck:
-    test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-    start_period: 10s
-    interval: 5s
-    timeout: 5s
-    retries: 10
-  networks:
-    - ars_net
+  # ── MariaDB ──
+  db:
+    image: mariadb:11
+    container_name: ps_db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: psdb
+      MARIADB_USER: ps_user
+      MARIADB_PASSWORD: ps_pass
+    ports:
+      - "3307:3306"   # exposed on 3307 so it doesn't clash with a local MySQL
+    volumes:
+      # Seed the DB on first run — runs every .sql file in alphabetical order
+      - ./docker/initdb:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ps_net
 
-# ── phpMyAdmin (for testing) ──
-phpmyadmin:
-  image: phpmyadmin:latest
-  container_name: ars_phpmyadmin
-  restart: unless-stopped
-  depends_on:
-    - db
-  environment:
-    PMA_HOST: db
-    PMA_PORT: 3306
-    PMA_USER: root
-    PMA_PASSWORD: root
-  ports:
-   - "8080:80"
-  networks:
-  - ars_net
-
+  # ── phpMyAdmin (optional, handy for testing) ──
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ps_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8080:80"
+    networks:
+      - ps_net
 
 volumes:
   db_data:
   uploads_data:
 
 networks:
-  ars_net:
+  ps_net:
     driver: bridge
