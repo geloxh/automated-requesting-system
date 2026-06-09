@@ -4,24 +4,26 @@
  *
  * Renders the horizontal approval-progress stepper on the form detail view.
  *
- * Expects:  $form  — the form row (requires 'form_type' and 'status')
- * Optionally: $approvalSteps — array of approval rows (id, sequence,
- *             approver_id, status, approved_at, remarks, full_name)
- *             When present, each completed node shows the approver name + date.
+ * Expects: $form — the form row (requires 'form_type' and 'status')
+ * Optionally: 
+ * $approvalSteps — array of approval rows (id, sequence,
+ *                  approver_id, status, approved_at, remarks, full_name)
+ * When present, each completed node shows the approver name + date.
  *
- * FIX: Previously this file contained two complete steppers rendered back-to-back
- *      (an inline-style <table> version AND a CSS-class div version).  Both were
- *      output on every page load.  The table version also used a hardcoded
- *      admin-pipeline status list, breaking the display for finance forms.
- *      This rewrite:
- *        1. Removes the duplicate table stepper entirely.
- *        2. Selects the correct pipeline (admin vs finance) based on form_type.
- *        3. Surfaces approver name + timestamp per completed step when available.
+ * FIX: 
+ * Previously this file contained two complete steppers rendered back-to-back
+ * (an inline-style <table> version AND a CSS-class div version).  Both were
+ * output on every page load.  The table version also used a hardcoded
+ * admin-pipeline status list, breaking the display for finance forms.
+ * This rewrite:
+ *  1. Removes the duplicate table stepper entirely.
+ *  2. Selects the correct pipeline (admin vs finance) based on form_type.
+ *  3. Surfaces approver name + timestamp per completed step when available.
  */
 
 use App\Helpers\FormLabels;
 
-// ── Choose the correct pipeline for this form type ──────────────────────────
+// ── Choose the correct pipeline for this form type ── /
 $financeTypes = ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'];
 $isFinance = in_array($form['form_type'], $financeTypes, true);
 
