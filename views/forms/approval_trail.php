@@ -1,63 +1,65 @@
 <?php
-/**
- * Approval Trail partial
- * Expects: $approvalSteps — rows from approvals JOIN employees (full_name, sequence, status, remarks, approved_at)
- *          $form['status'] — current form status
- */
+    /**
+     * Approval Trail partial
+     * Expects: 
+     *  $approvalSteps — rows from approvals JOIN employees (full_name, sequence, status, remarks, approved_at)
+     *  $form['status'] — current form status
+     */
 
-$icons = [
-    1 => 'ti-send',
-    2 => 'ti-user-check',
-    3 => 'ti-building-bank',
-    4 => 'ti-shield-check',
-    5 => 'ti-circle-check',
-    6 => 'ti-circle-check',
-];
-
-$formType = $form['form_type'] ?? '';
-$isAdmin = \App\Helpers\FormLabels::isAdminForm($formType);
-$maxSeq = $isAdmin ? 5 : 6;
-
-if ($isAdmin) {
-    $labels = [
-        1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
-        2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
-        3 => ['name' => 'Department Head', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
-        4 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
-        5 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
+    $icons = [
+        1 => 'ti-send',
+        2 => 'ti-user-check',
+        3 => 'ti-building-bank',
+        4 => 'ti-shield-check',
+        5 => 'ti-circle-check',
+        6 => 'ti-circle-check',
     ];
-} else {
-    $labels = [
-        1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
-        2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
-        3 => ['name' => 'Checker', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
-        4 => ['name' => 'Finance Head', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
-        5 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
-        6 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(6, $formType)],
-    ];
-}
 
-// Index by sequence (DB column), not level
-$stepsBySeq = [];
-foreach ($approvalSteps as $s) {
-    $stepsBySeq[(int)$s['sequence']] = $s;
-}
+    $formType = $form['form_type'] ?? '';
+    $isAdmin = \App\Helpers\FormLabels::isAdminForm($formType);
+    $maxSeq = $isAdmin ? 5 : 6;
 
-// Find the lowest pending sequence — that's the active step
-$activeSec = null;
-foreach ($stepsBySeq as $seq => $s) {
-    if ($s['status'] === 'pending') {
-        $activeSec = $seq;
-        break;
+    if ($isAdmin) {
+        $labels = [
+            1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
+            2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
+            3 => ['name' => 'Department Head', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
+            4 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
+            5 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
+        ];
+    } else {
+        $labels = [
+            1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
+            2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
+            3 => ['name' => 'Checker', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
+            4 => ['name' => 'Finance Head', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
+            5 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
+            6 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(6, $formType)],
+        ];
     }
-}
+
+    // Index by sequence (DB column), not level
+    $stepsBySeq = [];
+    foreach ($approvalSteps as $s) {
+        $stepsBySeq[(int)$s['sequence']] = $s;
+    }
+
+    // Find the lowest pending sequence — that's the active step
+    $activeSec = null;
+    foreach ($stepsBySeq as $seq => $s) {
+        if ($s['status'] === 'pending') {
+            $activeSec = $seq;
+            break;
+        }
+    }
 ?>
 
 <div class="form-section-title">Approval Trail</div>
 <div class="approval-trail">
 <?php 
-$isSubmitted = !in_array($form['status'], ['draft'], true);
-for ($seq = 1; $seq <= $maxSeq; $seq++):
+    $isSubmitted = !in_array($form['status'], ['draft'], true);
+    for ($seq = 1; $seq <= $maxSeq; $seq++):
+        
     $step = $stepsBySeq[$seq] ?? null;
     $status = $step['status'] ?? null;
 

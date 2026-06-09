@@ -79,29 +79,4 @@ sort($uniqueDepts);
 </div>
 
 <script src="/processing-system/public/scripts/all_requests.js"></script>
-<script>
-(function () {
-    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
-
-    function refilter() {
-        var deptVal = (document.getElementById('deptFilter')?.value || '').toLowerCase();
-        var statusVal = (document.getElementById('statusFilterAll')?.value || '').toLowerCase();
-        document.querySelectorAll('table[data-filterable] tbody tr').forEach(function (row) {
-            var dept = (row.dataset.dept || '').toLowerCase();
-            var status = (row.dataset.status || '');
-            var deptOk = !deptVal || dept === deptVal;
-            var statOk = !statusVal;
-            if (!statOk) {
-                if (statusVal === 'in_approval') statOk = inApproval.includes(status);
-                else if (statusVal === 'completed') statOk = (status === 'completed' || status === 'final_approved');
-                else statOk = status === statusVal;
-            }
-            row.style.display = (deptOk && statOk) ? '' : 'none';
-        });
-    }
-
-    document.getElementById('deptFilter')?.addEventListener('change', refilter);
-    document.getElementById('statusFilterAll')?.addEventListener('change', refilter);
-})();
-</script>
 <?php endif; ?>
