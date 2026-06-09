@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: ps_app
+    container_name: ars_app
     restart: unless-stopped
     depends_on:
       db:
@@ -20,18 +20,18 @@ services:
       # Persist uploaded files across container restarts
       - uploads_data:/var/www/processing-system/public/uploads
     networks:
-      - ps_net
+      - ars_net
 
   # ── MariaDB ──
   db:
     image: mariadb:11
-    container_name: ps_db
+    container_name: ars_db
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: psdb
-      MARIADB_USER: ps_user
-      MARIADB_PASSWORD: ps_pass
+      MARIADB_DATABASE: arsdb
+      MARIADB_USER: ars_user
+      MARIADB_PASSWORD: ars_pass
     ports:
       - "3307:3306"   # exposed on 3307 so it doesn't clash with a local MySQL
     volumes:
@@ -45,12 +45,12 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - ps_net
+      - ars_net
 
   # ── phpMyAdmin (optional, handy for testing) ──
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: ps_phpmyadmin
+    container_name: ars_phpmyadmin
     restart: unless-stopped
     depends_on:
       - db
@@ -62,12 +62,12 @@ services:
     ports:
       - "8080:80"
     networks:
-      - ps_net
+      - ars_net
 
 volumes:
   db_data:
   uploads_data:
 
 networks:
-  ps_net:
+  ars_net:
     driver: bridge
