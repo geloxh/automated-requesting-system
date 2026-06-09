@@ -56,7 +56,7 @@
                     </form>
                 </td>
                 <td>
-                    <div style="display: flex; gap: 4px; align-items: center;">
+                    <div class="flex-row-center">
                         <a href="/processing-system/public/employees/edit/<?= $e['id'] ?>" class="btn btn-ghost btn-sm" title="Edit">
                             <i class="ti ti-edit"></i> Edit
                         </a>

@@ -278,3 +278,29 @@ document.querySelectorAll('.vol-fill[data-pct]').forEach(function (el) {
     el.style.width = el.dataset.pct + '%';
     el.style.background = el.dataset.color;
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
+
+    function applyStatusFilter(val) {
+        var rows = document.querySelectorAll('table[data-filterable] tbody tr');
+        rows.forEach(function (row) {
+            if (!val) { row.style.display = ''; return; }
+            var s = row.dataset.status || '';
+            if (val === 'in_approval') {
+                row.style.display = inApproval.includes(s) ? '' : 'none';
+            } else if (val === 'approved') {
+                row.style.display = (s === 'final_approved' || s === 'completed') ? '' : 'none';
+            } else {
+                row.style.display = s === val ? '' : 'none';
+            }
+        });
+    }
+
+    var sel = document.getElementById('statusFilter');
+    if (sel) {
+        sel.addEventListener('change', function () { applyStatusFilter(sel.value); });
+        // Apply pre-filter from URL ?status= param on load
+        if (sel.value) applyStatusFilter(sel.value);
+    }
+});

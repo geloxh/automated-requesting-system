@@ -491,6 +491,42 @@ select.form-control {
 }
  
 /* Disk icon colours (replaces style="color:var(--danger/success)") */
-.icon-danger { color: var(--danger); }
+.icon-danger  { color: var(--danger); }
 .icon-success { color: var(--success); }
-.icon-soft { color: var(--text-soft); }
+.icon-soft    { color: var(--text-soft); }
+ 
+/* ── CSP-safe replacements — inline styles removed from views ── */
+ 
+/* employees/index.php — action button row */
+.flex-row-center {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+ 
+/* approvals/inbox.php — empty state text */
+.inbox-empty-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+.inbox-empty-sub {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-bottom: 16px;
+}
+ 
+/* approvals/inbox.php — small arrow icon */
+.icon-xs {
+    font-size: 11px;
+}
+ 
+/* forms/my_submissions.php — stage name cell */
+td.muted.text-xs {
+    font-size: 12px;
+}
+ 
+/* forms/show.php — padded empty state */
+.empty-state--padded {
+    padding: 1rem;
+}
+ 

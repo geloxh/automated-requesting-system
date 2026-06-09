@@ -1,12 +1,12 @@
 <?php
-    $formLabel   = \App\Helpers\FormLabels::all();
+    $formLabel = \App\Helpers\FormLabels::all();
     $statusBadge = \App\Helpers\FormLabels::allBadges();
-    $stepBadge   = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'];
+    $stepBadge = [ 'pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger' ];
 
-    $type    = $form['form_type'] ?? 'unknown';
-    $title   = \App\Helpers\FormLabels::get($type);
-    $roleId  = $_SESSION['role_id'];
-    $formId  = $form['id'];
+    $type = $form['form_type'] ?? 'unknown';
+    $title = \App\Helpers\FormLabels::get($type);
+    $roleId = $_SESSION['role_id'];
+    $formId = $form['id'];
     // Human-readable status label
     $humanStatus = \App\Helpers\FormLabels::statusLabel($form['status']);
 ?>
@@ -43,26 +43,26 @@
             <div class="dl-grid">
             <?php
                 $fieldLabels = [
-                    'purpose'       => 'Purpose',
-                    'payment_type'  => 'Payment Type',
-                    'payee'         => 'Payee',
-                    'date'          => 'Date',
+                    'purpose' => 'Purpose',
+                    'payment_type' => 'Payment Type',
+                    'payee' => 'Payee',
+                    'date' => 'Date',
                     'employee_name' => 'Employee Name',
-                    'department'    => 'Department',
-                    'request_date'  => 'Request Date',
-                    'unit_owner'    => 'Unit Owner',
-                    'bearer_name'   => 'Bearer Name',
-                    'service_type'  => 'Service Type',
-                    'leave_type'    => 'Leave Type',
-                    'from_date'     => 'From Date',
-                    'to_date'       => 'To Date',
-                    'payment_term'  => 'Payment Term',
+                    'department' => 'Department',
+                    'request_date' => 'Request Date',
+                    'unit_owner' => 'Unit Owner',
+                    'bearer_name' => 'Bearer Name',
+                    'service_type' => 'Service Type',
+                    'leave_type' => 'Leave Type',
+                    'from_date' => 'From Date',
+                    'to_date' => 'To Date',
+                    'payment_term' => 'Payment Term',
                     'car_available' => 'Car Available',
-                    'trip_type'     => 'Trip Type',
+                    'trip_type' => 'Trip Type',
                 ];
             ?>
             <?php if (empty($data)): ?>
-                <div class="empty-state" style="padding:1rem">
+                <div class="empty-state" class="empty-state-padded">
                     <i class="ti ti-file-off empty-state-icon"></i>
                     No form data available.
                 </div>
@@ -101,24 +101,24 @@
             <div class="card-body">
                 <?php
                     $actionLabels = [
-                        'submit'              => 'Submit for Approval',
-                        'checker-approval'    => 'Approve — Checker Approval',
-                        'review-approval'     => 'Approve — Review Approval',
-                        'process-approval'    => 'Approve — Process Approval',
+                        'submit' => 'Submit for Approval',
+                        'checker-approval' => 'Approve — Checker Approval',
+                        'review-approval' => 'Approve — Review Approval',
+                        'process-approval' => 'Approve — Process Approval',
                         'evaluation-approval' => 'Approve — Evaluation Approval',
-                        'grant-approval'      => 'Grant Approval Request',
-                        'complete'            => 'Mark as Completed',
+                        'grant-approval' => 'Grant Approval Request',
+                        'complete' => 'Mark as Completed',
                     ];
                     $approveLabel = $actionLabels[$nextAction] ?? 'Approve';
 
                     $nextStepHints = [
-                        'checker-approval'    => 'Approving will forward this to the Department Head.',
-                        'review-approval'     => 'Approving will forward this to the Final Approver.',
-                        'process-approval'    => 'Approving will forward this to the Finance Head.',
+                        'checker-approval' => 'Approving will forward this to the Department Head.',
+                        'review-approval' => 'Approving will forward this to the Final Approver.',
+                        'process-approval' => 'Approving will forward this to the Finance Head.',
                         'evaluation-approval' => 'Approving will forward this to the Final Approver.',
-                        'grant-approval'      => 'Approving will mark this as Final Approved.',
-                        'complete'            => 'This will close the request as fully completed.',
-                        'submit'              => 'Submitting will send this for Checker Approval.',
+                        'grant-approval' => 'Approving will mark this as Final Approved.',
+                        'complete' => 'This will close the request as fully completed.',
+                        'submit' => 'Submitting will send this for Checker Approval.',
                     ];
                 ?>
                 <form method="POST" id="approvalForm" enctype="multipart/form-data">
@@ -171,7 +171,7 @@
         </div>
         <?php endif; ?>
 
-        <?php if (!$canAct && in_array($form['status'], ['completed', 'rejected'], true)): ?>
+        <?php if (!$canAct && in_array($form[ 'status' ], [ 'completed', 'rejected' ], true)): ?>
             <div class="card card-action">
                 <div class="card-header">Request Status</div>
                 <div class="card-body">
