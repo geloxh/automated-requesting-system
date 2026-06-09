@@ -22,23 +22,23 @@
         } else {
             try {
                 if ($roleId === 1) {
-                    $ps = db()->prepare(
+                    $ars = db()->prepare(
                         'SELECT COUNT(*) FROM approvals a
                          JOIN forms f ON f.id = a.form_id
                          WHERE a.status = "pending"
                          AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )'
                     );
-                    $ps->execute();
+                    $ars->execute();
                 } else {
-                    $ps = db()->prepare(
+                    $ars = db()->prepare(
                         'SELECT COUNT(*) FROM approvals a
                          JOIN forms f ON f.id = a.form_id
                          WHERE a.approver_id = ? AND a.status = "pending"
                          AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )'
                     );
-                    $ps->execute([$userId]);
+                    $ars->execute([$userId]);
                 }
-                $pendingCount = (int) $ps->fetchColumn();
+                $pendingCount = (int) $ars->fetchColumn();
                 $_SESSION[$cacheKey] = $pendingCount;
                 $_SESSION[$cacheTs] = time();
             } catch (\Throwable $e) {}
@@ -123,7 +123,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · APS') ?></title>
+    <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · ARS') ?></title>
     <link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/app.css">
     <!-- Accent colour overrides — injected before first paint, no flash -->
     <style nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">:root{<?= $accentVars ?>}</style>

@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login — APS</title>
+    <title>Login — ARS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -60,7 +60,7 @@
         <!-- Sign In pane -->
         <div class="auth-pane <?= !$showSignup ? 'active' : '' ?>" id="pane-signin">
             <div class="auth-title">Welcome back</div>
-            <div class="auth-subtitle">Sign in to your APS account</div>
+            <div class="auth-subtitle">Sign in to your ARS account</div>
 
             <?php if ($success): ?>
                 <p class="form-success" role="alert"><?= htmlspecialchars($success) ?></p>
@@ -98,7 +98,7 @@
         <!-- Sign Up pane -->
         <div class="auth-pane <?= $showSignup ? 'active' : '' ?>" id="pane-signup">
             <div class="auth-title">Create account</div>
-            <div class="auth-subtitle">Register to access APS</div>
+            <div class="auth-subtitle">Register to access ARS</div>
 
             <?php if ($registerError): ?>
                 <p class="form-error" role="alert"><?= htmlspecialchars($registerError) ?></p>

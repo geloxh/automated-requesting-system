@@ -3,14 +3,14 @@
     const panels  = document.querySelectorAll('.settings-panel');
 
     // Restore last active tab from sessionStorage
-    const saved = sessionStorage.getItem('aps_settings_tab');
+    const saved = sessionStorage.getItem('ars_settings_tab');
     if (saved) activate(saved);
 
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
             activate(tab);
-            sessionStorage.setItem('aps_settings_tab', tab);
+            sessionStorage.setItem('ars_settings_tab', tab);
         });
     });
 
