@@ -27,7 +27,7 @@ class NotificationService
     ): void {
         $subject = "[Action Required] {$formLabel} #{$formId} — {$stageName}";
 
-        $link = ($_ENV['APP_URL'] ?? '') . "/processing-system/public/forms/view/{$formId}";
+        $link = ($_ENV['APP_URL'] ?? '') . "/automated-requesting-system/public/forms/view/{$formId}";
 
         $body = "Hi {$toName},\n\n"
               . "A {$formLabel} submitted by {$submitterName} requires your approval at the {$stageName} stage.\n\n"
@@ -48,7 +48,7 @@ class NotificationService
         string $stageName,
         string $remarks = ''
     ): void {
-        $link = ($_ENV['APP_URL'] ?? '') . "/processing-system/public/forms/view/{$formId}";
+        $link = ($_ENV['APP_URL'] ?? '') . "/automated-requesting-system/public/forms/view/{$formId}";
 
         switch ($outcome) {
             case 'rejected':

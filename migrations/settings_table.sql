@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS settings (
 -- Seed with .env defaults so the form is pre-populated on first visit.
 INSERT IGNORE INTO settings (`key`, `value`) VALUES
     ('app_name', 'AutomatedRequestingSystem'),
-    ('app_url', 'https://localhost/processing-system/public'),
+    ('app_url', 'https://localhost/automated-requesting-system/public'),
     ('app_env', 'local'),
     ('app_timezone', 'Asia/Manila'),
     ('items_per_page', '20'),

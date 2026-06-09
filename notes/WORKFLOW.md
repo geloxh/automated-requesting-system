@@ -1,4 +1,4 @@
-### System FLow of APS
+### System FLow of ARS
 
 ### Administrative Forms
 - **Overtime Authorization** 
@@ -21,7 +21,7 @@
 ```bash
     cd C:\xampp\mysql\bin
     mysql -u root -p
-    USE psdb;
+    USE a;
     SELECT id, full_name, email, role_id FROM employees ORDER BY role_id;
 ```
 

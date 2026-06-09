@@ -46,7 +46,7 @@
             }
 
             $_SESSION['success'] = 'General settings saved successfully.';
-            header('Location: /processing-system/public/settings');
+            header('Location: /automated-requesting-system/public/settings');
             exit;
         }
 
@@ -74,7 +74,7 @@
             }
 
             $_SESSION['success'] = 'Mail settings saved successfully.';
-            header('Location: /processing-system/public/settings');
+            header('Location: /automated-requesting-system/public/settings');
             exit;
         }
 
@@ -100,7 +100,7 @@
             }
 
             $_SESSION['success'] = 'Appearance settings saved.';
-            header('Location: /processing-system/public/settings#appearance');
+            header('Location: /automated-requesting-system/public/settings#appearance');
             exit;
         }
 
@@ -124,7 +124,7 @@
             }
 
             $_SESSION['success'] = 'Notification preferences saved.';
-            header('Location: /processing-system/public/settings#notifications');
+            header('Location: /automated-requesting-system/public/settings#notifications');
             exit;
         }
 
@@ -154,7 +154,7 @@
             }
 
             $_SESSION['success'] = 'Storage settings saved.';
-            header('Location: /processing-system/public/settings#storage');
+            header('Location: /automated-requesting-system/public/settings#storage');
             exit;
         }
 

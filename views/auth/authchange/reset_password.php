@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Create New Password — Processing System</title>
-    <link href="/processing-system/public/stylesheets/auth.css" rel="stylesheet">
+    <link href="/automated-requesting-system/public/stylesheets/auth.css" rel="stylesheet">
 </head>
 <body>
     <div class="forgot-password-card">
@@ -22,7 +22,7 @@
             <p class="form-error" role="alert"><?= htmlspecialchars($error) ?></p>
         <?php endif; ?>
 
-        <form method="POST" action="/processing-system/public/update-password">
+        <form method="POST" action="/automated-requesting-system/public/update-password">
             <?= \App\Helpers\Csrf::field() ?>
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
@@ -54,12 +54,12 @@
         <div class="card-divider"></div>
 
         <div class="card-footer">
-            <a href="/processing-system/public/login" class="card-back-link">
+            <a href="/automated-requesting-system/public/login" class="card-back-link">
                 <i data-lucide="x-circle" class="icon-sm"></i> Cancel and Login
             </a>
         </div>
     </div>
-    <script src="/processing-system/public/scripts/lucide.min.js"></script>
-    <script src="/processing-system/public/scripts/auth.js"></script>
+    <script src="/automated-requesting-system/public/scripts/lucide.min.js"></script>
+    <script src="/automated-requesting-system/public/scripts/auth.js"></script>
 </body>
 </html>

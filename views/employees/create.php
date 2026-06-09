@@ -8,7 +8,7 @@
 <?php endif; ?>
 
 <div class="form-card">
-    <form method="POST" action="/processing-system/public/employees/create">
+    <form method="POST" action="/automated-requesting-system/public/employees/create">
 
         <?= \App\Helpers\Csrf::field() ?>
         

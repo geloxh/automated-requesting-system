@@ -39,7 +39,7 @@
                     <td><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></td>
                     <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                     <td class="muted td-stage">
-                        <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">
+                        <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">
                             Submit Now
                         </a>
                     </td>
@@ -109,9 +109,9 @@
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
                     <?php if ($form['status'] === 'draft'): ?>
-                        <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">Submit</a>
+                        <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">Submit</a>
                     <?php else: ?>
-                        <a href="/processing-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
+                        <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
                     <?php endif; ?>
                 </td>
             </tr>
@@ -120,5 +120,5 @@
     </table>
 </div>
 
-<script src="/processing-system/public/scripts/app.js"></script>
+<script src="/automated-requesting-system/public/scripts/app.js"></script>
 <?php endif; ?>

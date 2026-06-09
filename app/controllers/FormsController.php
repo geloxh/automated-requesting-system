@@ -152,7 +152,7 @@
                 if (is_string($val)) $val = trim($val);
                 if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
                     $_SESSION['error'] = "Field '{$field}' is required.";
-                    header("Location: /processing-system/public/forms/{$slug}/create");
+                    header("Location: /automated-requesting-system/public/forms/{$slug}/create");
                     exit;
                 }
             }
@@ -194,13 +194,13 @@
                 $pdo->commit();
 
                 $_SESSION['success'] = 'Form submitted successfully.';
-                header("Location: /processing-system/public/forms/view/{$formId}");
+                header("Location: /automated-requesting-system/public/forms/view/{$formId}");
                 exit;
 
             } catch (\Throwable $e) {
                 $pdo->rollBack();
                 $_SESSION['error'] = 'Submission failed. Please try again.';
-                header("Location: /processing-system/public/forms/{$slug}/create");
+                header("Location: /automated-requesting-system/public/forms/{$slug}/create");
                 exit;
             }
         }
@@ -229,7 +229,7 @@
 
             if (!$approval && !$isSysAdmin) {
                 $_SESSION['error'] = 'No pending approval step found for you.';
-                header("Location: /processing-system/public/forms/view/{$id}");
+                header("Location: /automated-requesting-system/public/forms/view/{$id}");
                 exit;
             }
 
@@ -264,7 +264,7 @@
                 $_SESSION['error'] = 'Action failed. Please try again.';
             }
 
-            header("Location: /processing-system/public/forms/view/{$id}");
+            header("Location: /automated-requesting-system/public/forms/view/{$id}");
             exit;
         }
 

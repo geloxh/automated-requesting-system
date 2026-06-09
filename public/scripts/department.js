@@ -84,7 +84,7 @@ function selectDept(el, id, name, count = 0) {
     document.getElementById('detailForms').textContent = el.dataset.forms ?? 0;
 
     document.getElementById('detailDeleteForm').action =
-        '/processing-system/public/departments/' + parseInt(id, 10) + '/delete';
+        '/automated-requesting-system/public/departments/' + parseInt(id, 10) + '/delete';
     document.getElementById('detailEditBtn').onclick   = () => openEdit(id, name);
     document.getElementById('detailEditBtn').disabled  = false;
     document.getElementById('detailDeleteBtn').disabled = false;
@@ -95,7 +95,7 @@ function selectDept(el, id, name, count = 0) {
     const badge = document.getElementById('deptMembersCount');
     list.innerHTML = '<li class="dept-members-loading"><i class="ti ti-loader-2 spin"></i> Loading…</li>';
 
-    fetch('/processing-system/public/departments/' + parseInt(id, 10) + '/members')
+    fetch('/automated-requesting-system/public/departments/' + parseInt(id, 10) + '/members')
         .then(r => r.json())
         .then(members => {
             badge.textContent = members.length;
@@ -141,7 +141,7 @@ const renameCancelBtn = document.getElementById('renameCancelBtn');
 
 function openEdit(id, name) {
     document.getElementById('editForm').action =
-        '/processing-system/public/departments/' + parseInt(id, 10) + '/update';
+        '/automated-requesting-system/public/departments/' + parseInt(id, 10) + '/update';
     renameInput.value = name;
     renameBar.classList.remove('dept-hidden');
     detailName.classList.add('dept-hidden');
