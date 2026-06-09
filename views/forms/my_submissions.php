@@ -2,17 +2,17 @@
 <div class="page-subheading">Track the approval status of all your submitted requests.</div>
 
 <?php
-$badgeMap = \App\Helpers\FormLabels::allBadges();
-$statusLabels = \App\Helpers\FormLabels::allStatusLabels();
+    $badgeMap = \App\Helpers\FormLabels::allBadges();
+    $statusLabels = \App\Helpers\FormLabels::allStatusLabels();
 
-// Support pre-filtering from KPI card links (?status=draft|approved|rejected|in_approval)
-$activeFilter = $_GET['status'] ?? '';
-$inApprovalStatuses = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed'];
+    // Support pre-filtering from KPI card links (?status=draft|approved|rejected|in_approval)
+    $activeFilter = $_GET['status'] ?? '';
+    $inApprovalStatuses = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed'];
 
-$drafts = array_filter($forms ?? [], fn($f) => $f['status'] === 'draft');
-$others = array_filter($forms ?? [], fn($f) => $f['status'] !== 'draft');
-$uniqueTypes = array_unique(array_column($forms ?? [], 'form_type'));
-sort($uniqueTypes);
+    $drafts = array_filter($forms ?? [], fn($f) => $f['status'] === 'draft');
+    $others = array_filter($forms ?? [], fn($f) => $f['status'] !== 'draft');
+    $uniqueTypes = array_unique(array_column($forms ?? [], 'form_type'));
+    sort($uniqueTypes);
 ?>
 
 <?php if (!empty($drafts)): ?>
@@ -105,7 +105,7 @@ sort($uniqueTypes);
                         <?= htmlspecialchars($humanStatus) ?>
                     </span>
                 </td>
-                <td class="muted" style="font-size:12px"><?= htmlspecialchars($stageName) ?></td>
+                <td class="muted" class="muted text-xs"><?= htmlspecialchars($stageName) ?></td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
                     <?php if ($form['status'] === 'draft'): ?>
@@ -120,31 +120,5 @@ sort($uniqueTypes);
     </table>
 </div>
 
-<script>
-(function () {
-    var inApproval = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed','final_approved'];
-
-    function applyStatusFilter(val) {
-        var rows = document.querySelectorAll('table[data-filterable] tbody tr');
-        rows.forEach(function (row) {
-            if (!val) { row.style.display = ''; return; }
-            var s = row.dataset.status || '';
-            if (val === 'in_approval') {
-                row.style.display = inApproval.includes(s) ? '' : 'none';
-            } else if (val === 'approved') {
-                row.style.display = (s === 'final_approved' || s === 'completed') ? '' : 'none';
-            } else {
-                row.style.display = s === val ? '' : 'none';
-            }
-        });
-    }
-
-    var sel = document.getElementById('statusFilter');
-    if (sel) {
-        sel.addEventListener('change', function () { applyStatusFilter(sel.value); });
-        // Apply pre-filter from URL ?status= param on load
-        if (sel.value) applyStatusFilter(sel.value);
-    }
-})();
-</script>
+<script src="/processing-system/public/scripts/app.js"></script>
 <?php endif; ?>

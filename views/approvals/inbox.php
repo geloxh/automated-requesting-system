@@ -2,25 +2,25 @@
 <div class="page-subheading">Review and act on requests routed to you for approval.</div>
 
 <?php
-$formLabel = $formLabel ?? [];
-$iconMap = [
-    'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash'],
-    'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-    'request_for_payment' => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
-    'leave_application' => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
-    'reimbursement' => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
-    'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
-    'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
-];
-$uniqueTypes = array_unique(array_column($approvals ?? [], 'form_type'));
-sort($uniqueTypes);
+    $formLabel = $formLabel ?? [];
+    $iconMap = [
+        'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash'],
+        'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
+        'request_for_payment' => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        'leave_application' => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
+        'reimbursement' => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
+        'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
+        'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car'],
+    ];
+    $uniqueTypes = array_unique(array_column($approvals ?? [], 'form_type'));
+    sort($uniqueTypes);
 ?>
 
 <?php if (empty($approvals)): ?> 
     <div class="empty-state">
         <i class="ti ti-inbox-off empty-state-icon"></i>
-        <div style="font-weight:600;margin-bottom:6px">You're all caught up!</div>
-        <div style="font-size:13px;color:var(--text-soft);margin-bottom:16px">No pending approvals at this time.</div>
+        <div class="inbox-empty-title">You're all caught up!</div>
+        <div class="inbox-empty0sub">No pending approvals at this time.</div>
         <a href="/processing-system/public/my-submissions" class="btn btn-ghost btn-sm">
             <i class="ti ti-send"></i> View My Submissions
         </a>
@@ -28,11 +28,11 @@ sort($uniqueTypes);
 <?php else: ?>
 
 <?php
-$totalPending = count($approvals);
-$overdue      = count(array_filter($approvals, fn($r) => $r['days_pending'] >= 3));
-$byType       = array_count_values(array_column($approvals, 'form_type'));
-arsort($byType);
-$topType      = key($byType) ?? null;
+    $totalPending = count($approvals);
+    $overdue = count(array_filter($approvals, fn($r) => $r['days_pending'] >= 3));
+    $byType = array_count_values(array_column($approvals, 'form_type'));
+    arsort($byType);
+    $topType = key($byType) ?? null;
 ?>
 
 <div class="kpi-grid">
