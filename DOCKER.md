@@ -33,7 +33,7 @@ This single command:
 First run takes **2–3 minutes**. You'll know it's ready when you see:
 
 ```
-ars_app  | AH00558: apache2: ... httpd started
+ars_app | AH00558: apache2: ... httpd started
 ```
 
 ---
