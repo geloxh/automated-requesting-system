@@ -68,8 +68,8 @@ a { text-decoration: none; color: inherit; }
     color: #fff; font-size: 17px;
 }
 .brand-text { flex: 1; min-width: 0; overflow: hidden; }
-.brand-name  { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: #fff; line-height: 1; white-space: nowrap; }
-.brand-tag   { font-size: 9.5px; color: #475569; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
+.brand-name { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: #fff; line-height: 1; white-space: nowrap; }
+.brand-tag { font-size: 9.5px; color: #475569; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
 
 /* ── Sidebar toggle button (inside brand) ── */
 .sidebar-toggle-btn {
@@ -366,6 +366,40 @@ a { text-decoration: none; color: inherit; }
 .error-title { font-size: 1.1rem; font-weight: 600; margin-bottom: .4rem; }
 .error-message { color: var(--text-muted); font-size: 14px; }
 
+.new-req-wrap { position: relative; }
+
+.new-req-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    min-width: 210px;
+    z-index: 200;
+    overflow: hidden;
+}
+
+.new-req-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: .875rem;
+    color: var(--text);
+    text-decoration: none;
+    transition: background .15s;
+}
+
+.new-req-dropdown a:hover { background: var(--surface-hover); }
+
+.new-req-dropdown:not(.dept-hidden) {
+    animation: fade-down .15s ease;
+}
+
+.dept-hidden { display: none !important; }
+
 /* ── New Request button ── */
 .btn-new-req {
     display: inline-flex; align-items: center; gap: 6px;
@@ -469,7 +503,7 @@ a { text-decoration: none; color: inherit; }
 .kpi-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
 .kpi-value { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--text-main); line-height: 1; }
 .kpi-delta { font-size: 12px; margin-top: 6px; color: var(--text-soft); }
-.kpi-icon  { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.kpi-icon { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 .kpi-icon.blue { background: #e0f2fe; color: var(--accent); }
 .kpi-icon.green { background: #d1fae5; color: var(--success); }
 .kpi-icon.amber { background: #fef3c7; color: var(--warning); }
@@ -519,7 +553,7 @@ a { text-decoration: none; color: inherit; }
 
 .inbox-form-cell { display: flex; align-items: center; gap: 10px; }
 .inbox-form-name { font-weight: 600; font-size: 13.5px; }
-.inbox-form-id   { font-size: 11.5px; color: var(--text-muted); }
+.inbox-form-id { font-size: 11.5px; color: var(--text-muted); }
 
 .inbox-kpi {
     display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
@@ -574,10 +608,10 @@ td.text-end { text-align: right; }
 
 .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .75rem; }
 
-.card--draft-alert   { border-left: 3px solid var(--warning); margin-bottom: 1rem; }
-.card-header--flex   { display: flex; align-items: center; gap: 8px; }
-.card-body--flush    { padding: 0; }
-.td-stage            { font-size: 12px; }
+.card--draft-alert { border-left: 3px solid var(--warning); margin-bottom: 1rem; }
+.card-header--flex { display: flex; align-items: center; gap: 8px; }
+.card-body--flush { padding: 0; }
+.td-stage { font-size: 12px; }
 
 .label { font-size: .78rem; font-weight: 500; color: var(--text-muted); }
 
@@ -653,7 +687,7 @@ textarea { resize: vertical; }
 .show-form-id { font-weight: 400; color: var(--text-muted); font-size: 14px; margin-left: 4px; }
 
 /* ── Detail list ── */
-.dl-grid  { display: grid; grid-template-columns: 160px 1fr; gap: .5rem 1rem; align-items: start; }
+.dl-grid { display: grid; grid-template-columns: 160px 1fr; gap: .5rem 1rem; align-items: start; }
 .dl-label { font-weight: 500; color: var(--text-muted); font-size: .8rem; text-transform: capitalize; }
 .dl-value { font-size: .85rem; }
 
@@ -696,10 +730,10 @@ textarea { resize: vertical; }
     font-size: 15px; border: 2px solid var(--border);
     background: var(--card-bg); color: var(--text-soft);
 }
-.step-dot.done     { background: var(--success); border-color: var(--success); color: #fff; }
-.step-dot.current  { background: #fff; border-color: var(--warning); color: var(--warning); }
+.step-dot.done { background: var(--success); border-color: var(--success); color: #fff; }
+.step-dot.current { background: #fff; border-color: var(--warning); color: var(--warning); }
 .step-dot.rejected { background: #fee2e2; border-color: var(--danger); color: var(--danger); }
-.step-dot.pending  { background: var(--surface); border-color: var(--border); color: var(--text-soft); }
+.step-dot.pending { background: var(--surface); border-color: var(--border); color: var(--text-soft); }
 
 .step-remark {
     font-size: 12px; font-style: italic;
@@ -872,7 +906,7 @@ textarea { resize: vertical; }
     color: var(--qf-color, var(--text-main));
 }
 
-/* ── Table filter bar ──────────────────────────────────────────── */
+/* ── Table filter bar ── */
 .filter-bar {
     display: flex;
     flex-wrap: wrap;
@@ -907,7 +941,7 @@ textarea { resize: vertical; }
     background: #fff5f5 !important;
 }
 
-/* ── Notification panel — real data styles ─────────────────────── */
+/* ── Notification panel — real data styles ── */
 .notif-item--unread {
     background: var(--surface-raised, #f8fafc);
     border-left: 3px solid var(--primary);
@@ -1070,7 +1104,7 @@ textarea { resize: vertical; }
     transition: width .4s ease;
 }
 
-/* ── Dark mode ───────────────────────────────────────────────────────────── */
+/* ── Dark mode ──n */
 /*
    The <html> element gets data-theme="dark" from base.php when the DB
    setting theme_mode = 'dark'. Every rule below overrides the light-mode
