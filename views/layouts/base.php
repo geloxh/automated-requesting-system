@@ -45,7 +45,7 @@
         }
     }
 
-    // ── Notifications ─────────────────────────────────────────────────────────
+    // ── Notifications ── //
     $notifItems = [];
     $notifUnread = 0;
     if ($userId) {
