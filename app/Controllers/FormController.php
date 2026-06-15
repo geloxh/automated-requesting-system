@@ -2,9 +2,9 @@
 class FormController {
     private array $typeMap = [
         'advance-payment' => 'advance_payment',
-        'overtime' => 'overtime_authorization',
-        'request-payment' => 'request_for_payment',
-        'leave' => 'leave_application',
+        'overtime-authorization' => 'overtime_authorization',
+        'request-for-payment' => 'request_for_payment',
+        'leave-application' => 'leave_application',
         'reimbursement' => 'reimbursement',
         'liquidation' => 'liquidation',
         'vehicle-request' => 'vehicle_request',

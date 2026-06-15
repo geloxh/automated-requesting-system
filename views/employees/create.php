@@ -53,7 +53,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="ti ti-send"></i> Submit for Approval
             </button>
-            <a href="javascript:history.back()" class="btn btn-ghost">Cancel</a>
+            <a href="/automated-requesting-system/public/employees" class="btn btn-ghost">Cancel</a>
         </div>
     </form>
 </div>

@@ -12,5 +12,5 @@
         <div class="error-title"><?= htmlspecialchars($errorTitle) ?></div>
         <div class="error-message"><?= htmlspecialchars($errorMessage) ?></div>
     </div>
-    <a href="javascript:history.back()" class="btn btn-ghost btn-sm">← Go Back</a>
+    <button type="button" class="btn btn-ghost btn-sm js-go-back">← Go Back</button>
 </div>

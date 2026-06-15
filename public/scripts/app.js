@@ -3,7 +3,7 @@
  * Global UI behaviour — loaded at the bottom of every page via base.php.
  */
 
-// ── Notification panel ──────────────────────────────────────────
+// ── Notification panel ── //
 function toggleNotif() {
     document.getElementById('notifPanel').classList.toggle('open');
 }
@@ -14,18 +14,13 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// ── Sidebar toggle (desktop collapse + mobile overlay) ──────────
+// ── Sidebar toggle (desktop collapse + mobile overlay) ── //
 var sidebarToggle = document.getElementById('sidebarToggle');
 var sidebar = document.getElementById('sidebar');
 var SIDEBAR_KEY = 'sidebar_collapsed';
 
-// Restore sidebar collapsed state.
-// base.php adds the 'collapsed' class server-side when sidebar_collapsed=1
-// in the DB, which avoids the localStorage-only flash. The toggle button
-// still writes to localStorage so manual toggles survive page navigation.
 if (sidebar && window.innerWidth > 900) {
-    // If user toggled manually this session, localStorage takes precedence.
-    // Otherwise the server-rendered class is already set correctly.
+   
     var lsVal = localStorage.getItem(SIDEBAR_KEY);
     if (lsVal === 'true') {
         sidebar.classList.add('collapsed');
@@ -79,7 +74,7 @@ window.addEventListener('resize', function () {
     updateToggleIcon();
 });
 
-// ── Sidebar group dropdown ──────────────────────────────────────
+// ── Sidebar group dropdown ── //
 document.addEventListener('DOMContentLoaded', function () {
     var GROUPS_KEY = 'sidebar_groups';
     var saved = {};
@@ -176,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Escape') { close(); input.blur(); return; }
         if (dropdown.classList.contains('dept-hidden')) return;
         if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIdx + 1, results.length - 1)); }
-        if (e.key === 'ArrowUp')   { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
         if (e.key === 'Enter' && activeIdx >= 0) {
             e.preventDefault();
             window.location.href = '/automated-requesting-system/public/forms/view/' + results[activeIdx].id;
@@ -202,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ── Notification button wiring ──────────────────────────────────
+// ── Notification button wiring ── //
 document.addEventListener('DOMContentLoaded', function () {
     var notifBtn = document.getElementById('notifBtn');
     if (notifBtn) notifBtn.addEventListener('click', toggleNotif);
@@ -258,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(pollNotifications, 60000);
 });
 
-// ── Default today's date on date inputs ────────────────────────
+// ── Default today's date on date inputs ── //
 document.querySelectorAll('input[type="date"]:not([value])').forEach(function (el) {
     if (!el.closest('[data-no-default]')) {
         el.value = new Date().toISOString().split('T')[0];
@@ -304,3 +299,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sel.value) applyStatusFilter(sel.value);
     }
 });
+
+document.querySelectorAll('.js-go-back').forEach(btn => {
+    btn.addEventListener('click', () => history.back());
+});
+
+// New Request dropdown toggle
+const newReqBtn = document.getElementById('newReqBtn');
+const newReqDropdown = document.getElementById('newReqDropdown');
+if (newReqBtn && newReqDropdown) {
+    newReqBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isHidden = newReqDropdown.classList.contains('dept-hidden');
+        newReqDropdown.classList.toggle('dept-hidden', !isHidden);
+        newReqBtn.setAttribute('aria-expanded', String(isHidden));
+    });
+    document.addEventListener('click', function () {
+        newReqDropdown.classList.add('dept-hidden');
+        newReqBtn.setAttribute('aria-expanded', 'false');
+    });
+}
