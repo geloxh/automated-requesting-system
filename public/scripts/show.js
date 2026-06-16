@@ -4,14 +4,14 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ── Back button ─────────────────────────────────────────────
+    // ── Back button ──
     const backBtn = document.getElementById('btn-back');
     if (backBtn) {
         backBtn.addEventListener('click', () => {
             if (history.length > 1) {
                 history.back();
             } else {
-                window.location.href = backBtn.dataset.fallbackUrl || APP_URL + '/approvals';
+                window.location.href = backBtn.dataset.fallbackUrl || window.ARS_BASE + '/approvals';
             }
         });
     }
