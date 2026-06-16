@@ -28,7 +28,11 @@
 
     if ($uri === '/register') {
         if ($method === 'POST') (new AuthController)->register();
-        else require __DIR__ . '/../views/auth/register.php';
+        else {
+            // Register form lives inside login.php (signup tab)
+            $_SESSION['show_signup'] = true;
+            require __DIR__ . '/../views/auth/login.php';
+        }
         exit;
     }
 

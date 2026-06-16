@@ -9,7 +9,6 @@ class Csrf {
         return $_SESSION['csrf_token'];
     }
 
-    // empty() checks + unset after use to prevent replay attacks
     public static function verify(): void {
         $token = $_POST['csrf_token'] ?? '';
 
@@ -18,12 +17,15 @@ class Csrf {
             empty($token) ||
             !hash_equals($_SESSION['csrf_token'], $token)
         ) {
+            // Regenerate so the form works again after a failed attempt
+            unset($_SESSION['csrf_token']);
             http_response_code(403);
-            echo '<h3>403 - Invalid CSRF token.</h3>';
+            echo '<h3>403 - Invalid CSRF token.</h3><p><a href="javascript:history.back()">Go back and try again</a></p>';
             exit;
         }
 
-        unset($_SESSION['csrf_token']); // force regeneration on next request
+        // Rotate after successful use to prevent replay attacks
+        unset($_SESSION['csrf_token']);
     }
 
     public static function field(): string {

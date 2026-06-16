@@ -1,9 +1,10 @@
 <?php
 // Session security
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.cookie_samesite', 'Lax');   // Strict blocks cookie on cross-origin POST redirects
 ini_set('session.use_strict_mode', 1);
 ini_set('session.cookie_secure', 1);
+ini_set('session.name', 'ARS_SESSION');       // Explicit name avoids collisions with other PHP apps
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

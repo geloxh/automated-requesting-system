@@ -119,6 +119,12 @@
                     </div>
                 </div>
                 <div class="auth-field">
+                    <label for="reg_username">Username</label>
+                    <input type="text" id="reg_username" name="username"
+                           value="<?= htmlspecialchars($oldRegister['username'] ?? '') ?>"
+                           required placeholder="e.g. jdoe">
+                </div>
+                <div class="auth-field">
                     <label for="reg_email">Email</label>
                     <input type="email" id="reg_email" name="email"
                            value="<?= htmlspecialchars($oldRegister['email'] ?? '') ?>"
