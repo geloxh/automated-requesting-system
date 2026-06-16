@@ -30,10 +30,10 @@
         <tbody>
             <?php foreach ($employees as $e): ?>
             <tr>
-                <td><?= htmlspecialchars($e['employee_code']) ?></td>
-                <td><?= htmlspecialchars($e['full_name']) ?></td>
-                <td><?= htmlspecialchars($e['email']) ?></td>
-                <td><?= htmlspecialchars($e['department']) ?></td>
+                <td><?= htmlspecialchars($e['employee_code'] ?? '') ?></td>
+                <td><?= htmlspecialchars($e['full_name'] ?? '') ?></td>
+                <td><?= htmlspecialchars($e['email'] ?? '') ?></td>
+                <td><?= htmlspecialchars($e['department'] ?? '') ?></td>
                 <td><?= htmlspecialchars($e['role_name'] ?? 'N/A') ?></td>
                 <td><?= htmlspecialchars($e['supervisor_name'] ?? 'None') ?></td>
                 <td>
