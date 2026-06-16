@@ -31,7 +31,7 @@ class FormController {
      */
 
     private const FORM_CATEGORIES = [
-        'admin'   => ['overtime_authorization', 'leave_application', 'vehicle_request'],
+        'admin' => ['overtime_authorization', 'leave_application', 'vehicle_request'],
         'finance' => ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'],
     ];
 
@@ -822,7 +822,7 @@ class FormController {
         $pageTitle = "{$code} — {$title}";
         define('BASE_LOADED', true);
         ob_start();
-        require __DIR__ . '/../../views/errors/error.php';
+        require __DIR__ . '/../../views/error/error.php';
         $content = ob_get_clean();
         require __DIR__ . '/../../views/layouts/base.php';
         exit;

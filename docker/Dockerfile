@@ -31,18 +31,16 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # ── App files ─────────────────────────────────────────────────────────────────
 WORKDIR /var/www/automated-requesting-system
 
+# Copy project files into the image.
+# Because COPY runs inside the Linux container, only app/Helpers/ (capital H)
+# from the Windows host is copied — app/helpers/ (lowercase) does not exist
+# separately on a case-insensitive Windows filesystem, so there is no duplicate.
 COPY . .
 
-# Fix: Linux is case-sensitive but Windows is not, so all app/ subfolders were
-# committed with lowercase names. Every namespace and PSR-4 autoloader reference
-# uses capital letters (App\Controllers, App\Middleware, etc).
-# Rename all four affected folders once at build time.
-RUN for dir in controllers Controllers middleware Middleware helpers Helpers model Model services Services; do :; done \
-    && { [ -d app/helpers ] && [ ! -d app/Helpers ] && mv app/helpers app/Helpers; true; } \
-    && { [ -d app/controllers ] && [ ! -d app/Controllers ] && mv app/controllers app/Controllers; true; } \
-    && { [ -d app/middleware ] && [ ! -d app/Middleware ] && mv app/middleware  app/Middleware;  true; } \
-    && { [ -d app/model ] && [ ! -d app/Model ] && mv app/model app/Model; true; } \
-    && { [ -d app/services ] && [ ! -d app/Services ] && mv app/services app/Services; true; }
+# Fix: csrf.php was committed with lowercase filename.
+# PSR-4 resolves App\Helpers\Csrf → Csrf.php (capital C).
+RUN [ -f app/Helpers/csrf.php ] && [ ! -f app/Helpers/Csrf.php ] \
+    && mv app/Helpers/csrf.php app/Helpers/Csrf.php || true
 
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 

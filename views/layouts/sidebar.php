@@ -14,7 +14,7 @@
 
     <div class="sidebar-nav">
 
-        <a href="/automated-requesting-system/public/dashboard"
+        <a href="<?= url('dashboard') ?>"
            data-tooltip="Dashboard"
            class="<?= ($uri === '/dashboard' || $uri === '/') ? 'active' : '' ?>">
             <i class="ti ti-layout-dashboard"></i> <span>Dashboard</span>
@@ -27,22 +27,22 @@
                 <i class="ti ti-chevron-down sidebar-chevron"></i>
             </div>
             <div class="sidebar-group-links" id="group-finance">
-                <a href="/automated-requesting-system/public/forms/advance-payment"
+                <a href="<?= url('forms/advance-payment') ?>"
                    data-tooltip="Advance Payment"
                    class="<?= str_contains($uri, 'advance-payment') ? 'active' : '' ?>">
                     <i class="ti ti-cash"></i> <span>Advance Payment</span>
                 </a>
-                <a href="/automated-requesting-system/public/forms/request-payment"
+                <a href="<?= url('forms/request-for-payment') ?>"
                    data-tooltip="Request for Payment"
-                   class="<?= str_contains($uri, 'request-payment') ? 'active' : '' ?>">
+                   class="<?= str_contains($uri, 'request-for-payment') ? 'active' : '' ?>">
                     <i class="ti ti-receipt"></i> <span>Request for Payment</span>
                 </a>
-                <a href="/automated-requesting-system/public/forms/reimbursement"
+                <a href="<?= url('forms/reimbursement') ?>"
                    data-tooltip="Reimbursement"
                    class="<?= str_contains($uri, 'reimbursement') ? 'active' : '' ?>">
                     <i class="ti ti-credit-card-refund"></i> <span>Reimbursement</span>
                 </a>
-                <a href="/automated-requesting-system/public/forms/liquidation"
+                <a href="<?= url('forms/liquidation') ?>"
                    data-tooltip="Liquidation"
                    class="<?= str_contains($uri, 'liquidation') ? 'active' : '' ?>">
                     <i class="ti ti-calculator"></i> <span>Liquidation</span>
@@ -57,17 +57,17 @@
                 <i class="ti ti-chevron-down sidebar-chevron"></i>
             </div>
             <div class="sidebar-group-links" id="group-admin">
-                <a href="/automated-requesting-system/public/forms/leave"
+                <a href="<?= url('forms/leave-application') ?>"
                    data-tooltip="Leave Application"
-                   class="<?= str_contains($uri, '/leave') ? 'active' : '' ?>">
+                   class="<?= str_contains($uri, '/leave-application') ? 'active' : '' ?>">
                     <i class="ti ti-beach"></i> <span>Leave Application</span>
                 </a>
-                <a href="/automated-requesting-system/public/forms/overtime"
+                <a href="<?= url('forms/overtime-authorization') ?>"
                    data-tooltip="Overtime Auth."
-                   class="<?= str_contains($uri, 'overtime') ? 'active' : '' ?>">
+                   class="<?= str_contains($uri, 'overtime-authorization') ? 'active' : '' ?>">
                     <i class="ti ti-clock-hour-4"></i> <span>Overtime Auth.</span>
                 </a>
-                <a href="/automated-requesting-system/public/forms/vehicle-request"
+                <a href="<?= url('forms/vehicle-request') ?>"
                    data-tooltip="Vehicle Request"
                    class="<?= str_contains($uri, 'vehicle-request') ? 'active' : '' ?>">
                     <i class="ti ti-car"></i> <span>Vehicle Request</span>
@@ -83,7 +83,7 @@
             </div>
             <div class="sidebar-group-links" id="group-approval">
                 <?php if ($roleId !== 3): ?>
-                <a href="/automated-requesting-system/public/approvals"
+                <a href="<?= url('approvals') ?>"
                    data-tooltip="Approval Inbox"
                    class="<?= $uri === '/approvals' ? 'active' : '' ?>">
                     <i class="ti ti-inbox"></i> <span>Approval Inbox</span>
@@ -92,7 +92,7 @@
                     <?php endif; ?>
                 </a>
                 <?php endif; ?>
-                <a href="/automated-requesting-system/public/my-submissions"
+                <a href="<?= url('my-submissions') ?>"
                    data-tooltip="My Submissions"
                    class="<?= $uri === '/my-submissions' ? 'active' : '' ?>">
                     <i class="ti ti-send"></i> <span>My Submissions</span>
@@ -107,18 +107,18 @@
                 <i class="ti ti-chevron-down sidebar-chevron"></i>
             </div>
             <div class="sidebar-group-links" id="group-records">
-                <a href="/automated-requesting-system/public/requests"
+                <a href="<?= url('requests') ?>"
                    data-tooltip="All Requests"
                    class="<?= $uri === '/requests' ? 'active' : '' ?>">
                     <i class="ti ti-file-description"></i> <span>All Requests</span>
                 </a>
                 <?php if ($roleId === 1): ?>
-                <a href="/automated-requesting-system/public/employees"
+                <a href="<?= url('employees') ?>"
                     data-tooltip="Employees"
                     class="<?= $uri === '/employees' ? 'active' : '' ?>">
                     <i class="ti ti-users"></i> <span>Employees</span>
                 </a>
-                <a href="/automated-requesting-system/public/departments"
+                <a href="<?= url('departments') ?>"
                     data-tooltip="Departments"
                     class="<?= $uri === '/departments' ? 'active' : '' ?>">
                     <i class="ti ti-building-community"></i> <span>Departments</span>
@@ -130,12 +130,12 @@
     </div>
 
     <div class="sidebar-footer">
-        <a href="/automated-requesting-system/public/settings"
+        <a href="<?= url('settings') ?>"
            data-tooltip="Settings"
            class="sidebar-settings-link <?= $uri === '/settings' ? 'active' : '' ?>">
             <i class="ti ti-settings"></i> <span>Settings</span>
         </a>
-        <a href="/automated-requesting-system/public/profile" class="user-card" data-tooltip="Profile">
+        <a href="<?= url('profile') ?>" class="user-card" data-tooltip="Profile">
             <div class="user-avatar"><?= $initials ?></div>
             <div>
                 <div class="user-name"><?= htmlspecialchars($_SESSION['user_name']) ?></div>

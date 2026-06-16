@@ -13,3 +13,15 @@ require_once __DIR__ . '/database.php';
 
 // Timezone
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'Asia/Manila');
+
+// URL helper — generates root-relative paths (e.g. /forms/advance-payment)
+// so links work regardless of which IP/hostname the browser uses.
+// Docker:     APP_URL=https://192.168.100.108     → subpath = empty
+// Non-Docker: APP_URL=https://host/automated-requesting-system/public → subpath extracted
+if (!function_exists('url')) {
+    function url(string $path = ''): string {
+        $appUrl  = $_ENV['APP_URL'] ?? '';
+        $subPath = rtrim(parse_url($appUrl, PHP_URL_PATH) ?? '', '/');
+        return $subPath . '/' . ltrim($path, '/');
+    }
+}

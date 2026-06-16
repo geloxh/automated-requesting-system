@@ -6,7 +6,7 @@
     $roleId = (int) $_SESSION['role_id'];
     $userId = (int) $_SESSION['user_id'];
 
-    // ── Recent activity query (last 30 days, role-scoped) ───────────────────
+    // ── Recent activity query (last 30 days, role-scoped) ── //
     if ($roleId === 1) {
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, e.full_name, f.created_at
@@ -16,7 +16,7 @@
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
-    } elseif (in_array($roleId, [2, 4, 5, 6], true)) {
+    } elseif (in_array($roleId, [ 2, 4, 5, 6 ], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -43,9 +43,7 @@
 
     ob_start();
 
-    // ── Status → human label map (used in activity feed badges) ────────────
-    // FIX: was using ucfirst(str_replace('_',' ',$status)) which produced
-    //      "Checker approved" instead of a meaningful label.
+    // ── Status ── //
     $statusLabels = [
         'draft' => 'Draft',
         'submitted' => 'Submitted',
@@ -59,10 +57,7 @@
         'cancelled' => 'Cancelled',
     ];
 
-    // ── KPI bucket mapping ──────────────────────────────────────────────────
-    // FIX: original $inApprovalStatuses omitted finance pipeline statuses
-    //      (process_approved, finance_reviewed), so finance forms were not
-    //      counted in "In Approval".
+    // ── KPI bucket mapping ── //
     $inApprovalStatuses = [
         'submitted',
         'checker_approved',
@@ -86,7 +81,7 @@
         }
     }
 
-    // ── Icon + fixed colour map (keyed by form_type) ───────────────────────
+    // ── Icon + fixed colour map (keyed by form_type) ── //
     $iconMap = [
         'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash', 'barColor' => '#10b981'],
         'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4', 'barColor' => '#8b5cf6'],
@@ -97,7 +92,7 @@
         'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car', 'barColor' => '#ca8a04'],
     ];
 
-    // ── Form volume (FIX: use type-fixed colours, not index-cycling array) ─
+    // ── Form volume ── //
     $typeCounts   = [];
     foreach ($forms as $f) {
         $typeCounts[$f['form_type']] = ($typeCounts[$f['form_type']] ?? 0) + 1;
@@ -115,14 +110,10 @@
         ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#ca8a04', 'icon' => 'ti-car'],
     ];
 
-    // ── Pending alert — reuse the session-cached count from base.php ───────
-    // FIX: original code ran a second raw string-interpolated SQL query here.
-    //      base.php now caches $pendingCount in session; it is available via
-    //      $_SESSION["pending_count_{$userId}"] but we just let base.php inject
-    //      it.  For the dashboard alert we re-read the session cache directly.
+    // ── Pending alert ── //
     $dashPending = 0;
     if (in_array($roleId, [2, 4, 5, 6], true)) {
-        $cacheKey    = "pending_count_{$userId}";
+        $cacheKey = "pending_count_{$userId}";
         $dashPending = (int) ($_SESSION[$cacheKey] ?? 0);
     }
 ?>
@@ -132,7 +123,7 @@
 <div class="page-subheading"><?= date('l, F j, Y') ?> — here's your current activity.</div>
 
 <?php if ($dashPending > 0): ?>
-    <a href="/automated-requesting-system/public/approvals" class="dash-alert">
+    <a href="<?= url('approvals') ?>" class="dash-alert">
         <i class="ti ti-bell-ringing"></i>
         <span>You have <strong><?= $dashPending ?> pending approval<?= $dashPending > 1 ? 's' : '' ?></strong> waiting for your action.</span>
         <span class="dash-alert-cta">Go to Inbox <i class="ti ti-arrow-right"></i></span>
@@ -140,27 +131,26 @@
 <?php endif; ?>
 
 <!-- ── KPI Cards (last 30 days) ── -->
-<!-- FIX: previously only "In Approval" was a link; all four are now clickable -->
 <div class="kpi-grid">
-    <a href="/automated-requesting-system/public/my-submissions?status=in_approval" class="kpi-card blue kpi-card--link">
+    <a href="<?= url('my-submissions?status=in_approval') ?>" class="kpi-card blue kpi-card--link">
         <div class="kpi-icon blue"><i class="ti ti-hourglass"></i></div>
         <div class="kpi-label">In Approval</div>
         <div class="kpi-value"><?= $counts['in_approval'] ?></div>
         <div class="kpi-delta kpi-delta--period">Last 30 days · Submitted &amp; pending</div>
     </a>
-    <a href="/automated-requesting-system/public/my-submissions?status=approved" class="kpi-card green kpi-card--link">
+    <a href="<?= url('my-submissions?status=approved') ?>" class="kpi-card green kpi-card--link">
         <div class="kpi-icon green"><i class="ti ti-circle-check"></i></div>
         <div class="kpi-label">Approved</div>
         <div class="kpi-value"><?= $counts['approved'] ?></div>
         <div class="kpi-delta kpi-delta--period">Last 30 days · Final approved &amp; completed</div>
     </a>
-    <a href="/automated-requesting-system/public/my-submissions?status=draft" class="kpi-card amber kpi-card--link">
+    <a href="<?= url('my-submissions?status=draft') ?>" class="kpi-card amber kpi-card--link">
         <div class="kpi-icon amber"><i class="ti ti-file-pencil"></i></div>
         <div class="kpi-label">Drafts</div>
         <div class="kpi-value"><?= $counts['draft'] ?></div>
         <div class="kpi-delta kpi-delta--period">Last 30 days · Not yet submitted</div>
     </a>
-    <a href="/automated-requesting-system/public/my-submissions?status=rejected" class="kpi-card purple kpi-card--link">
+    <a href="<?= url('my-submissions?status=rejected') ?>" class="kpi-card purple kpi-card--link">
         <div class="kpi-icon purple"><i class="ti ti-circle-x"></i></div>
         <div class="kpi-label">Rejected</div>
         <div class="kpi-value"><?= $counts['rejected'] ?></div>
@@ -176,10 +166,10 @@
         <div class="card-panel-header">
             <span class="card-panel-title">Recent Activity</span>
             <?php $allLink = ($roleId === 1)
-                ? '/automated-requesting-system/public/requests'
+                ? url('requests')
                 : (in_array($roleId, [2, 4, 5, 6], true)
-                    ? '/automated-requesting-system/public/approvals'
-                    : '/automated-requesting-system/public/my-submissions');
+                    ? url('approvals')
+                    : url('my-submissions'));
             ?>
             <a href="<?= $allLink ?>" class="card-panel-link">View all →</a>
         </div>
@@ -195,10 +185,9 @@
                 $timeStr = $ago->days >= 1
                     ? date('M d', strtotime($form['created_at']))
                     : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
-                // FIX: use human label map instead of ucfirst(str_replace)
                 $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
             ?>
-            <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="activity-item activity-link">
+            <a href="<?= url('forms/view/' . $form['id']) ?> class="activity-item activity-link">
                 <div class="activity-icon activity-icon-dynamic" data-bg="<?= $ic['bg'] ?>" data-color="<?= $ic['color'] ?>">
                     <i class="ti <?= $ic['icon'] ?>"></i>
                 </div>
@@ -227,7 +216,7 @@
             </div>
             <div class="quick-form-grid">
                 <?php foreach ($quickForms as $i => $qf): ?>
-                <a href="/automated-requesting-system/public/forms/<?= $qf['slug'] ?>/create"
+                <a href="<?= url('forms/' . $qf['slug'] . '/create') ?>"
                    class="quick-form-btn <?= ($i % 2 === 0) ? 'border-right' : '' ?> <?= ($i < count($quickForms) - 2) ? 'border-bottom' : '' ?>">
                     <span class="qf-icon" data-color="<?= $qf['color'] ?>"><i class="ti <?= $qf['icon'] ?>"></i></span>
                     <span class="qf-label"><?= $qf['label'] ?></span>
@@ -247,8 +236,7 @@
                 <div class="empty-state empty-state-padded">No data yet.</div>
             <?php else:
                 foreach ($typeCounts as $type => $count):
-                    $pct      = round(($count / $maxTypeCount) * 100);
-                    // FIX: use the fixed colour from $iconMap, not an index-cycling array
+                    $pct = round(($count / $maxTypeCount) * 100);
                     $barColor = $iconMap[$type]['barColor'] ?? '#94a3b8';
             ?>
             <div class="vol-row">
@@ -265,6 +253,6 @@
 </div>
 
 <?php
-$content   = ob_get_clean();
+$content = ob_get_clean();
 $pageTitle = 'Dashboard';
 require __DIR__ . '/base.php';

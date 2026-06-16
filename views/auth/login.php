@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="/automated-requesting-system/public/stylesheets/auth.css" rel="stylesheet">
+    <link href="<?= url('stylesheets/auth.css') ?>" rel="stylesheet">
 </head>
 
 <body>
@@ -69,7 +69,7 @@
                 <p class="form-error" role="alert"><?= htmlspecialchars($loginError) ?></p>
             <?php endif; ?>
 
-            <form method="POST" action="/automated-requesting-system/public/login">
+            <form method="POST" action="<?= url('login') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
                 <div class="auth-field">
                     <label for="login_email">Email or Username</label>
@@ -89,7 +89,7 @@
                     </div>
                 </div>
                 <div class="auth-forgot">
-                    <a href="/automated-requesting-system/public/forgot-password">Forgot password?</a>
+                    <a href="<?= url('forgot-password') ?>">Forgot password?</a>
                 </div>
                 <button type="submit" class="auth-btn">Sign In</button>
             </form>
@@ -104,7 +104,7 @@
                 <p class="form-error" role="alert"><?= htmlspecialchars($registerError) ?></p>
             <?php endif; ?>
 
-            <form method="POST" action="/automated-requesting-system/public/register">
+            <form method="POST" action="<?= url('register') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
                 <div class="auth-field-row">
                     <div class="auth-field">
@@ -151,7 +151,7 @@
     </div>
 </div>
 
-<script src="/automated-requesting-system/public/scripts/lucide.min.js"></script>
-<script src="/automated-requesting-system/public/scripts/auth.js"></script>
+<script src="<?= url('scripts/lucide.min.js') ?>"></script>
+<script src="<?= url('scripts/auth.js') ?>"></script>
 </body>
 </html>

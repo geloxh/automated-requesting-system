@@ -3,7 +3,7 @@ class DepartmentController {
     private function requireAdmin(): void {
         if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
             $_SESSION['error'] = 'Access denied.';
-            header('Location: /automated-requesting-system/public/dashboard');
+            header('Location: ' . url('dashboard'));
             exit;
         }
     }
@@ -52,7 +52,7 @@ class DepartmentController {
         $name = trim($_POST['name'] ?? '');
         if ($name === '') {
             $_SESSION['error'] = 'Department name is required.';
-            header('Location: /automated-requesting-system/public/departments');
+            header('Location: ' . url('departments'));
             exit;
         }
         try {
@@ -62,7 +62,7 @@ class DepartmentController {
         } catch (\Throwable) {
             $_SESSION['error'] = 'Department already exists.';
         }
-        header('Location: /automated-requesting-system/public/departments');
+        header('Location: ' . url('departments'));
         exit;
     }
 
@@ -73,7 +73,7 @@ class DepartmentController {
         if ($name === '') {
             $_SESSION['error'] = 'Department name is required.';
             $_SESSION['last_dept_id'] = $id;
-            header('Location: /automated-requesting-system/public/departments');
+            header('Location: ' . url('departments'));
             exit;
         }
         try {
@@ -83,7 +83,7 @@ class DepartmentController {
             $_SESSION['error'] = 'That name is already in use.';
         }
         $_SESSION['last_dept_id'] = $id;
-        header('Location: /automated-requesting-system/public/departments');
+        header('Location: ' . url('departments'));
         exit;
     }
 
@@ -92,7 +92,7 @@ class DepartmentController {
         $this->requireAdmin();
         db()->prepare('DELETE FROM departments WHERE id = ?')->execute([$id]);
         $_SESSION['success'] = 'Department deleted.';
-        header('Location: /automated-requesting-system/public/departments');
+        header('Location: ' . url('departments'));
         exit;
     }
 }

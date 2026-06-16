@@ -72,7 +72,7 @@
         ): void {
             try {
                 $link = $formId
-                    ? '/automated-requesting-system/public/forms/view/' . $formId
+                    ? url('forms/view/' . $formId)
                     : null;
 
                 db()->prepare(

@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/department.css">
+<link rel="stylesheet" href="<?= url('stylesheets/department.css') ?>">
 
 <div class="dept-shell">
 
@@ -154,7 +154,7 @@
 
 <!-- Add dialog -->
 <dialog id="addDialog" class="dept-dialog">
-    <form method="POST" action="/automated-requesting-system/public/departments/create" id="addForm">
+    <form method="POST" action="<?= url('departments/create') ?>" id="addForm">
         <?= \App\Helpers\Csrf::field() ?>
         <div class="dept-dialog-header">
             <i class="ti ti-plus dept-icon-accent"></i>
@@ -197,4 +197,4 @@
     </div>
 </dialog>
 
-<script src="/automated-requesting-system/public/scripts/department.js"></script>
+<script src="<?= url('scripts/department.js') ?>"></script>

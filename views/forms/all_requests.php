@@ -70,7 +70,7 @@ sort($uniqueDepts);
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
-                    <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
+                    <a href="<?= url('forms/view/' . $form['id']) ?>" class="btn btn-ghost btn-sm">View</a>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -78,5 +78,5 @@ sort($uniqueDepts);
     </table>
 </div>
 
-<script src="/automated-requesting-system/public/scripts/all_requests.js"></script>
+<script src="<?= url('scripts/all_requests.js') ?>"></script>
 <?php endif; ?>

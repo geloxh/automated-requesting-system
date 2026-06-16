@@ -8,7 +8,7 @@
 <?php endif; ?>
 
 <div class="form-card">
-    <form method="POST" action="/automated-requesting-system/public/employees/create">
+    <form method="POST" action="<?= url('employees/create') ?>">
 
         <?= \App\Helpers\Csrf::field() ?>
         
@@ -53,7 +53,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="ti ti-send"></i> Submit for Approval
             </button>
-            <a href="/automated-requesting-system/public/employees" class="btn btn-ghost">Cancel</a>
+            <a href="<?= url('employees') ?>" class="btn btn-ghost">Cancel</a>
         </div>
     </form>
 </div>

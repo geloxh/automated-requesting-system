@@ -1,17 +1,22 @@
 <?php
-    require_once __DIR__ . '/../app/controllers/AuthController.php';
-    require_once __DIR__ . '/../app/controllers/SettingsController.php';
-    require_once __DIR__ . '/../app/controllers/FormController.php';
-    require_once __DIR__ . '/../app/controllers/ApprovalController.php';
-    require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+    require_once __DIR__ . '/../app/Controllers/AuthController.php';
+    require_once __DIR__ . '/../app/Controllers/SettingsController.php';
+    require_once __DIR__ . '/../app/Controllers/FormController.php';
+    require_once __DIR__ . '/../app/Controllers/ApprovalController.php';
+    require_once __DIR__ . '/../app/Controllers/EmployeeController.php';
 
-    require_once __DIR__ . '/../app/controllers/DepartmentController.php';
+    require_once __DIR__ . '/../app/Controllers/DepartmentController.php';
 
-    require_once __DIR__ . '/../app/controllers/NotificationController.php';
+    require_once __DIR__ . '/../app/Controllers/NotificationController.php';
     require_once __DIR__ . '/../app/Helpers/EmployeeCode.php';
 
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $uri = str_replace('/automated-requesting-system/public', '', $uri) ?: '/';
+    // Strip the subpath prefix only when APP_URL includes one (non-Docker deploys).
+    // In Docker, DocumentRoot is already /public so the URI is clean.
+    $appPath = parse_url($_ENV['APP_URL'] ?? '', PHP_URL_PATH) ?? '';
+    if ($appPath && $appPath !== '/') {
+        $uri = str_replace(rtrim($appPath, '/'), '', $uri) ?: '/';
+    }
     $method = $_SERVER['REQUEST_METHOD'];
 
     // PUBLIC - Auth routes (No auth required)

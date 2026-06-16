@@ -3,7 +3,7 @@
         public function index(): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied. Administrator privileges required.';
-                header('Location: /automated-requesting-system/public/dashboard'); 
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
@@ -26,7 +26,7 @@
         public function create(): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /automated-requesting-system/public/dashboard'); 
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
@@ -55,7 +55,7 @@
                 $val = trim($_POST[$f] ?? '');
                 if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'username'])) {
                     $_SESSION['error'] = "Field '{$f}' is required.";
-                    header('Location: /automated-requesting-system/public/employees/create'); 
+                    header('Location: ' . url('employees/create')); 
                     exit;
                 }
                 $data[$f] = $val;
@@ -63,13 +63,13 @@
 
             if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['error'] = 'Invalid email address.';
-                header('Location: /automated-requesting-system/public/employees/create'); 
+                header('Location: ' . url('employees/create')); 
                 exit;
             }
 
             if (strlen($data['password']) < 8) {
                 $_SESSION['error'] = 'Password must be at least 8 characters.';
-                header('Location: /automated-requesting-system/public/employees/create'); 
+                header('Location: ' . url('employees/create')); 
                 exit;
             }
 
@@ -77,7 +77,7 @@
             $stmt->execute([$data['email']]);
             if ($stmt->fetch()) {
                 $_SESSION['error'] = 'Email already registered.';
-                header('Location: /automated-requesting-system/public/employees/create'); 
+                header('Location: ' . url('employees/create')); 
                 exit;
             }
 
@@ -98,12 +98,12 @@
                 ]);
             } catch (\Throwable $e) {
                 $_SESSION['error'] = 'Failed to create employee: ' . $e->getMessage();
-                header('Location: /automated-requesting-system/public/employees/create'); 
+                header('Location: ' . url('employees/create')); 
                 exit;
             }
 
             $_SESSION['success'] = 'Employee created.';
-            header('Location: /automated-requesting-system/public/employees');
+            header('Location: ' . url('employees'));
             exit;
         }
         
@@ -112,14 +112,14 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /automated-requesting-system/public/dashboard'); 
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
             // Prevent self-deletion
             if ($id === (int)$_SESSION['user_id']) {
                 $_SESSION['error'] = 'You cannot delete your own account.';
-                header('Location: /automated-requesting-system/public/employees');
+                header('Location: ' . url('employees'));
                 exit;
             }
 
@@ -130,7 +130,7 @@
 
             if (!$employee) {
                 $_SESSION['error'] = 'Employee not found.';
-                header('Location: /automated-requesting-system/public/employees');
+                header('Location: ' . url('employees'));
                 exit;
             }
 
@@ -184,14 +184,14 @@
                 $_SESSION['error'] = 'Failed to deactivate employee.';
             }
 
-            header('Location: /automated-requesting-system/public/employees');
+            header('Location: ' . url('employees'));
             exit;
         }
 
         public function edit(int $id): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /automated-requesting-system/public/dashboard'); exit;
+                header('Location: ' . url('dashboard')); exit;
             }
 
             $stmt = db()->prepare('SELECT * FROM employees WHERE id = ?');
@@ -201,7 +201,7 @@
 
             if (!$employee) {
                 $_SESSION['error'] = 'Employee not found.';
-                header('Location: /automated-requesting-system/public/employees'); exit;
+                header('Location: ' . url('employees')); exit;
             }
 
             $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id = 2 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
@@ -229,7 +229,7 @@
             // Validation
             if (empty($data['full_name']) || empty($data['email'])) {
                 $_SESSION['error'] = "Name and Email are required.";
-                header("Location: /automated-requesting-system/public/employees/edit/{$id}"); 
+                header("Location: " . url("employees/edit/{$id}")); 
                 exit;
             }
 
@@ -253,7 +253,7 @@
                     $check->execute([$data['username'], $id]);
                     if ($check->fetch()) {
                         $_SESSION['error'] = 'That username is already taken.';
-                        header("Location: /automated-requesting-system/public/employees/edit/{$id}");
+                        header("Location: " . url("employees/edit/{$id}"));
                         exit;
                     }
                 }
@@ -273,11 +273,11 @@
                 $_SESSION['success'] = 'Employee updated successfully.';
             } catch (\Throwable $e) {
                 $_SESSION['error'] = 'Update failed: ' . $e->getMessage();
-                header("Location: /automated-requesting-system/public/employees/edit/{$id}"); 
+                header("Location: " . url("employees/edit/{$id}")); 
                 exit;
             }
 
-            header('Location: /automated-requesting-system/public/employees');
+            header('Location: ' . url('employees'));
             exit;
         }
 
@@ -286,7 +286,7 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: /automated-requesting-system/public/dashboard'); 
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
@@ -295,7 +295,7 @@
 
             if (!in_array($status, $allowed, true)) {
                 $_SESSION['error'] = 'Invalid employment status.';
-                header('Location: /automated-requesting-system/public/employees');
+                header('Location: ' . url('employees'));
                 exit;
             }
 
@@ -303,7 +303,7 @@
                 ->execute([$status, $id]);
 
             $_SESSION['success'] = 'Employment status updated.';
-            header('Location: /automated-requesting-system/public/employees');
+            header('Location: ' . url('employees'));
             exit;
         }
 
@@ -312,7 +312,7 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied. Only SysAdmins can perform manual overrides.';
-                header("Location: /automated-requesting-system/public/forms/view/{$formId}"); 
+                header("Location: " . url("forms/view/{$formId}")); 
                 exit;
             }
 
@@ -327,7 +327,7 @@
 
             if (!$form) {
                 $_SESSION['error'] = 'Form not found.';
-                header("Location: /automated-requesting-system/public/forms/view/{$formId}");
+                header("Location: " . url("forms/view/{$formId}"));
                 exit;
             }
 
@@ -408,7 +408,7 @@
                 $_SESSION['error'] = 'Action failed.';
             }
 
-            header("Location: /automated-requesting-system/public/forms/view/{$formId}");
+            header("Location: " . url("forms/view/{$formId}"));
             exit;
         }
 
@@ -448,17 +448,17 @@
             if ($section === 'password') {
                 if (empty($_POST['new_password'])) {
                     $_SESSION['error'] = 'Please enter a new password.';
-                    header('Location: /automated-requesting-system/public/profile');
+                    header('Location: ' . url('profile'));
                     exit;
                 }
                 if (strlen($_POST['new_password']) < 8) {
                     $_SESSION['error'] = 'New password must be at least 8 characters.';
-                    header('Location: /automated-requesting-system/public/profile');
+                    header('Location: ' . url('profile'));
                     exit;
                 }
                 if ($_POST['new_password'] !== ($_POST['confirm_password'] ?? '')) {
                     $_SESSION['error'] = 'Passwords do not match.';
-                    header('Location: /automated-requesting-system/public/profile');
+                    header('Location: ' . url('profile'));
                     exit;
                 }
 
@@ -468,7 +468,7 @@
 
                 if (!password_verify($_POST['current_password'] ?? '', $emp['password_hash'])) {
                     $_SESSION['error'] = 'Current password is incorrect.';
-                    header('Location: /automated-requesting-system/public/profile');
+                    header('Location: ' . url('profile'));
                     exit;
                 }
 
@@ -477,7 +477,7 @@
                     ->execute([$hash, $_SESSION['user_id']]);
 
                 $_SESSION['success'] = 'Password updated.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
             }
 
@@ -491,7 +491,7 @@
 
             if ($data['full_name'] === '') {
                 $_SESSION['error'] = 'Full name is required.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
             }
 
@@ -500,7 +500,7 @@
                 $check->execute([$data['username'], $_SESSION['user_id']]);
                 if ($check->fetch()) {
                     $_SESSION['error'] = 'That username is already taken.';
-                    header('Location: /automated-requesting-system/public/profile');
+                    header('Location: ' . url('profile'));
                     exit;
                 }
             }
@@ -512,7 +512,7 @@
 
             $_SESSION['user_name'] = $data['full_name'];
             $_SESSION['success'] = 'Profile updated.';
-            header('Location: /automated-requesting-system/public/profile');
+            header('Location: ' . url('profile'));
             exit;
         }
 
@@ -521,7 +521,7 @@
 
             if (empty($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
                 $_SESSION['error'] = 'No file uploaded or upload error.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
                 
             }
@@ -534,20 +534,20 @@
 
             if ($file['size'] > $maxSize) {
                 $_SESSION['error'] = 'Image must be under 2 MB.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
             }
 
             if (!in_array($mimeType, $allowed, true)) {
                 $_SESSION['error'] = 'Only JPEG, JPG, PNG, WEBP, or GIF images are allowed.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
             }
             
             $extMap = ['image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
             if (!isset($extMap[$mimeType])) {
                 $_SESSION['error'] = 'Unsupported image format.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
             }
             $ext = $extMap[$mimeType];
@@ -570,16 +570,16 @@
 
             if (!move_uploaded_file($file['tmp_name'], $destPath)) {
                 $_SESSION['error'] = 'Failed to save image.';
-                header('Location: /automated-requesting-system/public/profile');
+                header('Location: ' . url('profile'));
                 exit;
             }
 
-            $avatarPath = '/automated-requesting-system/public/uploads/avatars/' . $filename;
+            $avatarPath = url('uploads/avatars/' . $filename);
             db()->prepare('UPDATE employees SET avatar = ? WHERE id = ?')
                 ->execute([$avatarPath, $_SESSION['user_id']]);
 
             $_SESSION['success'] = 'Profile picture updated.';
-            header('Location: /automated-requesting-system/public/profile');
+            header('Location: ' . url('profile'));
             exit;
         }
 

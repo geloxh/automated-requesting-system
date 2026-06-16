@@ -2,7 +2,7 @@
     <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
-<form method="POST" action="/automated-requesting-system/public/forms/leave/create" class="card p-4 bg-white shadow-sm">
+<form method="POST" action="<?= url('forms/leave/create') ?>" class="card p-4 bg-white shadow-sm">
     <div class="page-heading">Request for Payment</div>
     <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
     <?= \App\Helpers\Csrf::field(); ?>

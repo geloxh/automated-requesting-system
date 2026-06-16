@@ -15,10 +15,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # Mount the entire project into the container's web root
-      - .:/var/www/processing-system
-      # Persist uploaded files across container restarts
-      - uploads_data:/var/www/processing-system/public/uploads
+      # Only uploads are mounted as a volume — persists files across rebuilds.
+      # The project code is baked into the image via COPY in the Dockerfile.
+      # DO NOT mount the whole project (. :) here — Windows has lowercase
+      # app/helpers/ which would overwrite the correctly-cased image filesystem.
+      - uploads_data:/var/www/automated-requesting-system/public/uploads
     networks:
       - ars_net
 
@@ -33,9 +34,8 @@ services:
       MARIADB_USER: ars_user
       MARIADB_PASSWORD: ars_pass
     ports:
-      - "3307:3306"   # exposed on 3307 so it doesn't clash with a local MySQL
+      - "3307:3306"
     volumes:
-      # Seed the DB on first run — runs every .sql file in alphabetical order
       - ./docker/initdb:/docker-entrypoint-initdb.d
       - db_data:/var/lib/mysql
     healthcheck:
@@ -47,7 +47,7 @@ services:
     networks:
       - ars_net
 
-  # ── phpMyAdmin (optional, handy for testing) ──
+  # ── phpMyAdmin ──
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: ars_phpmyadmin

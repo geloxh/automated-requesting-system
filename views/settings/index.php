@@ -10,7 +10,7 @@ $checked = fn(string $key, string $on = '1') => ($settings[$key] ?? '0') === $on
 $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match ? 'selected' : '';
 ?>
 
-<link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/settings.css">
+<link rel="stylesheet" href="<?= url('stylesheets/settings.css') ?>">
 
 <?php if (!empty($_SESSION['success'])): ?>
     <div class="alert alert-success">
@@ -19,7 +19,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
     </div>
     <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
 <?php if (!empty($_SESSION['error'])): ?>
     <div class="alert alert-danger">
         <i class="ti ti-alert-circle"></i>
@@ -73,7 +73,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
                 <p class="settings-section-sub">Personalise the look of the application.</p>
             </div>
 
-            <form method="POST" action="/automated-requesting-system/public/settings/appearance">
+            <form method="POST" action="<?= url('settings/appearance') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -148,7 +148,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
                 <p class="settings-section-sub">Choose which events trigger an email notification.</p>
             </div>
 
-            <form method="POST" action="/automated-requesting-system/public/settings/notifications">
+            <form method="POST" action="<?= url('settings/notifications') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -329,8 +329,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
                     </div>
                 </div>
             </div>
-        </div>
-         <!-- Developer -->
+            <!-- Developer -->
             <div class="settings-card">
                 <div class="settings-card-header">Developer</div>
                 <div class="settings-card-body settings-card-body--info">
@@ -359,7 +358,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
                 <p class="settings-section-sub">Core application configuration. SysAdmin only.</p>
             </div>
 
-            <form method="POST" action="/automated-requesting-system/public/settings/general">
+            <form method="POST" action="<?= url('settings/general') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -467,7 +466,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
                 <p class="settings-section-sub">SMTP configuration for outgoing emails. SysAdmin only.</p>
             </div>
 
-            <form method="POST" action="/automated-requesting-system/public/settings/mail">
+            <form method="POST" action="<?= url('settings/mail') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -571,7 +570,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
                 <p class="settings-section-sub">Upload path and file-type restrictions. SysAdmin only.</p>
             </div>
 
-            <form method="POST" action="/automated-requesting-system/public/settings/storage">
+            <form method="POST" action="<?= url('settings/storage') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
 
                 <div class="settings-card">
@@ -631,4 +630,4 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
     </div><!-- /.settings-panels -->
 </div><!-- /.settings-layout -->
 
-<script src="/automated-requesting-system/public/scripts/settings.js"></script>
+<script src="<?= url('scripts/settings.js') ?>"></script>

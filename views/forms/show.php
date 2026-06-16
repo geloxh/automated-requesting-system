@@ -30,7 +30,7 @@
             <?= htmlspecialchars($humanStatus) ?>
         </span>
     </div>
-    <button id="btn-back" class="btn btn-ghost btn-sm" data-fallback-url="/automated-requesting-system/public/approvals">
+    <button id="btn-back" class="btn btn-ghost btn-sm" data-fallback-url="<?= url('approvals') ?>">
         <i class="ti ti-arrow-left"></i> Back
     </button>
 </div>
@@ -148,7 +148,7 @@
                             <button type="submit"
                                 name="action"
                                 value="approve"
-                                formaction="/automated-requesting-system/public/forms/<?= $formId ?>/approve/<?= htmlspecialchars($nextAction) ?>"
+                                formaction="<?= url('forms/' . $formId . '/approve/' . htmlspecialchars($nextAction)) ?>"
                                 class="btn btn-success btn-block">
                                 <i class="ti ti-circle-check"></i>
                                 <?= htmlspecialchars($approveLabel) ?>
@@ -159,7 +159,7 @@
                         <button type="submit"
                             name="action"
                             value="reject"
-                            formaction="/automated-requesting-system/public/forms/<?= $formId ?>/reject"
+                            formaction="<?= url('forms/' . $formId . '/reject') ?>"
                             class="btn btn-danger btn-block"
                             id="btn-reject">
                             <i class="ti ti-x"></i> Reject
@@ -193,4 +193,4 @@
 
 </div>
 
-<script src='/automated-requesting-system/public/scripts/show.js'></script>
+<script src='<?= url('scripts/show.js') ?>'></script>

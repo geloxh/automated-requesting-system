@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (history.length > 1) {
                 history.back();
             } else {
-                window.location.href = backBtn.dataset.fallbackUrl || '/automated-requesting-system/public/approvals';
+                window.location.href = backBtn.dataset.fallbackUrl || APP_URL + '/approvals';
             }
         });
     }
