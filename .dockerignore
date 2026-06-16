@@ -1,0 +1,40 @@
+# ── Git ──
+.git
+.gitignore
+.gitattributes
+
+# ── Docker files (already applied before build runs) ──
+docker-compose.yml
+docker-compose*.yml
+.dockerignore
+
+# ── Environment files (secrets — never bake into image) ──
+.env
+.env.*
+!.env.example
+
+# ── Composer / Node dev dependencies & caches ──
+vendor/
+node_modules/
+.npm/
+
+# ── Uploaded user files (served from a named volume, not the image) ──
+public/uploads/
+
+# ── Local dev / OS junk ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE configs ──
+.vscode/
+.idea/
+*.code-workspace
+
+# ── Docs & notes (not needed at runtime) ──
+README.md
+DOCKER.md
+notes/
+
+# ── Misc dev scripts ──
+hash.php
