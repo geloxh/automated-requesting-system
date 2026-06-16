@@ -258,7 +258,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>window.ARS_BASE = '<?= rtrim(parse_url($_ENV['APP_URL'] ?? '', PHP_URL_PATH) ?? '', '/') ?>'; window.APP_URL = window.ARS_BASE;</script>
+<script nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">window.ARS_BASE = '<?= rtrim(parse_url($_ENV['APP_URL'] ?? '', PHP_URL_PATH) ?? '', '/') ?>'; window.APP_URL = window.ARS_BASE;</script>
 <script src="<?= url('scripts/form_table.js') ?>"></script>
 <script src="<?= url('scripts/table-filter.js') ?>"></script>
 <script src="<?= url('scripts/app.js') ?>"></script>
