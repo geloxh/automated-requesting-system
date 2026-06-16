@@ -102,11 +102,11 @@
 
     $quickForms = [
         ['slug' => 'advance-payment', 'label' => 'Advance', 'desc' => 'Cash advance', 'color' => '#10b981', 'icon' => 'ti-cash'],
-        ['slug' => 'overtime', 'label' => 'Overtime', 'desc' => 'OT authorization','color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-        ['slug' => 'request-payment', 'label' => 'Payment', 'desc' => 'Request payment', 'color' => '#ec4899', 'icon' => 'ti-receipt'],
-        ['slug' => 'leave', 'label' => 'Leave', 'desc' => 'File absence', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
+        ['slug' => 'overtime-authorization', 'label' => 'Overtime', 'desc' => 'OT authorization', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
+        ['slug' => 'request-for-payment', 'label' => 'Payment', 'desc' => 'Request payment',  'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        ['slug' => 'leave-application', 'label' => 'Leave', 'desc' => 'File absence', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
         ['slug' => 'reimbursement', 'label' => 'Reimburse', 'desc' => 'Claim expenses', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
-        ['slug' => 'liquidation', 'label' => 'Liquidation','desc' => 'Clear advance', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
+        ['slug' => 'liquidation', 'label' => 'Liquidation', 'desc' => 'Clear advance', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
         ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#ca8a04', 'icon' => 'ti-car'],
     ];
 
@@ -187,7 +187,7 @@
                     : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
                 $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
             ?>
-            <a href="<?= url('forms/view/' . $form['id']) ?> class="activity-item activity-link">
+            <a href="<?= url('forms/view/' . $form['id']) ?>" class="activity-item activity-link">
                 <div class="activity-icon activity-icon-dynamic" data-bg="<?= $ic['bg'] ?>" data-color="<?= $ic['color'] ?>">
                     <i class="ti <?= $ic['icon'] ?>"></i>
                 </div>
