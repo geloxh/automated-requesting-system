@@ -45,8 +45,7 @@ if (sidebarToggle && sidebar) {
 
 // close mobile overlay on outside click
 document.addEventListener('click', function (e) {
-    if (window.innerWidth <= 900 && sidebar &&
-        !e.target.closest('#sidebar')) {
+    if (window.innerWidth <= 900 && sidebar && !e.target.closest('#sidebar')) {
         sidebar.classList.remove('open');
     }
 });
@@ -55,11 +54,9 @@ document.addEventListener('click', function (e) {
 function updateToggleIcon() {
     var icon = document.getElementById('sidebarToggleIcon');
     if (!icon || !sidebar) return;
-    if (sidebar.classList.contains('collapsed')) {
-        icon.className = 'ti ti-layout-sidebar-left-expand';
-    } else {
-        icon.className = 'ti ti-layout-sidebar-left-collapse';
-    }
+    icon.className = sidebar.classList.contains('collapsed')
+        ? 'ti ti-layout-sidebar-left-expand'
+        : 'ti ti-layout-sidebar-left-collapse'
 }
 
 // sync icon on page load
@@ -78,7 +75,9 @@ window.addEventListener('resize', function () {
 document.addEventListener('DOMContentLoaded', function () {
     var GROUPS_KEY = 'sidebar_groups';
     var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(GROUPS_KEY) || '{}'); } catch (e) {}
+    try { 
+        saved = JSON.parse(localStorage.getItem(GROUPS_KEY) || '{}'); 
+    } catch (e) {}
 
     // restore collapsed groups
     document.querySelectorAll('.sidebar-group').forEach(function (group) {
@@ -100,15 +99,25 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (e) {}
         });
     });
+
+    // ── Logout confirmation ── //
+    var logoutForm = document.getElementById('logoutForm');
+    if (logoutForm) {
+        logoutForm.addEventListener('submit', function (e) {
+            if (!confirm('Sign out of your account?')) {
+                e.preventDefault();
+            }
+        });
+    }
 });
 
 // ── Topbar search ── //
 document.addEventListener('DOMContentLoaded', function () {
-    const input = document.getElementById('topbarSearch');
-    const dropdown = document.getElementById('searchDropdown');
+    var input = document.getElementById('topbarSearch');
+    var dropdown = document.getElementById('searchDropdown');
     if (!input || !dropdown) return;
 
-    const formLabels = {
+    var formLabels = {
         advance_payment: 'Advance Payment',
         overtime_authorization: 'Overtime Auth.',
         request_for_payment: 'Request for Payment',
@@ -117,36 +126,57 @@ document.addEventListener('DOMContentLoaded', function () {
         liquidation: 'Liquidation',
         vehicle_request: 'Vehicle Request',
     };
-    const statusColors = {
-        draft:'#94a3b8', submitted:'#3b82f6', completed:'#22c55e',
-        rejected:'#ef4444', cancelled:'#94a3b8',
-        checker_approved:'#f59e0b', process_approved:'#f59e0b',
-        department_reviewed:'#f59e0b', finance_reviewed:'#f59e0b',
+
+    var statusColors = {
+        draft:'#94a3b8', 
+        submitted:'#3b82f6', 
+        completed:'#22c55e',
+        rejected:'#ef4444', 
+        cancelled:'#94a3b8',
+        checker_approved:'#f59e0b', 
+        process_approved:'#f59e0b',
+        department_reviewed:'#f59e0b', 
+        finance_reviewed:'#f59e0b',
         final_approved:'#22c55e',
     };
 
-    let debounce, activeIdx = -1, results = [];
+    var debounce, activeIdx = -1, results = [];
 
-    const esc = s => String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+    function esc(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
 
-    function open() { dropdown.classList.remove('dept-hidden'); input.setAttribute('aria-expanded','true'); }
-    function close() { dropdown.classList.add('dept-hidden');    input.setAttribute('aria-expanded','false'); activeIdx = -1; }
+    function open() { 
+        dropdown.classList.remove('dept-hidden'); 
+        input.setAttribute('aria-expanded','true'); 
+    }
+    function close() { 
+        dropdown.classList.add('dept-hidden');    
+        input.setAttribute('aria-expanded', 'false'); 
+        activeIdx = -1; 
+    }
 
     function render(items) {
         results = items;
         activeIdx = -1;
         if (!items.length) {
             dropdown.innerHTML = '<div class="search-empty">No results found</div>';
-            open(); return;
+            open(); 
+            return;
         }
-        dropdown.innerHTML = items.map((r, i) => `
-            <a href="${window.ARS_BASE}/forms/view/${r.id}"
-               class="search-item" role="option" data-idx="${i}">
-                <span class="search-item-type">${esc(formLabels[r.form_type] ?? r.form_type)}</span>
-                <span class="search-item-id">#${r.id}</span>
-                <span class="search-item-status" style="color:${statusColors[r.status] ?? '#94a3b8'}">${esc(r.status)}</span>
-                <span class="search-item-who">${esc(r.submitted_by)}</span>
-            </a>`).join('');
+        dropdown.innerHTML = items.map(function (r, i) {
+            return '<a href="' + window.ARS_BASE + '/forms/view/' + r.id + '"'
+                + 'class="search-item" role="option" data-idx="' + i + '">'
+                + '<span class="search-item-type">' + esc(formLabels[r.form_type] || r.form_type) + '</span>'
+                + '<span class="search-item-id">#' + r.id + '</span>'
+                + '<span class="search-item-status" style="color:' + (statusColors[r.status] || '#94a3b8') + '">'
+                +  esc(r.status) + '</span>'
+                + '<span class="search-item-who">' + esc(r.submitted_by) + '</span>'
+                + '</a>';
+        }).join('');
         open();
     }
 
@@ -163,7 +193,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (q.length < 2) { close(); return; }
         debounce = setTimeout(() => {
             fetch(window.ARS_BASE + '/search?q=' + encodeURIComponent(q))
-                .then(r => r.json()).then(render).catch(() => close());
+                .then(function (r) { return r.json(); })
+                .then(render)
+                .catch(close);
         }, 200);
     });
 
@@ -260,6 +292,7 @@ document.querySelectorAll('input[type="date"]:not([value])').forEach(function (e
     }
 });
 
+// ── Dynamic CSS ── //
 document.querySelectorAll('.activity-icon-dynamic[data-bg]').forEach(function (el) {
     el.style.setProperty('--icon-bg', el.dataset.bg);
     el.style.setProperty('--icon-color', el.dataset.color);
@@ -274,12 +307,12 @@ document.querySelectorAll('.vol-fill[data-pct]').forEach(function (el) {
     el.style.background = el.dataset.color;
 });
 
+// ── Status filter ── //
 document.addEventListener('DOMContentLoaded', function () {
     var inApproval = [ 'submitted', 'checker_approved', 'process_approved', 'department_reviewed', 'finance_reviewed', 'final_approved' ];
 
     function applyStatusFilter(val) {
-        var rows = document.querySelectorAll('table[data-filterable] tbody tr');
-        rows.forEach(function (row) {
+        document.querySelectorAll('table[data-filterable] tbody tr').forEach(function (row) {
             if (!val) { row.style.display = ''; return; }
             var s = row.dataset.status || '';
             if (val === 'in_approval') {
@@ -295,40 +328,45 @@ document.addEventListener('DOMContentLoaded', function () {
     var sel = document.getElementById('statusFilter');
     if (sel) {
         sel.addEventListener('change', function () { applyStatusFilter(sel.value); });
-        // Apply pre-filter from URL ?status= param on load
         if (sel.value) applyStatusFilter(sel.value);
     }
 });
 
+// ── Back button ── //
 document.querySelectorAll('.js-go-back').forEach(btn => {
-    btn.addEventListener('click', () => history.back());
+    btn.addEventListener('click', function () { history.back(); });
 });
 
 // New Request dropdown toggle
-const newReqBtn = document.getElementById('newReqBtn');
-const newReqDropdown = document.getElementById('newReqDropdown');
-if (newReqBtn && newReqDropdown) {
+(function () {
+    var newReqBtn = document.getElementById('newReqBtn');
+    var newReqDropdown = document.getElementById('newReqDropdown');
+    if (!newReqBtn || !newReqDropdown) return;
+ 
     newReqBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        const isHidden = newReqDropdown.classList.contains('dept-hidden');
+        var isHidden = newReqDropdown.classList.contains('dept-hidden');
         newReqDropdown.classList.toggle('dept-hidden', !isHidden);
         newReqBtn.setAttribute('aria-expanded', String(isHidden));
     });
+ 
     document.addEventListener('click', function () {
         newReqDropdown.classList.add('dept-hidden');
         newReqBtn.setAttribute('aria-expanded', 'false');
     });
-}
+})();
 
+// ── User block / profile menu ── //
 (function () {
     var block = document.getElementById('userBlock');
-    var menu = document.getElementById('userMenu');
-    var chevron = document.getElementById('userBlockChevron');
+    var menu  = document.getElementById('userMenu');
     if (!block || !menu) return;
-    block.addEventListener('click', function (e) {
+ 
+    block.addEventListener('click', function () {
         var isOpen = menu.classList.toggle('open');
         block.classList.toggle('open', isOpen);
     });
+ 
     document.addEventListener('click', function (e) {
         if (!block.contains(e.target)) {
             menu.classList.remove('open');

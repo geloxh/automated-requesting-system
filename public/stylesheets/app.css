@@ -245,6 +245,9 @@ a { text-decoration: none; color: inherit; }
 .user-menu-item:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
 .user-menu-item i { font-size: 15px; flex-shrink: 0; }
 .user-menu-divider { height: 1px; background: rgba(255,255,255,.07); margin: 2px 0; }
+
+.logout-form { margin: 0; }
+
 .user-menu-item--danger { color: #f87171; }
 .user-menu-item--danger:hover { background: rgba(248,113,113,.08); color: #fca5a5; }
 /* Collapsed sidebar — hide info text */

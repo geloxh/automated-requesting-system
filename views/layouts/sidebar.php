@@ -2,7 +2,7 @@
     if (!defined('BASE_LOADED')) die('Direct access not allowed'); 
 ?>
 
-<link rel="stylesheet" href="<?= url('stylesheets/sidebar.css') ?>">
+<link rel="stylesheet" href="<?= url('stylesheets/app.css') ?>">
 <nav id="sidebar" class="<?= ($GLOBALS['sidebar_collapsed'] ?? false) ? 'collapsed' : '' ?>">
     <div class="sidebar-brand">
         <div class="brand-icon"><i class="ti ti-bolt"></i></div>
@@ -133,22 +133,17 @@
     </div>
 
     <div class="sidebar-footer">
-        <a href="<?= url('settings') ?>"
-           data-tooltip="Settings"
-           class="sidebar-settings-link <?= $uri === '/settings' ? 'active' : '' ?>">
-            <i class="ti ti-settings"></i> <span>Settings</span>
-        </a>
         <div class="user-block" id="userBlock">
             <!-- Popover floats above -->
             <div class="user-menu" id="userMenu">
-                <a href="<?= url('profile') ?>" class="user-menu-item" onclick="event.stopPropagation()">
+                <a href="<?= url('profile') ?>" class="user-menu-item">
                     <i class="ti ti-user"></i> My Profile
                 </a>
-                <a href="<?= url('settings') ?>" class="user-menu-item" onclick="event.stopPropagation()">
+                <a href="<?= url('settings') ?>" class="user-menu-item">
                     <i class="ti ti-settings"></i> Settings
                 </a>
                 <div class="user-menu-divider"></div>
-                <form method="POST" action="<?= url('logout') ?>" style="margin:0" onsubmit="return confirm('Sign out of your account?')">
+                <form method="POST" action="<?= url('logout') ?>" id="logoutForm" class="logout-form">
                     <?= \App\Helpers\Csrf::field() ?>
                     <button class="user-menu-item user-menu-item--danger" type="submit">
                         <i class="ti ti-logout"></i> Sign out
@@ -163,5 +158,4 @@
             <i class="ti ti-chevron-up user-block-chevron" id="userBlockChevron"></i>
         </div>
     </div>
-<script src="<?= url('scripts/app.js') ?>"></script>
 </nav>
