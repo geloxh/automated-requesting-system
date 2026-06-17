@@ -319,3 +319,20 @@ if (newReqBtn && newReqDropdown) {
         newReqBtn.setAttribute('aria-expanded', 'false');
     });
 }
+
+(function () {
+    var block = document.getElementById('userBlock');
+    var menu = document.getElementById('userMenu');
+    var chevron = document.getElementById('userBlockChevron');
+    if (!block || !menu) return;
+    block.addEventListener('click', function (e) {
+        var isOpen = menu.classList.toggle('open');
+        block.classList.toggle('open', isOpen);
+    });
+    document.addEventListener('click', function (e) {
+        if (!block.contains(e.target)) {
+            menu.classList.remove('open');
+            block.classList.remove('open');
+        }
+    });
+})();

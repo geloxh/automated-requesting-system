@@ -1,6 +1,7 @@
 <?php
 class FormController {
     private array $typeMap = [
+        // Full slugs (used in navbar dropdowns and direct links)
         'advance-payment' => 'advance_payment',
         'overtime-authorization' => 'overtime_authorization',
         'request-for-payment' => 'request_for_payment',
@@ -8,6 +9,10 @@ class FormController {
         'reimbursement' => 'reimbursement',
         'liquidation' => 'liquidation',
         'vehicle-request' => 'vehicle_request',
+        // Short aliases (used in sidebar links)
+        'overtime' => 'overtime_authorization',
+        'request-payment' => 'request_for_payment',
+        'leave' => 'leave_application',
     ];
 
     private array $fields = [
@@ -204,7 +209,7 @@ class FormController {
 
         // Breadcrumb
         $breadcrumbs = [
-            ['label' => $typeLabel, 'url' => '/automated-requesting-system/public/forms/' . array_search($form['form_type'], $this->typeMap)],
+            ['label' => $typeLabel, 'url' => url('forms/' . (array_search($form['form_type'], $this->typeMap) ?: 'list'))],
             ['label' => '#' . $id],
         ];
 
@@ -264,7 +269,7 @@ class FormController {
     public function reject(int $id): void {
         \App\Helpers\Csrf::verify();
 
-        $form  = $this->findForm($id);
+        $form = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
         $userId = (int) $_SESSION['user_id'];
         $roleId = (int) $_SESSION['role_id'];
@@ -272,7 +277,7 @@ class FormController {
         $allowedRoles = [1, 2, 4, 5, 6];
         if (!in_array($roleId, $allowedRoles, true)) {
             $_SESSION['error'] = 'You are not authorised to reject this form.';
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
@@ -287,27 +292,27 @@ class FormController {
 
             if (!$step) {
                 $_SESSION['error'] = 'No pending approval step found for this form.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
 
             // FIX: verify both role AND assigned approver_id
             if ((int)$step['approver_id'] !== $userId) {
                 $_SESSION['error'] = 'You are not the assigned approver for the current stage.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
         }
 
         if (in_array($form['status'], ['completed', 'rejected'], true)) {
             $_SESSION['error'] = 'This form is already finalised.';
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
         if ($remarks === '') {
             $_SESSION['error'] = 'A rejection reason is required.';
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
@@ -338,7 +343,7 @@ class FormController {
             $_SESSION['error'] = 'Rejection failed. Please try again.';
         }
 
-        header("Location: /automated-requesting-system/public/forms/view/{$id}");
+        header("Location: " . url("forms/view/{$id}"));
         exit;
     }
 
@@ -371,7 +376,7 @@ class FormController {
     public function allRequests(): void {
         if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
             $_SESSION['error'] = 'Access denied. You do not have permission to view all requests.';
-            header('Location: /automated-requesting-system/public/dashboard'); exit;
+            header('Location: ' . url('dashboard')); exit;
         }
 
         $stmt = db()->prepare(
@@ -409,7 +414,7 @@ class FormController {
         $pipeline = $this->getPipeline($form['form_type']);
         if (!isset($pipeline[$action])) {
             $_SESSION['error'] = "Unknown approval action: '{$action}'.";
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
@@ -420,13 +425,13 @@ class FormController {
                 "Cannot perform '%s': form is currently '%s', expected '%s'.",
                 $action, $form['status'], $step['from']
             );
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
         if (in_array($form['status'], ['completed', 'rejected'], true)) {
             $_SESSION['error'] = 'This form is already finalized.';
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
@@ -443,7 +448,7 @@ class FormController {
             // Must have a row AND it must be assigned to this user
             if (!$approval || (int)$approval['approver_id'] !== $userId) {
                 $_SESSION['error'] = 'No pending approval step found for you at this stage.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
         }
@@ -452,13 +457,13 @@ class FormController {
         $actorAllowed = $isAdmin || $action === 'submit' || $roleId === $step['role_id'];
         if (!$actorAllowed) {
             $_SESSION['error'] = 'You are not authorized to perform this action.';
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
         if ($action === 'submit' && !$isAdmin && (int)$form['submitted_by'] !== $userId) {
             $_SESSION['error'] = 'Only the form owner can submit this form.';
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
@@ -473,12 +478,12 @@ class FormController {
 
             if (!in_array($mimeType, $allowed, true)) {
                 $_SESSION['error'] = 'Only images and PDF files are allowed.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
             if ($file['size'] > $maxBytes) {
                 $_SESSION['error'] = 'File must be under 5 MB.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -487,7 +492,7 @@ class FormController {
             $fileName = sprintf('%d_%d_%s.%s', $id, time(), bin2hex(random_bytes(4)), $ext);
             if (!move_uploaded_file($file['tmp_name'], $destDir . $fileName)) {
                 $_SESSION['error'] = 'File upload failed. Please try again.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
             $uploadedFilePath = 'storage/approvals/' . $fileName;
@@ -531,7 +536,7 @@ class FormController {
             $_SESSION['error'] = 'Action failed. Please try again.';
         }
 
-        header("Location: /automated-requesting-system/public/forms/view/{$id}");
+        header("Location: " . url("forms/view/{$id}"));
         exit;
     }
 
@@ -548,7 +553,7 @@ class FormController {
                 if (is_string($val)) $val = trim($val);
                 if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
                     $_SESSION['error'] = "Field '{$field}' is required.";
-                    header("Location: /automated-requesting-system/public/forms/{$slug}/create");
+                    header("Location: " . url("forms/{$slug}/create"));
                     exit;
                 }
             }
@@ -582,13 +587,13 @@ class FormController {
             $_SESSION['success'] = $isSavingDraft
                 ? 'Draft saved. You can continue editing or submit when ready.'
                 : 'Form saved as draft. Review and submit it for approval.';
-            header("Location: /automated-requesting-system/public/forms/view/{$formId}");
+            header("Location: " . url("forms/view/{$formId}"));
             exit;
 
         } catch (\Throwable $e) {
             $pdo->rollBack();
             $_SESSION['error'] = 'Submission failed: ' . $e->getMessage();
-            header("Location: /automated-requesting-system/public/forms/{$slug}/create");
+            header("Location: " . url("forms/{$slug}/create"));
             exit;
         }
     }
@@ -639,25 +644,6 @@ class FormController {
         return $row ? (int) $row['id'] : null;
     }
 
-    /**
-     * Determine whether the current user may act on this form right now.
-     *
-     * FIX: The previous implementation returned true for ANY pending row
-     * belonging to the user, regardless of sequence position.  Because all
-     * future approval rows are seeded as 'pending' at form creation, a Role 6
-     * user always had a pending row — so canActOnForm returned true from the
-     * moment the form was submitted, causing the "Your Action" card to render
-     * on the form detail page even when it was not their turn.
-     *
-     * The fix: first find the MINIMUM pending sequence for this form (the
-     * active stage).  A user only qualifies if their pending row sits exactly
-     * at that minimum sequence.  Every other pending row is a future stage and
-     * must remain invisible to the user until it becomes the active one.
-     *
-     * The server-side status gate in processApproval() already blocks
-     * out-of-order submissions, but this fix removes the misleading UI state
-     * so approvers never see an action card they cannot legitimately use.
-     */
     private function canActOnForm(array $form, array $steps): bool {
         if (in_array($form['status'], ['completed', 'rejected'], true)) return false;
         if ($_SESSION['role_id'] == 1) return true;
@@ -835,7 +821,7 @@ class FormController {
         )->execute([
             $_SESSION['user_id'], $action, $entity, $entityId,
             $old ? json_encode($old) : null,
-            $new ? json_encode($new)  : null,
+            $new ? json_encode($new) : null,
             $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
     }

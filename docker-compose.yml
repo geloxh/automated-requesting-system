@@ -20,6 +20,7 @@ services:
       # DO NOT mount the whole project (. :) here — Windows has lowercase
       # app/helpers/ which would overwrite the correctly-cased image filesystem.
       - uploads_data:/var/www/automated-requesting-system/public/uploads
+      - storage_data:/var/www/automated-requesting-system/storage
     networks:
       - ars_net
 
@@ -67,6 +68,7 @@ services:
 volumes:
   db_data:
   uploads_data:
+  storage_data:
 
 networks:
   ars_net:

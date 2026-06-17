@@ -1,5 +1,8 @@
-<?php if (!defined('BASE_LOADED')) die('Direct access not allowed'); ?>
+<?php 
+    if (!defined('BASE_LOADED')) die('Direct access not allowed'); 
+?>
 
+<link rel="stylesheet" href="<?= url('stylesheets/sidebar.css') ?>">
 <nav id="sidebar" class="<?= ($GLOBALS['sidebar_collapsed'] ?? false) ? 'collapsed' : '' ?>">
     <div class="sidebar-brand">
         <div class="brand-icon"><i class="ti ti-bolt"></i></div>
@@ -59,7 +62,7 @@
             <div class="sidebar-group-links" id="group-admin">
                 <a href="<?= url('forms/leave-application') ?>"
                    data-tooltip="Leave Application"
-                   class="<?= str_contains($uri, '/leave-application') ? 'active' : '' ?>">
+                   class="<?= str_contains($uri, 'leave-application') ? 'active' : '' ?>">
                     <i class="ti ti-beach"></i> <span>Leave Application</span>
                 </a>
                 <a href="<?= url('forms/overtime-authorization') ?>"
@@ -135,13 +138,30 @@
            class="sidebar-settings-link <?= $uri === '/settings' ? 'active' : '' ?>">
             <i class="ti ti-settings"></i> <span>Settings</span>
         </a>
-        <a href="<?= url('profile') ?>" class="user-card" data-tooltip="Profile">
+        <div class="user-block" id="userBlock">
+            <!-- Popover floats above -->
+            <div class="user-menu" id="userMenu">
+                <a href="<?= url('profile') ?>" class="user-menu-item" onclick="event.stopPropagation()">
+                    <i class="ti ti-user"></i> My Profile
+                </a>
+                <a href="<?= url('settings') ?>" class="user-menu-item" onclick="event.stopPropagation()">
+                    <i class="ti ti-settings"></i> Settings
+                </a>
+                <div class="user-menu-divider"></div>
+                <form method="POST" action="<?= url('logout') ?>" style="margin:0" onsubmit="return confirm('Sign out of your account?')">
+                    <?= \App\Helpers\Csrf::field() ?>
+                    <button class="user-menu-item user-menu-item--danger" type="submit">
+                        <i class="ti ti-logout"></i> Sign out
+                    </button>
+                </form>
+            </div>
             <div class="user-avatar"><?= $initials ?></div>
-            <div>
+            <div class="user-info">
                 <div class="user-name"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
                 <div class="user-role"><?= $roleName ?> · <?= htmlspecialchars($_SESSION['department'] ?? '') ?></div>
             </div>
-            <i class="ti ti-dots-vertical"></i>
-        </a>
+            <i class="ti ti-chevron-up user-block-chevron" id="userBlockChevron"></i>
+        </div>
     </div>
+<script src="<?= url('scripts/app.js') ?>"></script>
 </nav>

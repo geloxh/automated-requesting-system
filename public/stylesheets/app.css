@@ -183,6 +183,75 @@ a { text-decoration: none; color: inherit; }
 .user-role { font-size: 10.5px; color: #475569; white-space: nowrap; }
 .user-card > i { margin-left: auto; color: #334155; font-size: 15px; flex-shrink: 0; }
 
+/* ── User block popover ── */
+.user-block {
+    position: relative;
+    padding: 10px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background .15s;
+    user-select: none;
+}
+.user-block:hover { background: #1e293b; }
+.user-block .user-info { flex: 1; overflow: hidden; }
+.user-block-chevron {
+    color: #475569;
+    font-size: 13px;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform .2s;
+}
+.user-block.open .user-block-chevron { transform: rotate(180deg); }
+/* Popover */
+.user-menu {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 8px; right: 8px;
+    background: #1e2844;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.45);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+    z-index: 200;
+}
+.user-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+}
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    text-decoration: none;
+}
+.user-menu-item:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+.user-menu-item i { font-size: 15px; flex-shrink: 0; }
+.user-menu-divider { height: 1px; background: rgba(255,255,255,.07); margin: 2px 0; }
+.user-menu-item--danger { color: #f87171; }
+.user-menu-item--danger:hover { background: rgba(248,113,113,.08); color: #fca5a5; }
+/* Collapsed sidebar — hide info text */
+#sidebar.collapsed .user-block .user-info,
+#sidebar.collapsed .user-block-chevron { display: none; }
+#sidebar.collapsed .user-block { justify-content: center; padding: 9px; }
+
 /* ══════════════════════════════════════════
    COLLAPSED STATE (desktop icon rail)
    ══════════════════════════════════════════ */

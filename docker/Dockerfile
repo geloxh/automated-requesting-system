@@ -44,8 +44,9 @@ RUN [ -f app/Helpers/csrf.php ] && [ ! -f app/Helpers/Csrf.php ] \
 
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Uploads directory must be writable by www-data
-RUN chown -R www-data:www-data public/uploads \
-    && chmod -R 775 public/uploads
+# Uploads and storage directories must be writable by www-data
+RUN mkdir -p public/uploads storage/approvals storage/avatars \
+    && chown -R www-data:www-data public/uploads storage \
+    && chmod -R 775 public/uploads storage
 
 EXPOSE 80 443
