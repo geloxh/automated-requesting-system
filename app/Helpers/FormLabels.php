@@ -29,7 +29,7 @@
         private const STATUS_LABELS = [
             'draft' => 'Draft',
             'submitted' => 'Submitted',
-            'checker_approved' => 'With Checker',
+            'immediatehead_approved' => 'With Immediate Head',
             'process_approved' => 'Processing',
             'department_reviewed' => 'Dept. Review',
             'finance_reviewed' => 'Finance Review',
@@ -58,7 +58,7 @@
         private const BADGE_MAP = [
             'draft' => 'secondary',
             'submitted' => 'primary',
-            'checker_approved' => 'info',
+            'immediatehead_approved' => 'info',
             'process_approved' => 'info',
             'department_reviewed' => 'info',
             'finance_reviewed' => 'warning',
@@ -82,15 +82,14 @@
 
         private const STEP_LABELS_ADMIN = [
             1 => 'Submitted',
-            2 => 'Checker Approval',
+            2 => 'Immediate Head Approval',
             3 => 'Review Approval',
             4 => 'Grant Approval Request',
-            5 => 'Completed',
         ];
 
         private const STEP_LABELS_FINANCE = [
             1 => 'Submitted',
-            2 => 'Checker Approval',
+            2 => 'Immediate Head Approval',
             3 => 'Process Approval',
             4 => 'Evaluation Approval',
             5 => 'Grant Approval Request',

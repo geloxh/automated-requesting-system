@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once __DIR__ . '/../vendor/autoload.php';
 
 header('X-Frame-Options: DENY');
@@ -11,7 +12,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 $GLOBALS['csp_nonce'] = base64_encode(random_bytes(16));
 $nonce = $GLOBALS['csp_nonce'];
 
-header("Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'nonce-{$nonce}' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self'; upgrade-insecure-requests;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net; style-src 'self' 'nonce-{$nonce}' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self'; upgrade-insecure-requests;");
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();

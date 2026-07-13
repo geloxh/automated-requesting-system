@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reset Password — Processing System</title>
-    <link href="/automated-requesting-system/public/stylesheets/auth.css" rel="stylesheet">
+    <link href="<?= url('stylesheets/auth.css') ?>" rel="stylesheet">
 </head>
 <body>
     <div class="forgot-password-card">
@@ -25,7 +25,7 @@
             <p class="form-success" role="alert"><?= htmlspecialchars($status) ?></p>
         <?php endif; ?>
 
-        <form method="POST" action="/automated-requesting-system/public/forgot-password">
+        <form method="POST" action="<?= url('forgot-password') ?>">
             <?= \App\Helpers\Csrf::field() ?>
             <div class="card-form-group">
                 <label for="email">Email Address</label>
@@ -37,12 +37,12 @@
         <div class="card-divider"></div>
 
         <div class="card-footer">
-            <a href="/automated-requesting-system/public/login" class="card-back-link">
+            <a href="<?= url('login') ?>" class="card-back-link">
                 <i data-lucide="arrow-left"></i> Back to Login
             </a>
         </div>
     </div>
-    <script src="/automated-requesting-system/public/scripts/lucide.min.js"></script>
-    <script src="/automated-requesting-system/public/scripts/auth.js"></script>
+    <script src="<?= url('scripts/lucide.min.js') ?>"></script>
+    <script src="<?= url('scripts/auth.js') ?>"></script>
 </body>
 </html>

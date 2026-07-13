@@ -1,15 +1,13 @@
 <?php
-namespace App\Middleware;
+    namespace App\Middleware;
 
-class AuthMiddleware
-{
-    public static function require(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) session_start();
+    class AuthMiddleware {
+        public static function require(): void {
+            if (session_status() === PHP_SESSION_NONE) session_start();
 
-        if (empty($_SESSION['user_id'])) {
-            header('Location: /automated-requesting-system/public/login');
-            exit;
+            if (empty($_SESSION['user_id'])) {
+                header('Location: ' . url('login'));
+                exit;
+            }
         }
     }
-}

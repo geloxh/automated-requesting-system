@@ -8,18 +8,6 @@
  *   data-search-col="0,1,2"  — comma-separated column indices to search
  *   data-filter-col="2" — column index for the type/status dropdown
  *
- * Then add inside .table-wrap, before <table>:
- *   <div class="filter-bar" data-filter-bar>
- *     <input type="search" placeholder="Search..." data-search-input>
- *     <select data-filter-select>
- *       <option value="">All types</option>
- *       ... options ...
- *     </select>
- *     <span class="filter-count" data-filter-count></span>
- *   </div>
- *
- * CHANGE: search input now debounced 200ms for smoother feel and
- *         rows fade on filter change instead of snapping.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -53,8 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 var show = matchesSearch && matchesFilter;
                 // Fade instead of snap
-                row.style.opacity = show ? '1' : '0';
-                row.style.display = show ? '' : 'none';
+                row.classList.toggle('table-row-faded', !show);
+                row.classList.toggle('d-none', !show);
                 if (show) visible++;
             });
 

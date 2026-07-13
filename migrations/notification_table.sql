@@ -5,11 +5,11 @@
 -- ================================================================
 CREATE TABLE IF NOT EXISTS notifications (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    user_id INT UNSIGNED NOT NULL,               -- recipient (employees.id)
-    form_id INT UNSIGNED NULL,                   -- related form, nullable
-    type VARCHAR(40) NOT NULL DEFAULT 'info',-- 'info' | 'success' | 'warning' | 'danger'
+    user_id INT UNSIGNED NOT NULL, -- recipient (employees.id)
+    form_id INT UNSIGNED NULL, -- related form, nullable
+    type VARCHAR(40) NOT NULL DEFAULT 'info', -- 'info' | 'success' | 'warning' | 'danger'
     message VARCHAR(500) NOT NULL,
-    link VARCHAR(500) NULL,                   -- href for the notification item
+    link VARCHAR(500) NULL, -- href for the notification item
     is_read TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  

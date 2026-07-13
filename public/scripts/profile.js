@@ -1,4 +1,4 @@
-// ── Avatar upload ────────────────────────────────────────────────
+// ── Avatar upload ──
 const avatarInput = document.getElementById('avatar-input');
 const avatarEditBtn = document.getElementById('avatar-edit-btn');
 if (avatarEditBtn && avatarInput) {
@@ -6,7 +6,7 @@ if (avatarEditBtn && avatarInput) {
     avatarInput.addEventListener('change', () => document.getElementById('avatar-form').submit());
 }
 
-// ── Nav: click handler + scroll-spy ─────────────────────────────
+// ── Nav: click handler + scroll-spy ──
 const navItems = document.querySelectorAll('.profile-nav-item');
 const sections  = ['account', 'password'].map(id => document.getElementById(id)).filter(Boolean);
 
@@ -32,7 +32,7 @@ const observer = new IntersectionObserver(entries => {
 
 sections.forEach(s => observer.observe(s));
 
-// ── Eye toggle ───────────────────────────────────────────────────
+// ── Eye toggle ──
 document.querySelectorAll('.eye-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
         const input = document.getElementById(btn.dataset.target);
@@ -43,7 +43,7 @@ document.querySelectorAll('.eye-toggle').forEach(btn => {
     });
 });
 
-// ── Password strength ────────────────────────────────────────────
+// ── Password strength ──
 const newPw = document.getElementById('new_password');
 const fill = document.getElementById('strength-fill');
 const label = document.getElementById('strength-label');
@@ -86,7 +86,7 @@ function checkMatch() {
     if (!confirmPw.value) { matchHint.textContent = ''; matchHint.className = 'field-hint'; return; }
     const ok = newPw.value === confirmPw.value;
     matchHint.textContent = ok ? '✓ Passwords match' : '✗ Passwords do not match';
-    matchHint.className   = 'field-hint ' + (ok ? 'match-ok' : 'match-err');
+    matchHint.className = 'field-hint ' + (ok ? 'match-ok' : 'match-err');
 }
 
 if (confirmPw) confirmPw.addEventListener('input', checkMatch);

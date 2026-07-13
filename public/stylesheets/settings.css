@@ -1,7 +1,7 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   settings.css  –  Settings page styles
-   Depends on app.css variables
-   ═══════════════════════════════════════════════════════════════════════════ */
+/*
+ * settings.css – Settings page styles
+ * Depends on app.css variables
+ */
 
 /* ── Layout ── */
 .settings-layout {
@@ -491,9 +491,9 @@ select.form-control {
 }
  
 /* Disk icon colours (replaces style="color:var(--danger/success)") */
-.icon-danger  { color: var(--danger); }
+.icon-danger { color: var(--danger); }
 .icon-success { color: var(--success); }
-.icon-soft    { color: var(--text-soft); }
+.icon-soft { color: var(--text-soft); }
  
 /* ── CSP-safe replacements — inline styles removed from views ── */
  

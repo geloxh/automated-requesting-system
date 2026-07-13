@@ -1,7 +1,7 @@
 <?php
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
     $uri = $uri ?? '/';
-    $roleLabels = [ 1 => 'Admin', 2 => 'Approver', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Checker', 6 => 'Final Approver' ];
+    $roleLabels = [ 1 => 'Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
     $roleName = $roleLabels[$_SESSION['role_id']] ?? 'User';
     $initials = strtoupper(substr($_SESSION['user_name'], 0, 2));
     $roleId = (int) $_SESSION['role_id'];
@@ -71,7 +71,7 @@
     $statusLabels = [
         'draft' => 'Draft',
         'submitted' => 'Submitted',
-        'checker_approved' => 'With Checker',
+        'immediatehead_approved' => 'With Immediate Head',
         'process_approved' => 'Processing',
         'department_reviewed' => 'Dept. Review',
         'finance_reviewed' => 'Finance Review',
@@ -124,8 +124,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · ARS') ?></title>
-    <link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/app.css">
+    <link rel="stylesheet" href="<?= url('stylesheets/app.css') ?>">
+    <link rel="stylesheet" href="<?= url('stylesheets/chat.css') ?>">
     <style nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">:root{<?= $accentVars ?>}</style>
+    <!-- CSRF token for fetch requests -->
+    <meta name="csrf-token" content="<?= \App\Helpers\Csrf::token() ?>">
+    <script nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">window.__ARS_CSP_NONCE = '<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>';</script>
+    <script src="<?= url('scripts/csp-utils.js') ?>"></script>
 </head>
 <body>
 <div class="layout">
@@ -209,41 +214,46 @@
                     <div class="search-dropdown dept-hidden" id="searchDropdown" role="listbox"></div>
                 </div>
 
+                <a href="<?= url('chat') ?>" class="icon-btn chat-icon-wrap" title="Messages" id="chatBtn">
+                    <i class="ti ti-message-circle"></i>
+                    <span id="chatDot"></span>
+                </a>
+
                 <button class="icon-btn" id="notifBtn" title="Notifications">
                     <i class="ti ti-bell"></i>
                     <span class="notif-dot <?= $notifUnread === 0 ? 'notif-dot--hidden' : '' ?>" id="notifDot"></span>
-                </button>`
+                </button>
 
                 <div class="new-req-wrap" id="newReqWrap">
                     <button type="button" class="btn-new-req" id="newReqBtn" aria-haspopup="true" aria-expanded="false">
                         <i class="ti ti-plus"></i> New Request <i class="ti ti-chevron-down"></i>
                     </button>
                     <div class="new-req-dropdown dept-hidden" id="newReqDropdown" role="menu">
-                        <a href="/automated-requesting-system/public/forms/advance-payment/create" role="menuitem">
+                        <a href="<?= url('forms/advance-payment/create') ?>" role="menuitem">
                             <i class="ti ti-cash"></i> Advance Payment
                         </a>
-                        <a href="/automated-requesting-system/public/forms/reimbursement/create" role="menuitem">
+                        <a href="<?= url('forms/reimbursement/create') ?>" role="menuitem">
                             <i class="ti ti-receipt"></i> Reimbursement
                         </a>
-                        <a href="/automated-requesting-system/public/forms/liquidation/create" role="menuitem">
+                        <a href="<?= url('forms/liquidation/create') ?>" role="menuitem">
                             <i class="ti ti-report-money"></i> Liquidation
                         </a>
-                        <a href="/automated-requesting-system/public/forms/request-for-payment/create" role="menuitem">
+                        <a href="<?= url('forms/request-for-payment/create') ?>" role="menuitem">
                             <i class="ti ti-file-invoice"></i> Request for Payment
                         </a>
-                        <a href="/automated-requesting-system/public/forms/leave-application/create" role="menuitem">
+                        <a href="<?= url('forms/leave-application/create') ?>" role="menuitem">
                             <i class="ti ti-calendar-off"></i> Leave Application
                         </a>
-                        <a href="/automated-requesting-system/public/forms/overtime-authorization/create" role="menuitem">
+                        <a href="<?= url('forms/overtime-authorization/create') ?>" role="menuitem">
                             <i class="ti ti-clock-plus"></i> Overtime Authorization
                         </a>
-                        <a href="/automated-requesting-system/public/forms/vehicle-request/create" role="menuitem">
+                        <a href="<?= url('forms/vehicle-request/create') ?>" role="menuitem">
                             <i class="ti ti-car"></i> Vehicle Request
                         </a>
                     </div>
                 </div>
 
-                <form method="POST" action="/automated-requesting-system/public/logout">
+                <form method="POST" action="<?= url('logout') ?>" id="logoutForm" class="logout-form">
                     <?= \App\Helpers\Csrf::field() ?>
                     <button class="icon-btn" title="Logout">
                         <i class="ti ti-logout"></i>
@@ -258,9 +268,15 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/automated-requesting-system/public/scripts/form_table.js"></script>
-<script src="/automated-requesting-system/public/scripts/table-filter.js"></script>
-<script src="/automated-requesting-system/public/scripts/app.js"></script>
+<script nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">window.ARS_BASE = '<?= rtrim(parse_url($_ENV['APP_URL'] ?? '', PHP_URL_PATH) ?? '', '/') ?>'; window.APP_URL = window.ARS_BASE;</script>
+<script src="<?= url('scripts/lucide.min.js') ?>"></script>
+<script src="<?= url('scripts/form_table.js') ?>"></script>
+<script src="<?= url('scripts/table-filter.js') ?>"></script>
+<script src="<?= url('scripts/app.js') ?>"></script>
+
+<?php if (isset($pageTitle) && $pageTitle === 'Messaging'): ?>
+<script src="<?= url('scripts/chat.js') ?>"></script>
+<?php endif; ?>
 
 </body>
 </html>

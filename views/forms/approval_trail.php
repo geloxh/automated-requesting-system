@@ -31,7 +31,7 @@
         $labels = [
             1 => ['name' => 'Requestor', 'role' => \App\Helpers\FormLabels::stepLabel(1, $formType)],
             2 => ['name' => 'Immediate Supervisor', 'role' => \App\Helpers\FormLabels::stepLabel(2, $formType)],
-            3 => ['name' => 'Checker', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
+            3 => ['name' => 'Acquisition Checker', 'role' => \App\Helpers\FormLabels::stepLabel(3, $formType)],
             4 => ['name' => 'Finance Head', 'role' => \App\Helpers\FormLabels::stepLabel(4, $formType)],
             5 => ['name' => 'Final Approver', 'role' => \App\Helpers\FormLabels::stepLabel(5, $formType)],
             6 => ['name' => 'Approved', 'role' => \App\Helpers\FormLabels::stepLabel(6, $formType)],

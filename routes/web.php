@@ -1,29 +1,30 @@
 <?php
-    require_once __DIR__ . '/../app/controllers/AuthController.php';
-    require_once __DIR__ . '/../app/controllers/SettingsController.php';
-    require_once __DIR__ . '/../app/controllers/FormController.php';
-    require_once __DIR__ . '/../app/controllers/ApprovalController.php';
-    require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+    require_once __DIR__ . '/../app/Controllers/AuthController.php';
+    require_once __DIR__ . '/../app/Controllers/SettingsController.php';
+    require_once __DIR__ . '/../app/Controllers/FormController.php';
+    require_once __DIR__ . '/../app/Controllers/ApprovalController.php';
+    require_once __DIR__ . '/../app/Controllers/EmployeeController.php';
 
-    require_once __DIR__ . '/../app/controllers/DepartmentController.php';
+    require_once __DIR__ . '/../app/Controllers/DepartmentController.php';
+    require_once __DIR__ . '/../app/Controllers/CompanyController.php';
 
-    require_once __DIR__ . '/../app/controllers/NotificationController.php';
+    require_once __DIR__ . '/../app/Controllers/NotificationController.php';
+    require_once __DIR__ . '/../app/Controllers/ToolsController.php';
     require_once __DIR__ . '/../app/Helpers/EmployeeCode.php';
 
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $uri = str_replace('/automated-requesting-system/public', '', $uri) ?: '/';
+    // Strip the subpath prefix only when APP_URL includes one (non-Docker deploys).
+    // In Docker, DocumentRoot is already /public so the URI is clean.
+    $appPath = parse_url($_ENV['APP_URL'] ?? '', PHP_URL_PATH) ?? '';
+    if ($appPath && $appPath !== '/') {
+        $uri = str_replace(rtrim($appPath, '/'), '', $uri) ?: '/';
+    }
     $method = $_SERVER['REQUEST_METHOD'];
 
     // PUBLIC - Auth routes (No auth required)
     if ($uri === '/login') {
         if ($method === 'POST') (new AuthController)->login();
         else require __DIR__ . '/../views/auth/login.php';
-        exit;
-    }
-
-    if ($uri === '/register') {
-        if ($method === 'POST') (new AuthController)->register();
-        else require __DIR__ . '/../views/auth/register.php';
         exit;
     }
 
@@ -79,6 +80,24 @@
      // POST /forms/{id}/reject
     if (preg_match('#^/forms/(\d+)/reject$#', $uri, $m) && $method === 'POST') {
         (new FormController)->reject((int)$m[1]);
+        exit;
+    }
+
+    // GET /forms/{id}/edit
+    if (preg_match('#^/forms/(\d+)/edit$#', $uri, $m) && $method === 'GET') {
+        (new FormController)->edit((int)$m[1]);
+        exit;
+    }
+
+    // POST /forms/{id}/update
+    if (preg_match('#^/forms/(\d+)/update$#', $uri, $m) && $method === 'POST') {
+        (new FormController)->update((int)$m[1]);
+        exit;
+    }
+
+    // POST /forms/{id}/delete
+    if (preg_match('#^/forms/(\d+)/delete$#', $uri, $m) && $method === 'POST') {
+        (new FormController)->delete((int)$m[1]);
         exit;
     }
 
@@ -187,6 +206,40 @@
     }
 
     // ---------------------------------------------------------------
+    // COMPANIES (SysAdmin only)
+    // ---------------------------------------------------------------
+    if ($uri === '/companies') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new CompanyController)->index();
+        exit;
+    }
+    if ($uri === '/companies/create' && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new CompanyController)->store();
+        exit;
+    }
+    if (preg_match('#^/companies/(\d+)/update$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new CompanyController)->update((int)$m[1]);
+        exit;
+    }
+    if (preg_match('#^/companies/(\d+)/delete$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new CompanyController)->delete((int)$m[1]);
+        exit;
+    }
+    if (preg_match('#^/companies/(\d+)/members$#', $uri, $m) && $method === 'GET') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new CompanyController)->members((int)$m[1]);
+        exit;
+    }
+    if (preg_match('#^/companies/(\d+)/logo$#', $uri, $m) && $method === 'POST') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new CompanyController)->uploadLogo((int)$m[1]);
+        exit;
+    }
+
+    // ---------------------------------------------------------------
     // Profile
     // ---------------------------------------------------------------
     if ($uri === '/profile/avatar' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -277,6 +330,107 @@
     // GET /search?q= - typeahead JSON endpoint
     if ($uri === '/search' && $method === 'GET') {
         (new FormController)->search();
+        exit;
+    }
+
+    // ---------------------------------------------------------------
+    // Chat / Messaging
+    // ---------------------------------------------------------------
+    require_once __DIR__ . '/../app/Controllers/ChatController.php';
+
+    if ($uri === '/chat') {
+        (new \App\Controllers\ChatController)->index();
+        exit;
+    }
+    if ($uri === '/chat/users' && $method === 'GET') {
+        (new \App\Controllers\ChatController)->users();
+        exit;
+    }
+    if ($uri === '/chat/messages' && $method === 'GET') {
+        (new \App\Controllers\ChatController)->messages();
+        exit;
+    }
+    if ($uri === '/chat/send' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->send();
+        exit;
+    }
+    if ($uri === '/chat/poll' && $method === 'GET') {
+        (new \App\Controllers\ChatController)->poll();
+        exit;
+    }
+    if ($uri === '/chat/unread' && $method === 'GET') {
+        (new \App\Controllers\ChatController)->unread();
+        exit;
+    }
+    if ($uri === '/chat/block' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->block();
+        exit;
+    }
+    if ($uri === '/chat/unblock' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->unblock();
+        exit;
+    }
+
+    if ($uri === '/chat/mark-read' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->markRead();
+        exit;
+    }
+
+    if ($uri === '/chat/typing') {
+        (new \App\Controllers\ChatController)->typing();
+        exit;
+    }
+
+    if ($uri === '/chat/react' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->react();
+        exit;
+    }
+    if ($uri === '/chat/block-status' && $method === 'GET') {
+        (new \App\Controllers\ChatController)->blockStatus();
+        exit;
+    }
+
+    if ($uri === '/chat/upload' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->upload();
+        exit;
+    }
+
+    if ($uri === '/chat/share-form' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->shareForm();
+        exit;
+    }
+
+    // ---------------------------------------------------------------
+    // Tools (World Clock, Calculator, Height/Weight Converter,
+    // Notes, File Converter)
+    // ---------------------------------------------------------------
+    if ($uri === '/tools' && $method === 'GET') {
+        (new ToolsController)->index();
+        exit;
+    }
+
+    if ($uri === '/tools/payslip/request' && $method === 'POST') {
+        (new ToolsController)->requestPayslip();
+        exit;
+    }
+
+    if ($uri === '/tools/notes' && $method === 'GET') {
+        (new ToolsController)->listNotes();
+        exit;
+    }
+
+    if ($uri === '/tools/notes' && $method === 'POST') {
+        (new ToolsController)->createNote();
+        exit;
+    }
+
+    if (preg_match('#^/tools/notes/(\d+)/update$#', $uri, $m) && $method === 'POST') {
+        (new ToolsController)->updateNote((int)$m[1]);
+        exit;
+    }
+
+    if (preg_match('#^/tools/notes/(\d+)/delete$#', $uri, $m) && $method === 'POST') {
+        (new ToolsController)->deleteNote((int)$m[1]);
         exit;
     }
 

@@ -25,8 +25,8 @@
 
 <div class="page-header">
     <h5><?= htmlspecialchars($title) ?></h5>
-    <?php if ($roleId != 2): ?>
-        <a href="/automated-requesting-system/public/forms/<?= $slug ?>/create" class="btn btn-primary btn-sm">+ New Request</a>
+    <?php if ($roleId != 2 && $roleId != 7): ?>
+        <a href="<?= url('forms/' . $slug . '/create') ?>" class="btn btn-primary btn-sm">+ New Request</a>
     <?php endif; ?>
 </div>
 
@@ -70,7 +70,7 @@
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
-                    <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
+                    <a href="<?= url('forms/view/' . $form['id']) ?>" class="btn btn-ghost btn-sm">View</a>
                 </td>
             </tr>
         <?php endforeach; ?>

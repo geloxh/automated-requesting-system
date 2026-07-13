@@ -22,7 +22,7 @@
 
             if ($_SESSION[$key]['count'] >= 5) {
                 $_SESSION['login_error'] = 'Too many login attempts. Try again in 15 minutes.';
-                header('Location: /automated-requesting-system/public/login');
+                header('Location: ' . url('login'));
                 exit;
             }
 
@@ -34,8 +34,8 @@
 
             $stmt = db()->prepare(
                 $isEmail
-                    ? 'SELECT id, full_name, password_hash, role_id, is_active FROM employees WHERE email = ?'
-                    : 'SELECT id, full_name, password_hash, role_id, is_active FROM employees WHERE username  = ?'
+                    ? 'SELECT id, full_name, password_hash, role_id, department, is_active FROM employees WHERE email = ?'
+                    : 'SELECT id, full_name, password_hash, role_id, department, is_active FROM employees WHERE username  = ?'
             );
 
             $stmt->execute([$input]);
@@ -45,94 +45,25 @@
                 $_SESSION[$key]['count']++;
                 $_SESSION['login_error'] = 'Invalid credentials or account inactive.';
                 $_SESSION['old_email'] = htmlspecialchars($input);
-                header('Location: /automated-requesting-system/public/login');
+                header('Location: ' . url('login'));
                 exit;
             }
 
             unset($_SESSION[$key]);
             session_regenerate_id(true);
-            $_SESSION['user_id']   = $employee['id'];
-            $_SESSION['user_name'] = $employee['full_name'];
-            $_SESSION['role_id']   = $employee['role_id'];
+            $_SESSION['user_id']    = $employee['id'];
+            $_SESSION['user_name']  = $employee['full_name'];
+            $_SESSION['role_id']    = $employee['role_id'];
+            $_SESSION['department'] = $employee['department'] ?? '';
             unset($_SESSION['csrf_token']); // Rotate CSRF token on successful login
 
-            header('Location: /automated-requesting-system/public/dashboard');
+            header('Location: ' . url('dashboard'));
             exit;
         }
 
         public function logout(): void {
             session_destroy();
-            header('Location: /automated-requesting-system/public/login');
-            exit;
-        }
-
-        public function register(): void {
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
-
-            \App\Helpers\Csrf::verify();
-
-            $first = trim($_POST['firstname'] ?? '');
-            $last = trim($_POST['lastname'] ?? '');
-            $username = trim($_POST['username'] ?? '');
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $confirm  = $_POST['password_confirmation'] ?? '';
-            
-            $old = [
-                'firstname' => htmlspecialchars($first),
-                'lastname' => htmlspecialchars($last),
-                'username' => htmlspecialchars($username),
-                'email' => htmlspecialchars($email),
-            ];
-
-            $fail = function (string $msg) use ($old): never {
-                $_SESSION['register_error'] = $msg;
-                $_SESSION['show_signup'] = true;
-                $_SESSION['old_register'] = $old;
-                header('Location: /automated-requesting-system/public/login');
-                exit;
-            };
-
-            if (!$first || !$last || !$username || !$email || !$password || !$confirm) {
-                $fail('All fields are required.');
-            }
-
-            if ($username) {
-                $stmt = db()->prepare('SELECT id FROM employees WHERE username = ?');
-                $stmt->execute([$username]);
-                if ($stmt->fetch()) { $fail('Username already taken.'); }
-            }
-
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-               $fail('Invalid email address.');
-            }
-
-            if (strlen($password) < 8) {
-                $fail('Password must be at least 8 characters.');
-            }
-
-            if ($password !== $confirm) {
-                $fail('Passwords do not match.');
-            }
-
-            $stmt = db()->prepare('SELECT id FROM employees WHERE email = ?');
-            $stmt->execute([$email]);
-            if ($stmt->fetch()) {
-                $fail('Email already registered.');
-            }
-
-            $pdo = db();
-            try {
-                $empCode = \App\Helpers\generateEmployeeCode($pdo);
-                $pdo->prepare(
-                    'INSERT INTO employees (employee_code, full_name, username, email, password_hash, role_id) VALUES (?, ?, ?, ?, ?, ?)'
-                )->execute([$empCode, "$first $last", $username ?: null, $email, password_hash($password, PASSWORD_BCRYPT), 3]);
-            } catch (\Throwable) {
-                $fail('Registration failed. Please try again.');
-            }
-
-            $_SESSION['success'] = 'Registration successful. You can now log in.';
-            header('Location: /automated-requesting-system/public/login');
+            header('Location: ' . url('login'));
             exit;
         }
 
@@ -185,7 +116,7 @@
                 }
             }
 
-            header('Location: /automated-requesting-system/public/forgot-password');
+            header('Location: ' . url('forgot-password'));
             exit;
         }
 
@@ -200,19 +131,19 @@
 
             if (empty($token) || empty($password)) {
                 $_SESSION['error'] = 'Invalid request.';
-                header('Location: /automated-requesting-system/public/login');
+                header('Location: ' . url('login'));
                 exit;
             }
 
             if ($password !== $confirm) {
                 $_SESSION['error'] = 'Passwords do not match.';
-                header("Location: /automated-requesting-system/public/reset-password?token=" . urlencode($token));
+                header("Location: " . url("reset-password?token=") . urlencode($token));
                 exit;
             }
 
             if (strlen($password) < 8) {
                 $_SESSION['error'] = 'Password must be at least 8 characters.';
-                header("Location: /automated-requesting-system/public/reset-password?token=" . urlencode($token));
+                header("Location: " . url("reset-password?token=") . urlencode($token));
                 exit;
             }
 
@@ -225,7 +156,7 @@
 
             if (!$row) {
                 $_SESSION['login_error'] = 'Reset link is invalid or has expired.';
-                header('Location: /automated-requesting-system/public/forgot-password');
+                header('Location: ' . url('forgot-password'));
                 exit;
             }
 
@@ -236,7 +167,7 @@
             ->execute([$row['id']]);
 
             $_SESSION['success'] = 'Password updated. You can now log in.';
-            header('Location: /automated-requesting-system/public/login');
+            header('Location: ' . url('login'));
             exit;
         }
     }

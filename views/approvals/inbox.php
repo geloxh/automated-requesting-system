@@ -21,7 +21,7 @@
         <i class="ti ti-inbox-off empty-state-icon"></i>
         <div class="inbox-empty-title">You're all caught up!</div>
         <div class="inbox-empty0sub">No pending approvals at this time.</div>
-        <a href="/automated-requesting-system/public/my-submissions" class="btn btn-ghost btn-sm">
+        <a href="<?= url('my-submissions') ?>" class="btn btn-ghost btn-sm">
             <i class="ti ti-send"></i> View My Submissions
         </a>
     </div>
@@ -138,8 +138,8 @@
                     </span>
                 </td>
                 <td class="td-last text-end">
-                    <a href="/automated-requesting-system/public/forms/view/<?= $row['id'] ?>" class="btn btn-primary btn-sm">
-                        <?= \App\Helpers\FormLabels::verb((int)$row['sequence']) ?> <i class="ti ti-arrow-right" style="font-size:11px"></i>
+                    <a href="<?= url('forms/view/' . $row['id']) ?>" class="btn btn-primary btn-sm">
+                        <?= \App\Helpers\FormLabels::verb((int)$row['sequence']) ?> <i class="ti ti-arrow-right ti-xs"></i>
                     </a>
                 </td>
             </tr>

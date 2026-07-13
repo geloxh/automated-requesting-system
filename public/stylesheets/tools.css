@@ -1,0 +1,194 @@
+/* ============================================================
+   TOOLS PAGE
+   World Clock · Calculator · Height & Weight Converter ·
+   Notes
+   ============================================================ */
+
+.tools-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .tools-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Left nav (same pattern as settings-nav) ── */
+.tools-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    position: sticky;
+    top: 84px;
+}
+
+.tools-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+
+.tools-nav-item i { font-size: 17px; }
+.tools-nav-item:hover { background: var(--hover); color: var(--text-main); }
+.tools-nav-item.active { background: var(--accent-glow); color: var(--accent); }
+
+.tools-nav-caption {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--text-soft);
+    padding: 12px 12px 4px;
+}
+.tools-nav-caption:first-child { padding-top: 4px; }
+
+/* ── Panels ── */
+.tools-panel { display: none; }
+.tools-panel.active { display: block; }
+
+.tools-section-header { margin-bottom: 16px; }
+.tools-section-title { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 1.15rem; margin: 0; }
+.tools-section-sub { color: var(--text-muted); font-size: .85rem; margin: 4px 0 0; }
+
+.tools-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+/* ── World Clock ── */
+.clock-add-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.clock-add-row select { flex: 1; }
+
+.clock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+.clock-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.clock-card .clock-city { font-weight: 600; font-size: .85rem; margin-bottom: 4px; }
+.clock-card .clock-time { font-family: var(--font-display); font-size: 1.7rem; letter-spacing: .5px; }
+.clock-card .clock-date { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+.clock-card .clock-remove {
+    position: absolute; top: 6px; right: 6px;
+    background: none; border: none; color: var(--text-soft); cursor: pointer;
+}
+.clock-card .clock-remove:hover { color: var(--danger); }
+
+/* ── Calculator ── */
+.calc-wrap { max-width: 360px; margin: 0 auto; }
+.calc-mode-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+.calc-mode-toggle button {
+    flex: 1; padding: 6px 10px; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 8px; font-size: .8rem; cursor: pointer; color: var(--text-muted);
+}
+.calc-mode-toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.calc-display {
+    background: var(--sidebar-bg); color: #fff; border-radius: 10px;
+    padding: 16px; text-align: right; margin-bottom: 12px;
+}
+.calc-display .calc-expr { font-size: .8rem; opacity: .6; min-height: 16px; word-break: break-all; }
+.calc-display .calc-value { font-family: var(--font-display); font-size: 1.9rem; word-break: break-all; }
+
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.calc-grid.calc-sci { grid-template-columns: repeat(5, 1fr); }
+
+.calc-grid button {
+    padding: 12px 0; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); font-size: .95rem; cursor: pointer; color: var(--text-main);
+}
+.calc-grid button:hover { background: var(--hover); }
+.calc-grid button.calc-op { background: var(--accent-glow); color: var(--accent); font-weight: 600; }
+.calc-grid button.calc-eq { background: var(--accent); color: #fff; grid-row: span 1; }
+.calc-grid button.calc-fn { font-size: .78rem; color: var(--info); }
+
+/* ── Height & Weight Converter ── */
+.conv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .conv-grid { grid-template-columns: 1fr; } }
+
+.conv-field { margin-bottom: 12px; }
+.conv-field label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: 4px; }
+.conv-unit-toggle { display: flex; gap: 6px; margin-bottom: 12px; }
+.conv-unit-toggle button {
+    flex: 1; padding: 6px 8px; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 8px; font-size: .78rem; cursor: pointer; color: var(--text-muted);
+}
+.conv-unit-toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.conv-result { font-size: .85rem; color: var(--text-muted); margin-top: 6px; }
+.conv-result strong { color: var(--text-main); font-size: 1rem; }
+.conv-bmi { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--border); }
+.conv-bmi-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+/* Replaces JS-set inline style="background:...;color:..." (CSP style-src-attr) */
+.conv-bmi-badge--underweight { background: color-mix(in srgb, var(--info) 20%, transparent); color: var(--info); }
+.conv-bmi-badge--normal      { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); }
+.conv-bmi-badge--overweight  { background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); }
+.conv-bmi-badge--obese       { background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger); }
+
+/* ── Notes ── */
+.notes-toolbar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+
+.note-card {
+    border-radius: 10px; padding: 14px; min-height: 130px; display: flex; flex-direction: column;
+    border: 1px solid rgba(0,0,0,.06); box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.note-card.note-yellow { background: #fef9c3; }
+.note-card.note-pink { background: #fce7f3; }
+.note-card.note-blue { background: #dbeafe; }
+.note-card.note-green { background: #dcfce7; }
+.note-card.note-purple { background: #ede9fe; }
+
+.note-card input.note-title {
+    background: transparent; border: none; font-weight: 600; font-size: .92rem; margin-bottom: 6px; color: #1f2937;
+}
+.note-card textarea.note-content {
+    flex: 1; background: transparent; border: none; resize: none; font-size: .82rem; color: #374151; min-height: 70px;
+}
+.note-card input.note-title:focus, .note-card textarea.note-content:focus { outline: none; }
+.note-card .note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.note-color-dots { display: flex; gap: 5px; }
+.note-color-dots span { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+.note-color-dots span.active { border-color: rgba(0,0,0,.4); }
+/* Replaces JS-set inline style="background:..." on each dot (CSP style-src-attr) */
+.note-color-dots .note-yellow { background: #fde047; }
+.note-color-dots .note-pink   { background: #f9a8d4; }
+.note-color-dots .note-blue   { background: #93c5fd; }
+.note-color-dots .note-green  { background: #86efac; }
+.note-color-dots .note-purple { background: #c4b5fd; }
+.note-card .note-delete { background: none; border: none; color: rgba(0,0,0,.35); cursor: pointer; }
+.note-card .note-delete:hover { color: var(--danger); }
+.notes-empty { color: var(--text-muted); font-size: .85rem; text-align: center; padding: 30px 0; }
+
+/* CSP-safe replacements for former inline styles */
+.mt-0        { margin-top: 0; }
+.mt-14       { margin-top: 14px; }
+.text-left   { text-align: left; }
+.clock-time-lg { font-size: 1.3rem; }
+.is-hidden   { display: none; }
+.calc-eq-scientific { grid-column: span 5; }

@@ -2,13 +2,13 @@
 <div class="page-subheading">Complete record of all submitted forms across all departments.</div>
 
 <?php
-$badgeMap = \App\Helpers\FormLabels::allBadges();
-$statusLabels = \App\Helpers\FormLabels::allStatusLabels();
+    $badgeMap = \App\Helpers\FormLabels::allBadges();
+    $statusLabels = \App\Helpers\FormLabels::allStatusLabels();
 
-$uniqueTypes = array_unique(array_column($forms ?? [], 'form_type'));
-sort($uniqueTypes);
-$uniqueDepts = array_unique(array_filter(array_column($forms ?? [], 'department')));
-sort($uniqueDepts);
+    $uniqueTypes = array_unique(array_column($forms ?? [], 'form_type'));
+    sort($uniqueTypes);
+    $uniqueDepts = array_unique(array_filter(array_column($forms ?? [], 'department')));
+    sort($uniqueDepts);
 ?>
 
 <?php if (empty($forms)): ?>
@@ -42,7 +42,7 @@ sort($uniqueDepts);
         </select>
         <span class="filter-count" data-filter-count></span>
     </div>
-    <table data-filterable data-search-col="0,1,2,3" data-filter-col="0">
+    <table data-filterable data-search-col="1,2,3" data-filter-col="1">
         <thead>
             <tr>
                 <th class="th-first">#</th>
@@ -70,7 +70,7 @@ sort($uniqueDepts);
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
-                    <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
+                    <a href="<?= url('forms/view/' . $form['id']) ?>" class="btn btn-ghost btn-sm">View</a>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -78,5 +78,5 @@ sort($uniqueDepts);
     </table>
 </div>
 
-<script src="/automated-requesting-system/public/scripts/all_requests.js"></script>
+<script src="<?= url('scripts/all_requests.js') ?>"></script>
 <?php endif; ?>

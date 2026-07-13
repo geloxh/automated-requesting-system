@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/department.css">
+<link rel="stylesheet" href="<?= url('stylesheets/department.css') ?>">
 
 <div class="dept-shell">
 
@@ -108,7 +108,7 @@
 
             <!-- Normal view -->
             <div class="dept-detail-name" id="detailName"></div>
-            <div class="dept-detail-id"   id="detailId"></div>
+            <div class="dept-detail-id" id="detailId"></div>
 
             <div class="dept-detail-stats">
                 <div class="dept-stat">
@@ -154,11 +154,16 @@
 
 <!-- Add dialog -->
 <dialog id="addDialog" class="dept-dialog">
-    <form method="POST" action="/automated-requesting-system/public/departments/create" id="addForm">
+    <form method="POST" action="<?= url('departments/create') ?>" id="addForm">
         <?= \App\Helpers\Csrf::field() ?>
         <div class="dept-dialog-header">
-            <i class="ti ti-plus dept-icon-accent"></i>
-            <h5>New Department</h5>
+            <div class="dept-dialog-icon dept-dialog-icon--accent">
+                <i class="ti ti-building-plus"></i>
+            </div>
+            <div>
+                <div class="dept-dialog-title">New Department</div>
+                <div class="dept-dialog-sub">Add a department to organize employees.</div>
+            </div>
         </div>
         <div class="dept-dialog-body">
             <div class="dept-field-wrap">
@@ -184,12 +189,16 @@
 <!-- Confirm delete dialog -->
 <dialog id="confirmDeleteDialog" class="dept-dialog">
     <div class="dept-dialog-header">
-        <i class="ti ti-trash dept-icon-danger"></i>
-        <h5>Delete Department?</h5>
+        <div class="dept-dialog-icon dept-dialog-icon--danger">
+            <i class="ti ti-trash"></i>
+        </div>
+        <div>
+            <div class="dept-dialog-title">Delete Department?</div>
+            <div class="dept-dialog-sub">This action cannot be undone.</div>
+        </div>
     </div>
     <p class="dept-dialog-body">
-        This will permanently remove <strong id="confirmDeptName"></strong>.
-        This action cannot be undone.
+        <strong id="confirmDeptName"></strong> and all its data will be permanent removed.
     </p>
     <div class="dept-dialog-footer">
         <button type="button" class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
@@ -197,4 +206,4 @@
     </div>
 </dialog>
 
-<script src="/automated-requesting-system/public/scripts/department.js"></script>
+<script src="<?= url('scripts/department.js') ?>"></script>

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     lucide.createIcons();
 
-    // ── Tab switcher ─────────────────────────────────────────────
+    // ── Tab switcher ──
     document.querySelectorAll('.auth-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -11,13 +11,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ── Password toggles ─────────────────────────────────────────
+    // ── Password toggles ──
     function setupToggle(btnId, inputId, iconId) {
         const btn = document.getElementById(btnId);
         if (!btn) return;
         btn.addEventListener('click', () => {
             const input = document.getElementById(inputId);
-            const icon  = document.getElementById(iconId);
+            const icon = document.getElementById(iconId);
             if (!input || !icon) return;
             const show = input.type === 'password';
             input.type = show ? 'text' : 'password';
@@ -27,6 +27,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     setupToggle('toggleBtn', 'login_password', 'eyeIcon');
-    setupToggle('toggleBtnReg', 'reg_password', 'eyeIconReg');
-    setupToggle('toggleBtnConfirm', 'reg_confirm', 'eyeIconConfirm');
 });

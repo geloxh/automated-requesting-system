@@ -7,3 +7,5 @@ app/controllers/ApprovalController.php
 config/arsdb.sql
 
 public/uploads/avatars
+
+INSTRUCTIONS.md

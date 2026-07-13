@@ -25,6 +25,17 @@
     SELECT id, full_name, email, role_id FROM employees ORDER BY role_id;
 ```
 
+```
+```
+    Role map (align with the employees table):
+        1 = SysAdmin
+        2 = Approver / Manager (Immediate Supervisor)
+        3 = Regular Employee
+        4 = Department Head / Finance Head
+        5 = Checker / Approval Acquisition
+        6 = Final Approver
+'''
+
 ### Admin Forms
 | Step |             Stage            |        Login Account        |       Email           |
 |  1   | Requestor — submits the form |          Requestor          |    staff@email.com    |
@@ -34,10 +45,10 @@
 |  5   |   Completion of Approval     |         System Admin        |   sysadmin#email.com  |
 
 ### Finance Forms
-| Step |             Stage            |        Login Account        |       Email           |
-|  1   | Requestor — submits the form |          Requestor          |    staff@email.com    |
-|  2   |      Checker Approval        |     Immediate Supervisor    |  approver@email.com   |
-|  3   |      Process Approval        |      Finance/Accounting     |   finance@email.com   |
-|  4   |     Evaluation Approval      |        Finance Head         | financehead@email.com |
-|  5   |   Grant Approval Request     |       Final Approver        |finalapprover@email.com|
-|  6   |   Completion of Approval     |         System Admin        |   sysadmin#email.com  |
+| Step |             Stage            |        Login Account                |       Email           |
+|  1   | Requestor — submits the form |          Requestor                  |    staff@email.com    |
+|  2   |      Checker Approval        |     Immediate Supervisor            |  approver@email.com   |
+|  3   |      Process Approval        |      Finance/Accounting             |   finance@email.com   |
+|  4   |     Evaluation Approval      |   Finance Head/Department Head      | financehead@email.com |
+|  5   |   Grant Approval Request     |       Final Approver                |finalapprover@email.com|
+|  6   |   Completion of Approval     |         System Admin                |   sysadmin#email.com  |

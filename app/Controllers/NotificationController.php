@@ -16,7 +16,7 @@
      */
     
     class NotificationController {
-        // ── Routes ────────────────────────────────────────────────────
+        // ── Routes ──
 
         /** GET /notifications/unread - returns JSON for the bell panel */
         public function unread(): void {
@@ -53,7 +53,7 @@
             exit;
         }
 
-        // ── Static helpers (called from FormController) ───────────────
+        // ── Static helpers (called from FormController) ──
  
         /**
          * Insert a notification for one user.
@@ -72,7 +72,7 @@
         ): void {
             try {
                 $link = $formId
-                    ? '/automated-requesting-system/public/forms/view/' . $formId
+                    ? url('forms/view/' . $formId)
                     : null;
 
                 db()->prepare(
@@ -85,7 +85,7 @@
             }
         }
 
-        // ── Private ───────────────────────────────────────────────────
+        // ── Private ──
         private function fetchForUser(int $userId, int $limit = 10): array {
             $stmt = db()->prepare(
                 'SELECT id, form_id, type, message, link, is_read, created_at

@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
 
 :root {
-    --accent:      #0ea5e9;
-    --accent-dark: #0284c7;
-    --accent-glow: #0ea5e920;
-    --success:     #10b981;
-    --danger:      #ef4444;
-    --surface:     #f8fafc;
-    --card-bg:     #ffffff;
-    --border:      #e2e8f0;
-    --text-main:   #0f172a;
-    --text-muted:  #64748b;
-    --text-soft:   #94a3b8;
+    --accent: #0ea5e9;
+    --accent-dark:#0284c7;
+    --accent-glow:#0ea5e920;
+    --success:#10b981;
+    --danger:#ef4444;
+    --surface:#f8fafc;
+    --card-bg:#ffffff;
+    --border:#e2e8f0;
+    --text-main:#0f172a;
+    --text-muted:#64748b;
+    --text-soft:#94a3b8;
     --font-display: 'Outfit', sans-serif;
-    --font-body:    'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

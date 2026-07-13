@@ -1,4 +1,3 @@
-<!-- this is the orginal FormController -->
 <?php
     class FormController {
         private array $typeMap = [
@@ -27,7 +26,7 @@
         // GET /forms/{slug}
         // ----------------------------------------------------------------
         public function index(string $slug): void {
-            $type   = $this->resolveType($slug);
+            $type = $this->resolveType($slug);
             $userId = $_SESSION['user_id'];
             $roleId = $_SESSION['role_id'];
 
@@ -152,7 +151,7 @@
                 if (is_string($val)) $val = trim($val);
                 if ($val === '' || (is_array($val) && empty(array_filter($val)))) {
                     $_SESSION['error'] = "Field '{$field}' is required.";
-                    header("Location: /automated-requesting-system/public/forms/{$slug}/create");
+                    header("Location: " . url("forms/{$slug}/create"));
                     exit;
                 }
             }
@@ -194,13 +193,13 @@
                 $pdo->commit();
 
                 $_SESSION['success'] = 'Form submitted successfully.';
-                header("Location: /automated-requesting-system/public/forms/view/{$formId}");
+                header("Location: " . url("forms/view/{$formId}"));
                 exit;
 
             } catch (\Throwable $e) {
                 $pdo->rollBack();
                 $_SESSION['error'] = 'Submission failed. Please try again.';
-                header("Location: /automated-requesting-system/public/forms/{$slug}/create");
+                header("Location: " . url("forms/{$slug}/create"));
                 exit;
             }
         }
@@ -229,7 +228,7 @@
 
             if (!$approval && !$isSysAdmin) {
                 $_SESSION['error'] = 'No pending approval step found for you.';
-                header("Location: /automated-requesting-system/public/forms/view/{$id}");
+                header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
 
@@ -264,11 +263,32 @@
                 $_SESSION['error'] = 'Action failed. Please try again.';
             }
 
-            header("Location: /automated-requesting-system/public/forms/view/{$id}");
+            header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
         private function resolveApprovers(string $type, array $data): array {
+            if ($type === 'reimbursement') {
+                // Fetch the two checker accounts (role_id = 5) in order
+                $stmt = db()->prepare(
+                    'SELECT id FROM employees WHERE role_id = 5 AND is_active = 1 ORDER BY id LIMIT 2'
+                );
+                $stmt->execute();
+                $checkers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                if (count($checkers) < 2) {
+                    throw new \RuntimeException('Two active Checker accounts are required for reimbursement.');
+                }
+
+                // seq 1 = submitter placeholder, seq 2 = checker1, seq 3 = checker2, etc.
+                // resolveApprovers returns a 0-indexed array; store() does $seq + 1
+                return [
+                    0 => $_SESSION['user_id'], // seq 1 — submitted
+                    1 => $checkers[0],         // seq 2 — checker 1
+                    2 => $checkers[1],         // seq 3 — checker 2
+                ];
+            }
+
             $stmt = db()->prepare(
                 'SELECT id FROM employees WHERE role_id = 2 AND is_active = 1 ORDER BY id'
             );

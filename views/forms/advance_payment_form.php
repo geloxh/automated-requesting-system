@@ -2,7 +2,17 @@
     <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
-<form method="POST" action="/automated-requesting-system/public/forms/advance-payment">
+<?php
+    // Edit mode: $form is set when coming from edit(), absent on create
+    $isEdit = isset($form);
+    $data = $data ?? [];
+    $formAction = $isEdit
+        ? url('forms/' . (int)$form['id'] . '/update')
+        : url('forms/advance-payment');
+    $fieldVal = fn(string $k, string $def = '') =>
+        htmlspecialchars($data[$k] ?? $def);
+?>
+<form method="POST" action="<?= $formAction ?>">
     <div class="page-heading">Advance Payment Request</div>
     <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
     
@@ -15,7 +25,7 @@
             <div class="form-group">
                 <label>Department</label>
                 <div class="input-select">
-                    <input type="text" name="department" list="dept-list" autocomplete="off" required>
+                    <input type="text" name="department" list="dept-list" autocomplete="off" required value="<?= $fieldVal('department') ?>">
                     <datalist id="dept-list">
                         <?php foreach ($departments ?? [] as $dept): ?>
                             <option value="<?= htmlspecialchars($dept) ?>">
@@ -23,11 +33,11 @@
                     </datalist>
                 </div>
             </div>
-            <div class="form-group"><label>Pages</label><input type="text" name="page_no" placeholder="No. of attachments"></div>
-            <div class="form-group"><label>Date</label><input type="date" name="date" required></div>
+            <div class="form-group"><label>Pages</label><input type="text" name="page_no" placeholder="No. of attachments" value="<?= $fieldVal('page_no') ?>"></div>
+            <div class="form-group"><label>Date</label><input type="date" name="date" required value="<?= $fieldVal('date') ?>"></div>
         </div>
         <div class="form-group mt-1">
-            <label>Project Name</label><input type="text" name="project_name">
+            <label>Project Name</label><input type="text" name="project_name" value="<?= $fieldVal('project_name') ?>">
         </div>
     </div>
 
@@ -43,14 +53,14 @@
                     <option>Cheque</option>
                 </select>
             </div>
-            <div class="form-group"><label>Payee</label><input type="text" name="payee" required></div>
-            <div class="form-group"><label>Account Name</label><input type="text" name="account_name"></div>
-            <div class="form-group"><label>Bank Name</label><input type="text" name="bank_name"></div>
-            <div class="form-group"><label>Bank Account No.</label><input type="text" name="bank_account_no"></div>
-            <div class="form-group"><label>Address</label><input type="text" name="address"></div>
+            <div class="form-group"><label>Payee</label><input type="text" name="payee" required value="<?= $fieldVal('payee') ?>"></div>
+            <div class="form-group"><label>Account Name</label><input type="text" name="account_name" value="<?= $fieldVal('account_name') ?>"></div>
+            <div class="form-group"><label>Bank Name</label><input type="text" name="bank_name" value="<?= $fieldVal('bank_name') ?>"></div>
+            <div class="form-group"><label>Bank Account No.</label><input type="text" name="bank_account_no" value="<?= $fieldVal('bank_account_no') ?>"></div>
+            <div class="form-group"><label>Address</label><input type="text" name="address" value="<?= $fieldVal('address') ?>"></div>
         </div>
         <div class="form-group mt-1">
-            <label>Purpose</label><textarea name="purpose" rows="2"></textarea>
+            <label>Purpose</label><textarea name="purpose" rows="2"><?= $fieldVal('purpose') ?></textarea>
         </div>
     </div>
 
@@ -65,11 +75,11 @@
                 <thead><tr><th>Item</th><th>Description</th><th>Unit Price</th><th>Quantity</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" name="item[]"></td>
-                        <td><input type="text" name="description[]"></td>
-                        <td><input type="number" step="0.01" name="unit_price[]" class="unit-price"></td>
-                        <td><input type="number" name="quantity[]" class="qty"></td>
-                        <td><input type="number" step="0.01" name="amount[]" class="row-amount" readonly></td>
+                        <td><input type="text" name="item[]" value="<?= $fieldVal('item[]') ?>"></td>
+                        <td><input type="text" name="description[]" value="<?= $fieldVal('description[]') ?>"></td>
+                        <td><input type="number" step="0.01" name="unit_price[]" class="unit-price" value="<?= $fieldVal('unit_price[]') ?>"></td>
+                        <td><input type="number" name="quantity[]" class="qty" value="<?= $fieldVal('quantity[]') ?>"></td>
+                        <td><input type="number" step="0.01" name="amount[]" class="row-amount" readonly value="<?= $fieldVal('amount[]') ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>
                 </tbody>
@@ -77,8 +87,8 @@
         </div>
         <button type="button" class="btn btn-ghost btn-sm btn-add-row" id="add-row">+ Add Row</button>
         <div class="form-grid g-4 mt-1">
-            <div class="form-group"><label>Total Amount</label><input type="number" step="0.01" name="total_amount" id="total_amount" readonly></div>
-            <div class="form-group g-span-2"><label>Total Amount (in words)</label><input type="text" name="amount_words"></div>
+            <div class="form-group"><label>Total Amount</label><input type="number" step="0.01" name="total_amount" id="total_amount" readonly value="<?= $fieldVal('total_amount') ?>"></div>
+            <div class="form-group g-span-2"><label>Total Amount (in words)</label><input type="text" name="amount_words" value="<?= $fieldVal('amount_words') ?>"></div>
         </div>
     </div>
 

@@ -1,13 +1,21 @@
 <?php
-    $roleLabels = [ 1 => 'Admin', 2 => 'Approver', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Checker', 6 => 'Final Approver' ];
+    $roleLabels = [ 1 => 'Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
     $roleName = $roleLabels[$employee['role_id']] ?? 'User';
     $initials = strtoupper(substr($employee['full_name'], 0, 2));
     $updatedAt = $employee['updated_at'] ? date('M d, Y', strtotime($employee['updated_at'])) : '—'
 ?>
 
-<?php $avatarUrl = !empty($employee['avatar']) ? htmlspecialchars($employee['avatar']) : null; ?>
+<?php
+    $av = $employee['avatar'] ?? '';
+    $av = ltrim($av, '/');
+    if (!empty($av) && !str_starts_with($av, 'http')) {
+        if (!str_starts_with($av, 'uploads/avatars/')) $av = 'uploads/avatars/' . $av;
+        $av = url($av);
+    }
+    $avatarUrl = !empty($av) ? htmlspecialchars($av) : null;
+?>
 
-<link rel="stylesheet" href="/automated-requesting-system/public/stylesheets/profile.css">
+<link rel="stylesheet" href="<?= url('stylesheets/profile.css') ?>">
 
 <div class="page-header">
     <div class="page-title-group">
@@ -41,7 +49,7 @@
                 <div class="profile-avatar"><?= $initials ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="/automated-requesting-system/public/profile/avatar"
+            <form method="POST" action="<?= url('profile/avatar') ?>"
                 enctype="multipart/form-data" id="avatar-form">
                 <?= \App\Helpers\Csrf::field() ?>
                 <input type="file" name="avatar" id="avatar-input"
@@ -88,7 +96,7 @@
 
         <!-- Account Details -->
         <div class="section-card" id="account">
-            <form method="POST" action="/automated-requesting-system/public/profile">
+            <form method="POST" action="<?= url('profile') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
                 <input type="hidden" name="section" value="account">
 
@@ -140,7 +148,7 @@
                         Email and employee code cannot be changed here.
                     </span>
                     <div class="btn-row">
-                        <a href="/automated-requesting-system/public/profile" class="btn btn-ghost">Discard</a>
+                        <a href="<?= url('profile') ?>" class="btn btn-ghost">Discard</a>
                         <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy"></i> Save changes</button>
                     </div>
                 </div>
@@ -149,7 +157,7 @@
 
         <!-- Password -->
         <div class="section-card" id="password">
-            <form method="POST" action="/automated-requesting-system/public/profile">
+            <form method="POST" action="<?= url('profile') ?>">
                 <?= \App\Helpers\Csrf::field() ?>
                 <input type="hidden" name="section" value="password">
 
@@ -201,4 +209,4 @@
         </div>
     </div>
 </div>
-<script src="/automated-requesting-system/public/scripts/profile.js"></script>
+<script src="<?= url('scripts/profile.js') ?>"></script>

@@ -3,10 +3,33 @@
  * Global UI behaviour — loaded at the bottom of every page via base.php.
  */
 
+// ── Lucide icons ── //
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.lucide) lucide.createIcons();
+});
+
 // ── Notification panel ── //
 function toggleNotif() {
     document.getElementById('notifPanel').classList.toggle('open');
 }
+
+// ── Password visibility toggles (global) ── //
+// Usage: <button type="button" class="toggle-icon" data-toggle-password="inputId">
+//            <i data-lucide="eye" data-toggle-password-icon></i>
+//        </button>
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-toggle-password]');
+    if (!btn) return;
+
+    const input = document.getElementById(btn.dataset.togglePassword);
+    const icon = btn.querySelector('[data-toggle-password-icon]') || btn.querySelector('i');
+    if (!input || !icon) return;
+
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    icon.setAttribute('data-lucide', show ? 'eye-off' : 'eye');
+    if (window.lucide) lucide.createIcons();
+});
 
 document.addEventListener('click', function (e) {
     if (!e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) {
@@ -45,8 +68,7 @@ if (sidebarToggle && sidebar) {
 
 // close mobile overlay on outside click
 document.addEventListener('click', function (e) {
-    if (window.innerWidth <= 900 && sidebar &&
-        !e.target.closest('#sidebar')) {
+    if (window.innerWidth <= 900 && sidebar && !e.target.closest('#sidebar')) {
         sidebar.classList.remove('open');
     }
 });
@@ -55,11 +77,9 @@ document.addEventListener('click', function (e) {
 function updateToggleIcon() {
     var icon = document.getElementById('sidebarToggleIcon');
     if (!icon || !sidebar) return;
-    if (sidebar.classList.contains('collapsed')) {
-        icon.className = 'ti ti-layout-sidebar-left-expand';
-    } else {
-        icon.className = 'ti ti-layout-sidebar-left-collapse';
-    }
+    icon.className = sidebar.classList.contains('collapsed')
+        ? 'ti ti-layout-sidebar-left-expand'
+        : 'ti ti-layout-sidebar-left-collapse'
 }
 
 // sync icon on page load
@@ -78,7 +98,9 @@ window.addEventListener('resize', function () {
 document.addEventListener('DOMContentLoaded', function () {
     var GROUPS_KEY = 'sidebar_groups';
     var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(GROUPS_KEY) || '{}'); } catch (e) {}
+    try { 
+        saved = JSON.parse(localStorage.getItem(GROUPS_KEY) || '{}'); 
+    } catch (e) {}
 
     // restore collapsed groups
     document.querySelectorAll('.sidebar-group').forEach(function (group) {
@@ -100,15 +122,25 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (e) {}
         });
     });
+
+    // ── Logout confirmation ── //
+    var logoutForm = document.getElementById('logoutForm');
+    if (logoutForm) {
+        logoutForm.addEventListener('submit', function (e) {
+            if (!confirm('Sign out of your account?')) {
+                e.preventDefault();
+            }
+        });
+    }
 });
 
 // ── Topbar search ── //
 document.addEventListener('DOMContentLoaded', function () {
-    const input = document.getElementById('topbarSearch');
-    const dropdown = document.getElementById('searchDropdown');
+    var input = document.getElementById('topbarSearch');
+    var dropdown = document.getElementById('searchDropdown');
     if (!input || !dropdown) return;
 
-    const formLabels = {
+    var formLabels = {
         advance_payment: 'Advance Payment',
         overtime_authorization: 'Overtime Auth.',
         request_for_payment: 'Request for Payment',
@@ -117,36 +149,57 @@ document.addEventListener('DOMContentLoaded', function () {
         liquidation: 'Liquidation',
         vehicle_request: 'Vehicle Request',
     };
-    const statusColors = {
-        draft:'#94a3b8', submitted:'#3b82f6', completed:'#22c55e',
-        rejected:'#ef4444', cancelled:'#94a3b8',
-        checker_approved:'#f59e0b', process_approved:'#f59e0b',
-        department_reviewed:'#f59e0b', finance_reviewed:'#f59e0b',
+
+    var statusColors = {
+        draft:'#94a3b8', 
+        submitted:'#3b82f6', 
+        completed:'#22c55e',
+        rejected:'#ef4444', 
+        cancelled:'#94a3b8',
+        checker_approved:'#f59e0b', 
+        process_approved:'#f59e0b',
+        department_reviewed:'#f59e0b', 
+        finance_reviewed:'#f59e0b',
         final_approved:'#22c55e',
     };
 
-    let debounce, activeIdx = -1, results = [];
+    var debounce, activeIdx = -1, results = [];
 
-    const esc = s => String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
+    function esc(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
 
-    function open() { dropdown.classList.remove('dept-hidden'); input.setAttribute('aria-expanded','true'); }
-    function close() { dropdown.classList.add('dept-hidden');    input.setAttribute('aria-expanded','false'); activeIdx = -1; }
+    function open() { 
+        dropdown.classList.remove('dept-hidden'); 
+        input.setAttribute('aria-expanded','true'); 
+    }
+    function close() { 
+        dropdown.classList.add('dept-hidden');    
+        input.setAttribute('aria-expanded', 'false'); 
+        activeIdx = -1; 
+    }
 
     function render(items) {
         results = items;
         activeIdx = -1;
         if (!items.length) {
             dropdown.innerHTML = '<div class="search-empty">No results found</div>';
-            open(); return;
+            open(); 
+            return;
         }
-        dropdown.innerHTML = items.map((r, i) => `
-            <a href="/automated-requesting-system/public/forms/view/${r.id}"
-               class="search-item" role="option" data-idx="${i}">
-                <span class="search-item-type">${esc(formLabels[r.form_type] ?? r.form_type)}</span>
-                <span class="search-item-id">#${r.id}</span>
-                <span class="search-item-status" style="color:${statusColors[r.status] ?? '#94a3b8'}">${esc(r.status)}</span>
-                <span class="search-item-who">${esc(r.submitted_by)}</span>
-            </a>`).join('');
+        dropdown.innerHTML = items.map(function (r, i) {
+            return '<a href="' + window.ARS_BASE + '/forms/view/' + r.id + '"'
+                + 'class="search-item" role="option" data-idx="' + i + '">'
+                + '<span class="search-item-type">' + esc(formLabels[r.form_type] || r.form_type) + '</span>'
+                + '<span class="search-item-id">#' + r.id + '</span>'
+                + '<span class="search-item-status search-status--' + r.status + '">'
+                +  esc(r.status) + '</span>'
+                + '<span class="search-item-who">' + esc(r.submitted_by) + '</span>'
+                + '</a>';
+        }).join('');
         open();
     }
 
@@ -162,8 +215,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const q = input.value.trim();
         if (q.length < 2) { close(); return; }
         debounce = setTimeout(() => {
-            fetch('/automated-requesting-system/public/search?q=' + encodeURIComponent(q))
-                .then(r => r.json()).then(render).catch(() => close());
+            fetch(window.ARS_BASE + '/search?q=' + encodeURIComponent(q))
+                .then(function (r) { return r.json(); })
+                .then(render)
+                .catch(close);
         }, 200);
     });
 
@@ -174,11 +229,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIdx - 1, 0)); }
         if (e.key === 'Enter' && activeIdx >= 0) {
             e.preventDefault();
-            window.location.href = '/automated-requesting-system/public/forms/view/' + results[activeIdx].id;
+            window.location.href = window.ARS_BASE + '/forms/view/' + results[activeIdx].id;
         }
         // Enter with no selection — navigate to search page
         if (e.key === 'Enter' && activeIdx < 0 && input.value.trim()) {
-            window.location.href = '/automated-requesting-system/public/my-submissions?q=' + encodeURIComponent(input.value.trim());
+            window.location.href = window.ARS_BASE + '/my-submissions?q=' + encodeURIComponent(input.value.trim());
         }
     });
 
@@ -205,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var markAllBtn = document.getElementById('markAllReadBtn');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function () {
-            fetch('/automated-requesting-system/public/notifications/read-all', {
+            fetch(window.ARS_BASE + '/notifications/read-all', {
                 method: 'POST',
                 headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
             }).then(function () {
@@ -213,10 +268,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     el.classList.remove('notif-item--unread');
                 });
                 document.querySelectorAll('.notif-dot-sm').forEach(function (d) {
-                    d.style.background = '#cbd5e1';
+                    d.classList.add('notif-dot-sm--read');
                 });
                 var dot = document.getElementById('notifDot');
-                if (dot) dot.style.display = 'none';
+                if (dot) dot.classList.add('d-none');
             });
         });
     }
@@ -227,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var href = item.dataset.href;
             if (item.classList.contains('notif-item--unread')) {
                 item.classList.remove('notif-item--unread');
-                fetch('/automated-requesting-system/public/notifications/' + id + '/read', {
+                fetch(window.ARS_BASE + '/notifications/' + id + '/read', {
                     method: 'POST',
                     headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
                 });
@@ -237,15 +292,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function pollNotifications() {
-        fetch('/automated-requesting-system/public/notifications/unread')
+        fetch(window.ARS_BASE + '/notifications/unread')
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var dot = document.getElementById('notifDot');
-                if (dot) dot.style.display = data.unread_count > 0 ? '' : 'none';
+                if (dot) dot.classList.toggle('d-none', !(data.unread_count > 0));
                 var badge = document.querySelector('.badge-count');
                 if (badge && data.pending_count !== undefined) {
                     badge.textContent = data.pending_count;
-                    badge.style.display = data.pending_count > 0 ? '' : 'none';
+                    badge.classList.toggle('d-none', !(data.pending_count > 0));
                 }
             })
             .catch(function () {});
@@ -260,62 +315,240 @@ document.querySelectorAll('input[type="date"]:not([value])').forEach(function (e
     }
 });
 
+// ── Dynamic CSS ── //
 document.querySelectorAll('.activity-icon-dynamic[data-bg]').forEach(function (el) {
-    el.style.setProperty('--icon-bg', el.dataset.bg);
-    el.style.setProperty('--icon-color', el.dataset.color);
+    ArsStyle.setVars(el, { '--icon-bg': el.dataset.bg, '--icon-color': el.dataset.color });
 });
 
 document.querySelectorAll('.qf-icon[data-color]').forEach(function (el) {
-    el.style.setProperty('--qf-color', el.dataset.color);
+    ArsStyle.setVars(el, { '--qf-color': el.dataset.color });
 });
 
 document.querySelectorAll('.vol-fill[data-pct]').forEach(function (el) {
-    el.style.width = el.dataset.pct + '%';
-    el.style.background = el.dataset.color;
+    ArsStyle.setVars(el, { width: el.dataset.pct + '%', background: el.dataset.color });
 });
 
+// ── Status filter ── //
 document.addEventListener('DOMContentLoaded', function () {
     var inApproval = [ 'submitted', 'checker_approved', 'process_approved', 'department_reviewed', 'finance_reviewed', 'final_approved' ];
 
     function applyStatusFilter(val) {
-        var rows = document.querySelectorAll('table[data-filterable] tbody tr');
-        rows.forEach(function (row) {
-            if (!val) { row.style.display = ''; return; }
+        document.querySelectorAll('table[data-filterable] tbody tr').forEach(function (row) {
+            if (!val) { row.classList.remove('d-none'); return; }
             var s = row.dataset.status || '';
+            var show;
             if (val === 'in_approval') {
-                row.style.display = inApproval.includes(s) ? '' : 'none';
+                show = inApproval.includes(s);
             } else if (val === 'approved') {
-                row.style.display = (s === 'final_approved' || s === 'completed') ? '' : 'none';
+                show = (s === 'final_approved' || s === 'completed');
             } else {
-                row.style.display = s === val ? '' : 'none';
+                show = s === val;
             }
+            row.classList.toggle('d-none', !show);
         });
     }
 
     var sel = document.getElementById('statusFilter');
     if (sel) {
         sel.addEventListener('change', function () { applyStatusFilter(sel.value); });
-        // Apply pre-filter from URL ?status= param on load
         if (sel.value) applyStatusFilter(sel.value);
     }
 });
 
+// ── Back button ── //
 document.querySelectorAll('.js-go-back').forEach(btn => {
-    btn.addEventListener('click', () => history.back());
+    btn.addEventListener('click', function () { history.back(); });
 });
 
 // New Request dropdown toggle
-const newReqBtn = document.getElementById('newReqBtn');
-const newReqDropdown = document.getElementById('newReqDropdown');
-if (newReqBtn && newReqDropdown) {
+(function () {
+    var newReqBtn = document.getElementById('newReqBtn');
+    var newReqDropdown = document.getElementById('newReqDropdown');
+    if (!newReqBtn || !newReqDropdown) return;
+ 
     newReqBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        const isHidden = newReqDropdown.classList.contains('dept-hidden');
+        var isHidden = newReqDropdown.classList.contains('dept-hidden');
         newReqDropdown.classList.toggle('dept-hidden', !isHidden);
         newReqBtn.setAttribute('aria-expanded', String(isHidden));
     });
+ 
     document.addEventListener('click', function () {
         newReqDropdown.classList.add('dept-hidden');
         newReqBtn.setAttribute('aria-expanded', 'false');
     });
-}
+})();
+
+// ── User block / profile menu ── //
+(function () {
+    var block = document.getElementById('userBlock');
+    var menu = document.getElementById('userMenu');
+    if (!block || !menu) return;
+ 
+    block.addEventListener('click', function () {
+        var isOpen = menu.classList.toggle('open');
+        block.classList.toggle('open', isOpen);
+    });
+ 
+    document.addEventListener('click', function (e) {
+        if (!block.contains(e.target)) {
+            menu.classList.remove('open');
+            block.classList.remove('open');
+        }
+    });
+})();
+
+// ── Generic "data-confirm" guard ── //
+// Any <form data-confirm="..."> shows a native confirm dialog before
+// submitting. Used by row-level delete buttons (e.g. my_submissions.php)
+// that don't have a dedicated modal of their own.
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (form.matches && form.matches('[data-confirm]')) {
+        var msg = form.getAttribute('data-confirm') || 'Are you sure?';
+        if (!window.confirm(msg)) {
+            e.preventDefault();
+        }
+    }
+});
+
+// ── Delete confirmation modal ── //
+// Works for a single page-level form (forms/show.php just has #deleteForm)
+// AND for tables with one delete-form per row (my_submissions.php): the
+// trigger button carries data-target-form="<form id>" so we know which
+// row's form to submit when "Yes, Delete" is clicked.
+(function () {
+    var targetFormId = 'deleteForm'; // default, matches forms/show.php
+
+    document.addEventListener('click', function (e) {
+        // Open modal
+        var trigger = e.target.closest('[data-modal]');
+        if (trigger) {
+            var modalId = trigger.getAttribute('data-modal');
+            var modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            targetFormId = trigger.getAttribute('data-target-form') || 'deleteForm';
+
+            var nameEl = document.getElementById('deleteModalFormName');
+            if (nameEl) {
+                nameEl.textContent = trigger.getAttribute('data-form-title') || 'this form';
+            }
+
+            modal.removeAttribute('hidden');
+            return;
+        }
+
+        // Confirm — submit the real form with CSRF
+        if (e.target.closest('#btn-delete-confirm')) {
+            var form = document.getElementById(targetFormId);
+            if (form) form.submit();
+            return;
+        }
+
+        // Close modal via cancel button
+        var closeBtn = e.target.closest('[data-modal-close]');
+        if (closeBtn) {
+            var m = document.getElementById(closeBtn.getAttribute('data-modal-close'));
+            if (m) m.setAttribute('hidden', '');
+            return;
+        }
+
+        // Close modal on backdrop click
+        if (e.target.classList.contains('ars-modal-backdrop')) {
+            e.target.setAttribute('hidden', '');
+            return;
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.ars-modal-backdrop:not([hidden])').forEach(function (m) {
+                m.setAttribute('hidden', '');
+            });
+        }
+    });
+})();
+
+
+// ── Approval file-drop zone ── //
+(function () {
+    var input = document.getElementById('approvalFile');
+    var zone = document.getElementById('fileDrop');
+    var label = document.getElementById('fileDropLabel');
+    if (!input || !zone || !label) return;
+
+    input.addEventListener('change', function () {
+        if (input.files && input.files[0]) {
+            label.textContent = input.files[0].name;
+            zone.classList.add('has-file');
+        } else {
+            label.textContent = 'Click to attach a file';
+            zone.classList.remove('has-file');
+        }
+    });
+})();
+
+// ── Auto-submit selects (employment status) ── //
+document.addEventListener('change', function (e) {
+    var sel = e.target.closest('select.auto-submit');
+    if (!sel) return;
+    // Update visual class before submitting
+    sel.classList.remove('emp-sel--employed', 'emp-sel--resigned', 'emp-sel--floating');
+    var map = { employed: 'emp-sel--employed', resigned: 'emp-sel--resigned', floating: 'emp-sel--floating' };
+    if (map[sel.value]) sel.classList.add(map[sel.value]);
+    sel.closest('form').submit();
+});
+
+// ── Employee deactivate modal ── //
+(function () {
+    var modal = document.getElementById('deactivateEmpModal');
+    var nameEl = document.getElementById('deactivateEmpName');
+    var warnEl = document.getElementById('deactivateEmpPendingWarn');
+    var countEl = document.getElementById('deactivateEmpPendingCount');
+    var confirmBtn = document.getElementById('deactivateEmpConfirmBtn');
+    var cancelBtn = document.getElementById('deactivateEmpCancelBtn');
+    if (!modal) return;
+
+    var targetFormId = null;
+
+    document.addEventListener('click', function (e) {
+        var trigger = e.target.closest('[data-emp-delete]');
+        if (trigger) {
+            var empId = trigger.getAttribute('data-emp-delete');
+            var empName = trigger.getAttribute('data-emp-name');
+            var pending = parseInt(trigger.getAttribute('data-emp-pending') || '0', 10);
+
+            targetFormId = 'deleteEmpForm-' + empId;
+            nameEl.textContent = empName;
+
+            if (pending > 0) {
+                countEl.textContent = pending;
+                warnEl.removeAttribute('hidden');
+            } else {
+                warnEl.setAttribute('hidden', '');
+            }
+
+            modal.removeAttribute('hidden');
+        }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        var form = document.getElementById(targetFormId);
+        if (form) form.submit();
+    });
+
+    function closeModal() {
+        modal.setAttribute('hidden', '');
+        targetFormId = null;
+    }
+
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
+})();

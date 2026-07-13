@@ -215,7 +215,7 @@
 .strength-label.s2 { color: var(--warning); }
 .strength-label.s3 { color: #3b82f6; }
 .strength-label.s4 { color: var(--success); }
-#match-hint.match-ok  { color: var(--success); }
+#match-hint.match-ok { color: var(--success); }
 #match-hint.match-err { color: var(--danger); }
 
 /* ── Footer ── */

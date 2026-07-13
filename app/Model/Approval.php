@@ -8,13 +8,18 @@ class Approval {
      * Forms: overtime_authorization, leave_application, vehicle_request
      *
      * sequence → the approvals.sequence value
-     * role     → role_id of the employee allowed to approve at this level
-     * label    → human-readable stage name
-     * status   → the value written to forms.status after this level passes
+     * role → role_id of the employee allowed to approve at this level
+     * label → human-readable stage name
+     * status → the value written to forms.status after this level passes
+     */
+
+    /**
+     * Administrative Forms Stages
+     * Submitted (Employee) -> Checker Approval (Immediate Surpervisor) -> Review Approval (Department Head) -> Grant Approval Request (Final Approval) -> Completion of Approval (Employee Request Approved) 
      */
     private const LEVELS_ADMIN = [
         1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
-        2 => ['role' => 2, 'label' => 'Checker Approval', 'status' => 'checker_approved'],
+        2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
         3 => ['role' => 4, 'label' => 'Review Approval', 'status' => 'department_reviewed'],
         4 => ['role' => 6, 'label' => 'Grant Approval Request', 'status' => 'final_approved'],
         5 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
@@ -24,14 +29,30 @@ class Approval {
      * Finance pipeline — 6 stages.
      * Forms: advance_payment, request_for_payment, reimbursement, liquidation
      */
+
+    /**
+     * Finance Forms Stages
+     * Submitted (Employee) -> Checker Approval (Immediate Supervisor) -> Process Approval (Approval Acquisition) -> Evaluation Approval (Finance Head) -> Grant Approval Request (Final Approval) -> Completion of Approval (Completed)
+     */
     private const LEVELS_FINANCE = [
         1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
-        2 => ['role' => 2, 'label' => 'Checker Approval', 'status' => 'checker_approved'],
+        2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
         3 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
         4 => ['role' => 4, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
         5 => ['role' => 6, 'label' => 'Grant Approval Request','status' => 'final_approved'],
-        6 => ['role' => 1, 'label' => 'Completed',             'status' => 'completed'],
+        6 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
     ];
+
+    private const LEVELS_REIMBURSEMENT = [
+        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
+        2 => ['role' => 5, 'label' => 'Checker 1 Approval', 'status' => 'checker1_approved'],
+        3 => ['role' => 5, 'label' => 'Checker 2 Approval', 'status' => 'immediatehead_approved'],
+        4 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
+        5 => ['role' => 4, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
+        6 => ['role' => 6, 'label' => 'Grant Approval', 'status' => 'final_approved'],
+        7 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
+    ];
+
 
     /** Form types that follow the finance pipeline. */
     private const FINANCE_TYPES = [
@@ -256,7 +277,7 @@ class Approval {
         $pending = $this->currentPending($formId);
         if (!$pending) return false;
 
-        $levels   = $this->getLevels($formType);
+        $levels = $this->getLevels($formType);
         $required = $levels[$pending['sequence']]['role'] ?? null;
         return $required !== null && $actorRole === $required;
     }
@@ -268,9 +289,10 @@ class Approval {
      * @param string $formType  The form_type value from the forms table.
      */
     public static function pipeline(string $formType): array {
+        if ($formType === 'reimbursement') return self::LEVELS_REIMBURSEMENT;
         return in_array($formType, self::FINANCE_TYPES, true)
             ? self::LEVELS_FINANCE
-            : self::LEVELS_ADMIN;
+            : SELF::LEVELS_ADMIN;
     }
 
     // ----------------------------------------------------------------
@@ -281,6 +303,7 @@ class Approval {
      * Select the correct levels array based on form type.
      */
     private function getLevels(string $formType): array {
+        if ($formType === 'reimbursement') return self::LEVELS_REIMBURSEMENT;
         return in_array($formType, self::FINANCE_TYPES, true)
             ? self::LEVELS_FINANCE
             : self::LEVELS_ADMIN;

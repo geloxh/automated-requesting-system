@@ -7,7 +7,7 @@
 
     // Support pre-filtering from KPI card links (?status=draft|approved|rejected|in_approval)
     $activeFilter = $_GET['status'] ?? '';
-    $inApprovalStatuses = ['submitted','checker_approved','process_approved','department_reviewed','finance_reviewed'];
+    $inApprovalStatuses = ['submitted','immediatehead_approved','process_approved','department_reviewed','finance_reviewed'];
 
     $drafts = array_filter($forms ?? [], fn($f) => $f['status'] === 'draft');
     $others = array_filter($forms ?? [], fn($f) => $f['status'] !== 'draft');
@@ -39,7 +39,7 @@
                     <td><?= htmlspecialchars($formLabel[$form['form_type']] ?? $form['form_type']) ?></td>
                     <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                     <td class="muted td-stage">
-                        <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">
+                        <a href="<?= url('forms/view/' . $form['id']) ?>" class="btn btn-warning btn-sm">
                             Submit Now
                         </a>
                     </td>
@@ -108,10 +108,33 @@
                 <td class="muted" class="muted text-xs"><?= htmlspecialchars($stageName) ?></td>
                 <td class="muted"><?= date('M d, Y', strtotime($form['created_at'])) ?></td>
                 <td class="td-last text-end">
+                    <?php
+                        $editableStatuses = ['draft', 'submitted', 'rejected'];
+                        $canEditRow = in_array($form['status'], $editableStatuses, true);
+                    ?>
                     <?php if ($form['status'] === 'draft'): ?>
-                        <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-warning btn-sm">Submit</a>
+                        <a href="<?= url('forms/view/' . $form['id']) ?>" class="btn btn-warning btn-sm">Submit</a>
                     <?php else: ?>
-                        <a href="/automated-requesting-system/public/forms/view/<?= $form['id'] ?>" class="btn btn-ghost btn-sm">View</a>
+                        <a href="<?= url('forms/view/' . $form['id']) ?>" class="btn btn-ghost btn-sm">View</a>
+                    <?php endif; ?>
+                    <?php if ($canEditRow): ?>
+                        <a href="<?= url('forms/' . $form['id'] . '/edit') ?>" class="btn btn-secondary btn-sm">
+                            <i class="ti ti-pencil"></i>
+                        </a>
+                        <form method="POST" action="<?= url('forms/' . $form['id'] . '/delete') ?>"
+                              id="deleteForm-<?= $form['id'] ?>"
+                              class="form-inline-btn">
+                            <?= \App\Helpers\Csrf::field() ?>
+                            <button
+                                type="button"
+                                class="btn btn-danger btn-sm"
+                                data-modal="deleteModal"
+                                data-target-form="deleteForm-<?= $form['id'] ?>"
+                                data-form-title="<?= htmlspecialchars(($formLabel[$form['form_type']] ?? $form['form_type']) . ' #' . $form['id']) ?>"
+                            >
+                                <i class="ti ti-trash"></i>
+                            </button>
+                        </form>
                     <?php endif; ?>
                 </td>
             </tr>
@@ -120,5 +143,27 @@
     </table>
 </div>
 
-<script src="/automated-requesting-system/public/scripts/app.js"></script>
 <?php endif; ?>
+
+<!-- Delete confirmation modal — shared by every row's delete button. -->
+<div class="ars-modal-backdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" hidden>
+    <div class="ars-modal">
+        <div class="ars-modal-icon ars-modal-icon--danger">
+            <i class="ti ti-trash"></i>
+        </div>
+        <h3 class="ars-modal-title" id="deleteModalTitle">Delete Form?</h3>
+        <p class="ars-modal-body">
+            You're about to permanently delete
+            <strong id="deleteModalFormName"></strong>.
+            This action cannot be undone.
+        </p>
+        <div class="ars-modal-actions">
+            <button type="button" class="btn btn-ghost btn-sm" data-modal-close="deleteModal">
+                Cancel
+            </button>
+            <button type="button" class="btn btn-danger btn-sm" id="btn-delete-confirm">
+                <i class="ti ti-trash"></i> Yes, Delete
+            </button>
+        </div>
+    </div>
+</div>
