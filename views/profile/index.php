@@ -1,5 +1,5 @@
 <?php
-    $roleLabels = [ 1 => 'Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
+    $roleLabels = [ 1 => 'SyS Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
     $roleName = $roleLabels[$employee['role_id']] ?? 'User';
     $initials = strtoupper(substr($employee['full_name'], 0, 2));
     $updatedAt = $employee['updated_at'] ? date('M d, Y', strtotime($employee['updated_at'])) : '—'
