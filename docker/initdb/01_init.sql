@@ -36,7 +36,7 @@ INSERT INTO roles (name, description) VALUES
 CREATE TABLE employees (
     id INT AUTO_INCREMENT PRIMARY KEY,
     employee_code VARCHAR(20) UNIQUE NOT NULL,
-    avatar VARCHAR(255) UNIQUE NOT NULL DEFAULT('default.png'), -- avatar = 'default.png' WHERE avatar = '' OR avatar IS NULL,
+    avatar VARCHAR(255)s NOT NULL DEFAULT('default.png'), -- avatar = 'default.png' WHERE avatar = '' OR avatar IS NULL,
     username VARCHAR(50) UNIQUE NULL,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
