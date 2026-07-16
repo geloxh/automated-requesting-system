@@ -55,12 +55,14 @@ Documentation of ARS
 
 ### Role Map
 
-| role_id | Role                              | Description                                                                 |
-|---------|-----------------------------------|-----------------------------------------------------------------------------|
-| 1       | SysAdmin                          | Full system access. Marks Finance forms as completed after final approval.  |
-| 2       | Approver / Immediate Supervisor   | First-level checker. Reviews and approves submitted requests from staff.    |
-| 3       | Regular Employee (Staff)          | Submits forms/requests. Can only view their own submissions.                |
-| 4       | Department Head / Finance Head    | Reviews approved requests. Handles Review (Admin) or Evaluation (Finance).  |
-| 5       | Checker / Approval Acquisition    | Finance-only stage. Processes requests between Immediate Head and Finance Head. |
-| 6       | Final Approver                    | Last approval authority. Grants final approval on all form types.           |
-| 7       | AdminApprover                     | Combined authority covering roles 2, 4, and 6. Can stand in for those stages on specific form types (Vehicle Request: all three; Leave Application & Overtime: role 4 only). |
+| role_id | Role                                            | Description                                                               |
+|---------|-------------------------------------------------|---------------------------------------------------------------------------|
+| 1       | IT (SysAdmin)                                   | Full system access. Marks Finance forms as completed after final approval.|
+| 2       | Approver/Immediate Supervisor (ImmediateHead)   | First-level checker. Reviews and approves submitted requests from staff.  |
+| 3       | Regular Employee (Staff)                        | Submits forms/requests. Can only view their own submissions.              |
+| 4       | Department Head/Finance Head (MasterApprover)   | Reviews approved requests. Handles Review (Admin) or Evaluation(Finance). |
+| 5       | Accounting/Process Approval(AcquisitionChecker) | Finance-only stage. Processes requests and submit to Finance Head.        |
+| 6       | Management (FinalApprover)                      | Last approval authority. Grants final approval on all form types.         |
+| 7       | Procurement Head (AdminApprover)                | Can cover roles 2, 4, and 6.                                              |
+
+- **Admin Approver** - Can stand in for those stages on specific form types (Vehicle Request: all three; Leave Application & Overtime: role 4 only). 
