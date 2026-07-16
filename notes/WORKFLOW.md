@@ -1,5 +1,5 @@
 ### System FLow of ARS
-
+Documentation of ARS
 ### Administrative Forms
 - **Overtime Authorization** 
 - **Leave Application** 
@@ -59,7 +59,7 @@
 |---------|-----------------------------------|-----------------------------------------------------------------------------|
 | 1       | SysAdmin                          | Full system access. Marks Finance forms as completed after final approval.  |
 | 2       | Approver / Immediate Supervisor   | First-level checker. Reviews and approves submitted requests from staff.    |
-| 3       | Regular Employee                  | Submits forms/requests. Can only view their own submissions.                |
+| 3       | Regular Employee (Staff)          | Submits forms/requests. Can only view their own submissions.                |
 | 4       | Department Head / Finance Head    | Reviews approved requests. Handles Review (Admin) or Evaluation (Finance).  |
 | 5       | Checker / Approval Acquisition    | Finance-only stage. Processes requests between Immediate Head and Finance Head. |
 | 6       | Final Approver                    | Last approval authority. Grants final approval on all form types.           |
