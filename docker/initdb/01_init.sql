@@ -5,6 +5,7 @@
 -- filesystem is not accessible from the db container).
 -- MariaDB runs this automatically on first `docker compose up`
 -- only when the db_data volume is empty / freshly created.
+-- DOCKER mysql access `docker compose exec db mariadb -u ars_user -pars_pass arsdb`
 -- ============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;

@@ -192,3 +192,25 @@
 .clock-time-lg { font-size: 1.3rem; }
 .is-hidden   { display: none; }
 .calc-eq-scientific { grid-column: span 5; }
+
+/* ── Coming Soon ── */
+.coming-soon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    text-align: center;
+}
+.coming-soon-icon {
+    font-size: 3rem;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+}
+.coming-soon-label {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+}

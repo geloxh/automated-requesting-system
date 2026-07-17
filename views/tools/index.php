@@ -48,62 +48,33 @@
     <!-- ── Panels ── -->
     <div class="tools-panels">
 
-        <!-- ═══════════════ PAYSLIP (Services) ═══════════════ -->
+        <!-- ── PAYSLIP (Services) ── -->
         <div class="tools-panel active" id="tab-payslip">
             <div class="tools-section-header">
                 <h2 class="tools-section-title"><i class="ti ti-file-invoice"></i> Payslip</h2>
-                <p class="tools-section-sub">Request a copy of your payslip. HR will be notified.</p>
+                <p class="tools-section-sub">Request a copy of your payslip.</p>
             </div>
-
-            <div class="tools-card">
-                <form method="POST" action="<?= url('tools/payslip/request') ?>">
-                    <?= \App\Helpers\Csrf::field() ?>
-                    <div class="conv-field">
-                        <label for="payslipPeriod">Pay period</label>
-                        <input type="month" id="payslipPeriod" name="period" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-send"></i> Request payslip
-                    </button>
-                </form>
-                <p class="tools-section-sub mt-14">
-                    Payroll records aren't wired up yet — this sends HR a notification for now.
-                    Once payslip data is available, this panel can list and let you download past payslips directly.
-                </p>
+            <div class="tools-card coming-soon-card">
+                <i class="ti ti-clock-hour-4 coming-soon-icon"></i>
+                <p class="coming-soon-label">Coming Soon</p>
+                <p class="tools-section-sub">Payslip requests will be available once HRIS integration is complete.</p>
             </div>
         </div>
 
-        <!-- ═══════════════ LEAVE CREDITS (Services) ═══════════════ -->
+        <!-- ── LEAVE CREDITS (Services) ── -->
         <div class="tools-panel" id="tab-leavecredits">
             <div class="tools-section-header">
                 <h2 class="tools-section-title"><i class="ti ti-calendar-stats"></i> Leave Credits</h2>
                 <p class="tools-section-sub">Based on your completed Leave Application forms.</p>
             </div>
-
-            <div class="tools-card">
-                <?php if (empty($leaveCredits)): ?>
-                    <p class="tools-section-sub">No leave credit data available yet.</p>
-                <?php else: ?>
-                    <div class="clock-grid">
-                        <?php foreach ($leaveCredits as $lc): ?>
-                            <div class="clock-card text-left">
-                                <div class="clock-city"><?= htmlspecialchars($lc['label']) ?></div>
-                                <div class="clock-time clock-time-lg">
-                                    <?= htmlspecialchars((string)$lc['remaining']) ?> / <?= htmlspecialchars((string)$lc['total']) ?>
-                                </div>
-                                <div class="clock-date">days remaining · <?= htmlspecialchars((string)$lc['used']) ?> used</div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <p class="tools-section-sub mt-14">
-                        Allotments shown are a placeholder policy default — update <code>leaveCreditsSummary()</code>
-                        in <code>ToolsController</code> to match your actual HR policy.
-                    </p>
-                <?php endif; ?>
+            <div class="tools-card coming-soon-card">
+                <i class="ti ti-clock-hour-4 coming-soon-icon"></i>
+                <p class="coming-soon-label">Coming Soon</p>
+                <p class="tools-section-sub">Leave credit tracking will be available in a future update.</p>
             </div>
         </div>
 
-        <!-- ═══════════════ WORLD CLOCK (Extras) ═══════════════ -->
+        <!-- ── WORLD CLOCK (Extras) ── -->
         <div class="tools-panel" id="tab-clock">
             <div class="tools-section-header">
                 <h2 class="tools-section-title"><i class="ti ti-clock"></i> World Clock</h2>
@@ -136,7 +107,7 @@
             </div>
         </div>
 
-        <!-- ═══════════════ CALCULATOR (Extras) ═══════════════ -->
+        <!-- ── CALCULATOR (Extras) ── -->
         <div class="tools-panel" id="tab-calculator">
             <div class="tools-section-header">
                 <h2 class="tools-section-title"><i class="ti ti-calculator"></i> Calculator</h2>
@@ -158,7 +129,7 @@
             </div>
         </div>
 
-        <!-- ═══════════════ NOTES (Extras) ═══════════════ -->
+        <!-- ── NOTES (Extras) ── -->
         <div class="tools-panel" id="tab-notes">
             <div class="tools-section-header">
                 <h2 class="tools-section-title"><i class="ti ti-notes"></i> Notes</h2>
@@ -172,7 +143,7 @@
             <div class="notes-grid" id="notesGrid" data-notes='<?= htmlspecialchars(json_encode($notes ?? []), ENT_QUOTES) ?>'></div>
         </div>
 
-        <!-- ═══════════════ HEIGHT & WEIGHT CONVERTER (Extras) ═══════════════ -->
+        <!-- ── HEIGHT & WEIGHT CONVERTER (Extras) ── -->
         <div class="tools-panel" id="tab-converter">
             <div class="tools-section-header">
                 <h2 class="tools-section-title"><i class="ti ti-ruler-2"></i> Height &amp; Weight Converter</h2>
