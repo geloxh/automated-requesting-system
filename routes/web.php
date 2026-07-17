@@ -64,8 +64,6 @@
     // Forms
     // ---------------------------------------------------------------
 
-
-
     // Multilevel Approval Routes
    $approvalActions = ['submit', 'checker-approval', 'review-approval', 'process-approval', 'evaluation-approval', 'grant-approval', 'complete'];
 
@@ -385,6 +383,12 @@
         (new \App\Controllers\ChatController)->react();
         exit;
     }
+
+    if ($uri === '/chat/delete' && $method === 'POST') {
+        (new \App\Controllers\ChatController)->delete();
+        exit;
+    }
+    
     if ($uri === '/chat/block-status' && $method === 'GET') {
         (new \App\Controllers\ChatController)->blockStatus();
         exit;

@@ -536,6 +536,24 @@
             actions.appendChild(replyBtn);
         }
 
+        if (m.is_mine) {
+            var delBtn = document.createElement('button');
+            delBtn.className = 'chat-msg-action-btn chat-delete-btn';
+            delBtn.innerHTML = '<i class="ti ti-trash"></i> Delete';
+            delBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (!confirm('Delete this message?')) return;
+                post('/chat/delete', { message_id: m.id })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res.ok) wrap.remove();
+                        else showToast('Could not delete message.', 'error');
+                    })
+                    .catch(function () { showToast('Network error.', 'error'); });
+            });
+            actions.appendChild(delBtn);
+        }
+
         wrap.appendChild(bubble);
         wrap.appendChild(meta);
         wrap.appendChild(actions);

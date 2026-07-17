@@ -365,6 +365,30 @@ namespace App\Controllers;
             $this->json(['ok' => true, 'reactions' => $this->getReactions([$messageId])[$messageId] ?? []]);
         }
 
+        /** POST /chat/delete */
+        public function delete(): void {
+            \App\Helpers\Csrf::verify();
+            $me = $this->me();
+            $messageId = (int) ($_POST['message_id'] ?? 0);
+            
+            if (!$me || !$messageId) { 
+                $this->json(['error' => 'Invalid'], 400); 
+                return; 
+            }
+
+            $stmt = db()->prepare('SELECT sender_id FROM chat_messages WHERE id = ?');
+            $stmt->execute([$messageId]);
+            $row = $stmt->fetch();
+
+            if (!$row || (int)$row['sender_id'] !== $me) {
+                $this->json(['error' => 'Forbidden'], 403); 
+                return;
+            }
+
+            db()->prepare('DELETE FROM chat_messages WHERE id = ?')->execute([$messageId]);
+            $this->json(['ok' => true]);
+        }
+
         /** POST /chat/mark-read */
         public function markRead(): void {
             \App\Helpers\Csrf::verify();
