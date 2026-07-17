@@ -88,6 +88,8 @@
         <nav class="profile-nav">
             <a href="#account" class="profile-nav-item active"><i class="ti ti-id-badge"></i> Account details</a>
             <a href="#password" class="profile-nav-item"><i class="ti ti-lock"></i> Password</a>
+            <a href="#payslip" class="profile-nav-item"><i class="ti ti-file-invoice"></i> Payslip</a>
+            <a href="#leave-credits" class="profile-nav-item"><i class="ti ti-calendar-stats"></i> Leave Credits</a>
         </nav>
     </aside>
 
@@ -220,6 +222,32 @@
                     </div>
                 </div>
             </form>
+        </div>
+
+        <!-- Payslip -->
+        <div class="section-card" id="payslip">
+            <div class="section-head">
+                <div class="section-head-left"><i class="ti ti-file-invoice"></i> Payslip</div>
+                <span class="selection-hint">Your recent payslips</span>
+            </div>
+            <div class="section-body">
+                <div class="empty-state">
+                    <i class="ti ti-file-off empty-state-icon"></i> No payslips available yet. (Coming Soon)
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Credits -->
+        <div class="section-card" id="leave-credits">
+            <div class="section-head">
+                <div class="section-head-left"><i class="ti ti-calendar-stats"></i> Leave Credits</div>
+                <span class="secction-hint">Remaining leave balance</span>
+            </div>
+            <div class="section-body">
+                <div class="empty-state">
+                    <i class="ti ti-calendar-off empty-state-icon"></i> No Leave credit data available yat. (Coming Soon)
+                </div>
+            </div>
         </div>
     </div>
 </div>

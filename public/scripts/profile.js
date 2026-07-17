@@ -8,7 +8,7 @@ if (avatarEditBtn && avatarInput) {
 
 // ── Nav: click handler + scroll-spy ──
 const navItems = document.querySelectorAll('.profile-nav-item');
-const sections  = ['account', 'password'].map(id => document.getElementById(id)).filter(Boolean);
+const sections  = ['account', 'password', 'payslip', 'leave-credits'].map(id => document.getElementById(id)).filter(Boolean);
 
 navItems.forEach(link => {
     link.addEventListener('click', e => {
