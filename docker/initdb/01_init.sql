@@ -37,7 +37,7 @@ INSERT INTO roles (name, description) VALUES
 CREATE TABLE employees (
     id INT AUTO_INCREMENT PRIMARY KEY,
     employee_code VARCHAR(20) UNIQUE NOT NULL,
-    avatar VARCHAR(255)s NOT NULL DEFAULT('default.png'), -- avatar = 'default.png' WHERE avatar = '' OR avatar IS NULL,
+    avatar VARCHAR(255) NOT NULL DEFAULT('default.png'), -- avatar = 'default.png' WHERE avatar = '' OR avatar IS NULL,
     username VARCHAR(50) UNIQUE NULL,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
@@ -302,14 +302,14 @@ SELECT
      WHERE a3.form_id = f.id AND a3.status <> 'pending' ORDER BY a3.sequence DESC LIMIT 1) AS last_action,
     (SELECT a3.updated_at FROM approvals a3
      WHERE a3.form_id = f.id AND a3.status <> 'pending' ORDER BY a3.sequence DESC LIMIT 1) AS last_action_at,
-    (SELECT DATEDIFF(NOW(), a4.created_at) FROM approvals a4
+    (SELECT DATEDIFF(NOW(), a4.assigned_at) FROM approvals a4
      WHERE a4.form_id = f.id AND a4.status = 'pending' ORDER BY a4.sequence LIMIT 1) AS days_pending_at_current_step,
     GROUP_CONCAT(
         CONCAT(a.approver_id, ':', ap.full_name, ':', a.status)
         ORDER BY a.sequence SEPARATOR ' → '
     ) AS approval_chain,
     CASE
-        WHEN MAX(CASE WHEN a.status = 'pending' THEN DATEDIFF(NOW(), a.created_at) END) > 3 THEN 'overdue'
+        WHEN MAX(CASE WHEN a.status = 'pending' THEN DATEDIFF(NOW(), a.assigned_at) END) > 3 THEN 'overdue'
         WHEN f.status = 'approved' THEN 'complete'
         WHEN f.status = 'rejected' THEN 'rejected'
         ELSE 'on_track'
@@ -330,7 +330,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     message TEXT NOT NULL,
     message_type ENUM('text', 'sticker', 'attachment', 'form_share') NOT NULL DEFAULT 'text',
     attachment_url VARCHAR(500) NULL DEFAULT NULL,
-    form_id BIGINT NULL AFTER attachment_url,
+    form_id BIGINT NULL,
     is_read TINYINT(1) NOT NULL DEFAULT 0,
     sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_cm_sender (sender_id),

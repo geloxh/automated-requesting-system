@@ -1,7 +1,8 @@
 <?php
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
+    
     $uri = $uri ?? '/';
-    $roleLabels = [ 1 => 'Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
+    $roleLabels = [ 1 => 'Sys Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
     $roleName = $roleLabels[$_SESSION['role_id']] ?? 'User';
     $initials = strtoupper(substr($_SESSION['user_name'], 0, 2));
     $roleId = (int) $_SESSION['role_id'];
