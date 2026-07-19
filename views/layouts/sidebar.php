@@ -206,7 +206,11 @@
                     </button>
                 </form>
             </div>
-            <div class="user-avatar"><?= $initials ?></div>
+            <?php if ($sidebarAvatarUrl): ?>
+                <img src="<?= $sidebarAvatarUrl ?>" class="user-avatar user-avatar-img" alt="">
+            <?php else: ?>
+                <div class="user-avatar"><?= $initials ?></div>
+            <?php endif; ?>
             <div class="user-info">
                 <div class="user-name"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
                 <div class="user-role"><?= $roleName ?> · <?= htmlspecialchars($_SESSION['department'] ?? '') ?></div>

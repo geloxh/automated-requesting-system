@@ -5,15 +5,7 @@
     $updatedAt = $employee['updated_at'] ? date('M d, Y', strtotime($employee['updated_at'])) : '—'
 ?>
 
-<?php
-    $av = $employee['avatar'] ?? '';
-    $av = ltrim($av, '/');
-    if (!empty($av) && !str_starts_with($av, 'http')) {
-        if (!str_starts_with($av, 'uploads/avatars/')) $av = 'uploads/avatars/' . $av;
-        $av = url($av);
-    }
-    $avatarUrl = !empty($av) ? htmlspecialchars($av) : null;
-?>
+<?php $avatarUrl = avatar_url($employee['avatar'] ?? null); ?>
 
 <link rel="stylesheet" href="<?= url('stylesheets/profile.css') ?>">
 

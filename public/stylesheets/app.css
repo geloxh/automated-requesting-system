@@ -188,6 +188,7 @@ a { text-decoration: none; color: inherit; }
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700; color: #fff;
 }
+.user-avatar-img { object-fit: cover; }
 .user-name { font-size: 12.5px; font-weight: 600; color: #e2e8f0; line-height: 1.2; white-space: nowrap; }
 .user-role { font-size: 10.5px; color: #475569; white-space: nowrap; }
 .user-card > i { margin-left: auto; color: #334155; font-size: 15px; flex-shrink: 0; }
@@ -785,6 +786,7 @@ textarea { resize: vertical; }
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
+.emp-avatar-img { object-fit: cover; }
 .emp-name { font-weight: 500; font-size: 13px; color: var(--text-main); }
 .emp-code { font-size: 11px; color: var(--text-muted); }
 

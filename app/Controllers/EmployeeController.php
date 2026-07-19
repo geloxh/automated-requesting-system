@@ -652,6 +652,8 @@
             db()->prepare('UPDATE employees SET avatar = ? WHERE id = ?')
                 ->execute([$filename, $_SESSION['user_id']]);
 
+            $_SESSION['avatar'] = $filename;
+
             $_SESSION['success'] = 'Profile picture updated.';
             header('Location: ' . url('profile'));
             exit;

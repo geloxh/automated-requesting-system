@@ -34,8 +34,8 @@
 
             $stmt = db()->prepare(
                 $isEmail
-                    ? 'SELECT id, full_name, password_hash, role_id, department, is_active FROM employees WHERE email = ?'
-                    : 'SELECT id, full_name, password_hash, role_id, department, is_active FROM employees WHERE username  = ?'
+                    ? 'SELECT id, full_name, password_hash, role_id, department, is_active, avatar FROM employees WHERE email = ?'
+                    : 'SELECT id, full_name, password_hash, role_id, department, is_active, avatar FROM employees WHERE username  = ?'
             );
 
             $stmt->execute([$input]);
@@ -51,10 +51,11 @@
 
             unset($_SESSION[$key]);
             session_regenerate_id(true);
-            $_SESSION['user_id']    = $employee['id'];
-            $_SESSION['user_name']  = $employee['full_name'];
-            $_SESSION['role_id']    = $employee['role_id'];
+            $_SESSION['user_id'] = $employee['id'];
+            $_SESSION['user_name'] = $employee['full_name'];
+            $_SESSION['role_id'] = $employee['role_id'];
             $_SESSION['department'] = $employee['department'] ?? '';
+            $_SESSION['avatar'] = $employee['avatar'] ?? '';
             unset($_SESSION['csrf_token']); // Rotate CSRF token on successful login
 
             header('Location: ' . url('dashboard'));

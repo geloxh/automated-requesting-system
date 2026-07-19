@@ -66,7 +66,12 @@
             <tr>
                 <td class="td-first">
                     <div class="emp-cell">
-                        <div class="emp-avatar"><?= htmlspecialchars($initials) ?></div>
+                        <?php $empAvatarUrl = avatar_url($e['avatar'] ?? null); ?>
+                        <?php if ($empAvatarUrl): ?>
+                            <img src="<?= $empAvatarUrl ?>" class="emp-avatar emp-avatar-img" alt="">
+                        <?php else: ?>
+                            <div class="emp-avatar"><?= htmlspecialchars($initials) ?></div>
+                        <?php endif; ?>
                         <div>
                             <div class="emp-name"><?= htmlspecialchars($e['full_name'] ?? '') ?></div>
                             <div class="emp-code"><?= htmlspecialchars($e['employee_code'] ?? '') ?></div>

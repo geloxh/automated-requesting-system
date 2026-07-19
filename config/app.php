@@ -26,3 +26,18 @@
             return $subPath . '/' . ltrim($path, '/');
         }
     }
+
+    // Avatar helper - turns a stored avatar filename (or full URL) into a
+    // browser-ready, escaped src, or null if the employee has no avatar.
+    if (!function_exists('avatar_url')) {
+        function avatar_url(?string $avatar): ?string {
+            $av = ltrim((string) $avatar, '/');
+            if ($av === '' || $av === 'default.png') return null;
+            if (!str_starts_with($av, 'http')) {
+                if (!str_Starts_with($av, 'uploads/avatars/')) $av = 'uploads/avatars/' . $av;
+                $av = url($av);
+            }
+
+            return htmlspecialchars($av);
+        }
+    }
