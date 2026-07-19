@@ -93,15 +93,25 @@
             .replace(/"/g, AMP + 'quot;');
     }
 
+    // Server sends naive "Y-m-d H:i:s" strings that are actually UTC (MySQL NOW()
+    // / gmdate() are both UTC). JS treats a string with no timezone marker as
+    // LOCAL time, so we must mark it as UTC ourselves before parsing, or every
+    // timestamp renders shifted by the viewer's UTC offset.
+    function utcDate(iso) {
+        var s = iso.replace(' ', 'T');
+        if (!/Z$|[+-]\d\d:?\d\d$/.test(s)) s += 'Z';
+        return new Date(s);
+    }
+
     function timeStr(iso) {
-        var d = new Date(iso.replace(' ', 'T')), h = d.getHours(), m = d.getMinutes();
+        var d = utcDate(iso), h = d.getHours(), m = d.getMinutes();
         var ampm = h >= 12 ? 'PM' : 'AM';
         h = h % 12 || 12;
         return h + ':' + String(m).padStart(2, '0') + ' ' + ampm;
     }
 
     function relativeTime(iso) {
-        var diff = (Date.now() - new Date(iso).getTime()) / 1000;
+        var diff = (Date.now() - utcDate(iso).getTime()) / 1000;
         if (diff < 60) return 'just now';
         if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
         if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
@@ -109,7 +119,7 @@
     }
 
     function friendlyDate(iso) {
-        var d = new Date(iso), today = new Date(), yesterday = new Date(today);
+        var d = utcDate(iso), today = new Date(), yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
         if (d.toDateString() === today.toDateString()) return 'Today';
         if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
@@ -118,7 +128,7 @@
 
     function isOnline(lastSeenAt) {
         if (!lastSeenAt) return false;
-        return (Date.now() - new Date(lastSeenAt).getTime()) < 5 * 60 * 1000;
+        return (Date.now() - utcDate(lastSeenAt).getTime()) < 5 * 60 * 1000;
     }
 
     function avatarInitials(name) {
@@ -412,7 +422,7 @@
         var lastDate = null;
         msgs.forEach(function (m) {
             var sep = maybeDateSep(m.sent_at, lastDate);
-            if (sep) { frag.appendChild(sep); lastDate = new Date(m.sent_at).toDateString(); }
+            if (sep) { frag.appendChild(sep); lastDate = utcDate(m.sent_at).toDateString(); }
             frag.appendChild(buildMessageEl(m));
         });
         messagesEl.insertBefore(frag, anchor);
@@ -424,13 +434,13 @@
             if (sep) {
                 messagesEl.appendChild(sep);
             }
-            _lastRenderedDate = new Date(m.sent_at.replace(' ', 'T')).toDateString();
+            _lastRenderedDate = utcDate(m.sent_at).toDateString();
             messagesEl.appendChild(buildMessageEl(m));
         });
     }
 
     function maybeDateSep(iso, lastDate) {
-        var d = new Date(iso.replace(' ', 'T')).toDateString();
+        var d = utcDate(iso).toDateString();
         if (d === lastDate) return null;
         var el = document.createElement('div');
         el.className = 'chat-date-sep';
