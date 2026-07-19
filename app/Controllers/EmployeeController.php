@@ -493,7 +493,7 @@
                 return;
             }
             $employee = db()->prepare('
-                SELECT e.id, e.employee_code, e.full_name, e.email, e.department,
+                SELECT e.id, e.employee_code, e.full_name, e.email, e.department, e.company,
                     e.username, e.is_active, e.role_id, e.updated_at, e.avatar,
                     s.full_name AS supervisor_name
                 FROM employees e

@@ -1,8 +1,4 @@
-/**
- *
- * app.css - Global stylesheets for project UX/UI
- *
-/
+/* - app.css - Global stylesheets for project UX/UI */
 
 /* ── Google Fonts + Tabler Icons (moved from base.php <link> tags) ── */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');

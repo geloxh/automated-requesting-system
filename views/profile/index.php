@@ -76,8 +76,11 @@
 
         <div class="profile-divider"></div>
         <div class="profile-meta">
+            <?php if (!empty($employee['company'])): ?>
+                <div class="profile-meta-row"><i class="ti ti-building"></i> <?= htmlspecialchars($employee['company']) ?></div>
+            <?php endif; ?>
             <?php if (!empty($employee['department'])): ?>
-                <div class="profile-meta-row"><i class="ti ti-building"></i> <?= htmlspecialchars($employee['department']) ?></div>
+                <div class="profile-meta-row"><i class="ti ti-users-group"></i> <?= htmlspecialchars($employee['department']) ?></div>
             <?php endif; ?>
             <div class="profile-meta-row"><i class="ti ti-mail"></i> <?= htmlspecialchars($employee['email']) ?></div>
             <?php if (!empty($employee['supervisor_name'])): ?>
