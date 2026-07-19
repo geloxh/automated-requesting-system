@@ -493,7 +493,7 @@
                 return;
             }
             $employee = db()->prepare('
-                SELECT e.id, e.employee_code, e.full_name, e.email, e.department, e.company,
+                SELECT e.id, e.employee_code, e.full_name, e.email, e.department,
                     e.username, e.is_active, e.role_id, e.updated_at, e.avatar,
                     s.full_name AS supervisor_name
                 FROM employees e
@@ -505,7 +505,6 @@
             $employee->execute([$_SESSION['user_id']]);
             $employee = $employee->fetch();
             $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
-            $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
@@ -562,7 +561,6 @@
             $data = [
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'department' => trim($_POST['department'] ?? ''),
-                'company' => trim($_POST['company'] ?? ''),
                 'username' => trim($_POST['username'] ?? '') ?: null,
             ];
 
@@ -582,8 +580,8 @@
                 }
             }
 
-            $sets = 'full_name = ?, department = ?, company = ?, username = ?';
-            $params = [$data['full_name'], $data['department'], $data['company'], $data['username'], $_SESSION['user_id']];
+            $sets = 'full_name = ?, department = ?, username = ?';
+            $params = [$data['full_name'], $data['department'], $data['username'], $_SESSION['user_id']];
 
             db()->prepare("UPDATE employees SET {$sets} WHERE id = ?")->execute($params);
 

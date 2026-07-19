@@ -131,19 +131,6 @@
                             </div>
                         </div>
                         <div class="field-group">
-                            <label class="field-label">Company</label>
-                            <select name="company">
-                                <option value="">-- Select --</option>
-                                <?php foreach ($companies as $company): ?>
-                                    <option value="<?= htmlspecialchars($company['name']) ?>"
-                                        <?= ($employee['company'] ?? '') === $company['name'] ? 'selected' : '' ?> 
-                                    >
-                                        <?= htmlspecialchars($company['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="field-group">
                             <label class="field-label">Department</label>
                             <select name="department">
                                 <option value="">-- Select --</option>
