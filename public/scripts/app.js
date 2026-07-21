@@ -567,3 +567,103 @@ document.addEventListener('change', function (e) {
         if (e.key === 'Escape') closeModal();
     });
 })();
+
+// ── Form attachment drop zone ── //
+(function () {
+    var drop = document.getElementById('attachDrop');
+    var input = document.getElementById('attachInput');
+    var newList = document.getElementById('attachNewList');
+    if (!drop || !input || !newList) return;
+
+    var pickedFiles = [];
+
+    function fmt(bytes) {
+        return bytes < 1024 * 1024
+            ? (bytes / 1024).toFixed(1) + ' KB'
+            : (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function renderNew() {
+        newList.innerHTML = '';
+        pickedFiles.forEach(function (file, i) {
+            var isImg = file.type.startsWith('image/');
+            var iconHtml = isImg
+                ? '<img class="attach-thumb" alt="">'
+                : '<span class="attach-icon"><i class="ti ti-file-type-pdf"></i></span>';
+
+            var item = document.createElement('div');
+            item.className = 'attach-item';
+            item.innerHTML =
+                iconHtml +
+                '<div class="attach-info">' +
+                    '<span class="attach-name">' + file.name + '</span>' +
+                    '<span class="attach-size">' + fmt(file.size) + '</span>' +
+                '</div>' +
+                '<div class="attach-actions">' +
+                    '<button type="button" class="attach-btn attach-btn--danger" title="Remove">' +
+                        '<i class="ti ti-trash"></i>' +
+                    '</button>' +
+                '</div>';
+
+            if (isImg) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    item.querySelector('img').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            item.querySelector('button').addEventListener('click', function () {
+                pickedFiles.splice(i, 1);
+                syncInput();
+                renderNew();
+            });
+
+            newList.appendChild(item);
+        });
+    }
+
+    function syncInput() {
+        var dt = new DataTransfer();
+        pickedFiles.forEach(function (f) { dt.items.add(f); });
+        input.files = dt.files;
+    }
+
+    function addFiles(files) {
+        Array.from(files).forEach(function (f) {
+            if (f.size > 5 * 1024 * 1024) { alert(f.name + ' exceeds 5 MB.'); return; }
+            pickedFiles.push(f);
+        });
+        syncInput();
+        renderNew();
+    }
+
+    input.addEventListener('change', function () {
+        addFiles(input.files);
+    });
+
+    // Drag-and-drop
+    drop.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        drop.classList.add('is-dragover');
+    });
+    drop.addEventListener('dragleave', function () {
+        drop.classList.remove('is-dragover');
+    });
+    drop.addEventListener('drop', function (e) {
+        e.preventDefault();
+        drop.classList.remove('is-dragover');
+        addFiles(e.dataTransfer.files);
+    });
+
+    // Remove saved attachments
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-remove-saved]');
+        if (!btn) return;
+        var item = document.getElementById('saved-' + btn.dataset.removeSaved);
+        if (item) {
+            item.querySelector('input[type="hidden"]').disabled = true;
+            item.remove();
+        }
+    });
+})();

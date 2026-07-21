@@ -3,7 +3,6 @@
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 <?php
-    // Edit mode: $form is set when coming from edit(), absent on create
     $isEdit = isset($form);
     $data = $data ?? [];
     $formAction = $isEdit
@@ -12,10 +11,10 @@
     $fieldVal = fn(string $k, string $def = '') =>
         htmlspecialchars($data[$k] ?? $def);
 ?>
-<form method="POST" action="<?= $formAction ?>">
+<form method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
     <div class="page-heading">Advance Payment Request</div>
     <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
-    
+
     <?= \App\Helpers\Csrf::field(); ?>
 
     <div class="form-card">
@@ -48,9 +47,9 @@
                 <label>Type of Payment</label>
                 <select name="payment_type" required>
                     <option value="">-- Select --</option>
-                    <option>Cash</option>
-                    <option>Bank Transfer</option>
-                    <option>Cheque</option>
+                    <option <?= $fieldVal('payment_type') === 'Cash' ? 'selected' : '' ?>>Cash</option>
+                    <option <?= $fieldVal('payment_type') === 'Bank Transfer' ? 'selected' : '' ?>>Bank Transfer</option>
+                    <option <?= $fieldVal('payment_type') === 'Cheque' ? 'selected' : '' ?>>Cheque</option>
                 </select>
             </div>
             <div class="form-group"><label>Payee</label><input type="text" name="payee" required value="<?= $fieldVal('payee') ?>"></div>
@@ -90,6 +89,60 @@
             <div class="form-group"><label>Total Amount</label><input type="number" step="0.01" name="total_amount" id="total_amount" readonly value="<?= $fieldVal('total_amount') ?>"></div>
             <div class="form-group g-span-2"><label>Total Amount (in words)</label><input type="text" name="amount_words" value="<?= $fieldVal('amount_words') ?>"></div>
         </div>
+    </div>
+
+    <div class="form-card">
+        <div class="form-section-title">Supporting Documents</div>
+
+        <!-- Drop zone -->
+        <label class="attach-drop" id="attachDrop">
+            <i class="ti ti-cloud-upload"></i>
+            <span class="attach-drop-main">Click or drag files here</span>
+            <span class="attach-drop-sub">PDF, JPG, PNG — max 5 MB each · multiple allowed</span>
+            <input type="file" name="attachments[]" id="attachInput"
+                multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden-input">
+        </label>
+
+        <!-- Newly picked files (pre-upload preview) -->
+        <div id="attachNewList" class="attach-list"></div>
+
+        <!-- Already-saved files (edit mode) -->
+        <?php if (!empty($data['attachments'])): ?>
+            <div class="attach-saved-label">Attached files</div>
+            <div class="attach-list" id="attachSavedList">
+                <?php foreach ((array)$data['attachments'] as $i => $f):
+                    $ext  = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                    $name = htmlspecialchars(basename($f));
+                    $url  = htmlspecialchars(url($f));
+                    $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
+                ?>
+                <div class="attach-item" id="saved-<?= $i ?>">
+                    <?php if ($isImg): ?>
+                        <img src="<?= $url ?>" class="attach-thumb" alt="<?= $name ?>">
+                    <?php else: ?>
+                        <span class="attach-icon"><i class="ti ti-file-type-pdf"></i></span>
+                    <?php endif; ?>
+                    <div class="attach-info">
+                        <a href="<?= $url ?>" target="_blank" class="attach-name"><?= $name ?></a>
+                    </div>
+                    <div class="attach-actions">
+                        <a href="<?= $url ?>" download class="attach-btn" title="Download">
+                            <i class="ti ti-download"></i>
+                        </a>
+                        <a href="<?= $url ?>" target="_blank" class="attach-btn" title="View">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                        <button type="button" class="attach-btn attach-btn--danger"
+                                title="Remove" data-remove-saved="<?= $i ?>">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                        <!-- hidden input keeps the path unless removed -->
+                        <input type="hidden" name="existing_attachments[]" value="<?= htmlspecialchars($f) ?>">
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="form-card">

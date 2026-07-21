@@ -683,6 +683,29 @@ class FormController {
     private function store(string $type, string $slug): void {
         \App\Helpers\Csrf::verify();
 
+        $uploadedPaths = [];
+        if (!empty($_FILES['attachments']['name'][0])) {
+            $allowed  = ['image/jpeg', 'image/png', 'application/pdf'];
+            $maxBytes = 5 * 1024 * 1024;
+            $destDir  = __DIR__ . '/../../public/uploads/forms/';
+            if (!is_dir($destDir)) mkdir($destDir, 0755, true);
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+
+            foreach ($_FILES['attachments']['tmp_name'] as $i => $tmp) {
+                if ($_FILES['attachments']['error'][$i] !== UPLOAD_ERR_OK) continue;
+                $mime = $finfo->file($tmp);
+                if (!in_array($mime, $allowed, true) || $_FILES['attachments']['size'][$i] > $maxBytes) {
+                    $_SESSION['error'] = 'Invalid file or file exceeds 5 MB.';
+                    header("Location: " . url("forms/{$slug}/create"));
+                    exit;
+                }
+                $ext      = pathinfo($_FILES['attachments']['name'][$i], PATHINFO_EXTENSION);
+                $fileName = sprintf('%s_%s.%s', time(), bin2hex(random_bytes(4)), $ext);
+                move_uploaded_file($tmp, $destDir . $fileName);
+                $uploadedPaths[] = 'uploads/forms/' . $fileName;
+            }
+        }
+
         $isSavingDraft = isset($_POST['save_draft']);
         $required = $this->fields[$type];
         $data = [];
@@ -706,6 +729,10 @@ class FormController {
             } else {
                 $data[$key] = htmlspecialchars(trim($val), ENT_QUOTES);
             }
+        }
+
+        if (!empty($uploadedPaths)) {
+            $data['attachments'] = $uploadedPaths;
         }
 
         $pdo = db();
@@ -1179,9 +1206,9 @@ class FormController {
             exit;
         }
 
-        $type = $form['form_type'];
+        $type   = $form['form_type'];
         $fields = $this->fields[$type] ?? [];
-        $data = [];
+        $data   = [];
 
         foreach ($fields as $field) {
             $val = $_POST[$field] ?? '';
@@ -1194,12 +1221,42 @@ class FormController {
         }
 
         foreach ($_POST as $key => $val) {
-            if (in_array($key, ['csrf_token', 'save_draft'], true)) continue;
+            if (in_array($key, ['csrf_token', 'save_draft', 'existing_attachments'], true)) continue;
             if (is_array($val)) {
                 $data[$key] = array_map(fn($v) => htmlspecialchars(trim($v), ENT_QUOTES), $val);
             } else {
                 $data[$key] = htmlspecialchars(trim($val), ENT_QUOTES);
             }
+        }
+
+        // Keep only the saved attachments the user did NOT delete
+        $existing = array_values(array_filter($_POST['existing_attachments'] ?? []));
+
+        // Append any newly uploaded files
+        if (!empty($_FILES['attachments']['name'][0])) {
+            $allowed  = ['image/jpeg', 'image/png', 'application/pdf'];
+            $maxBytes = 5 * 1024 * 1024;
+            $destDir  = __DIR__ . '/../../public/uploads/forms/';
+            if (!is_dir($destDir)) mkdir($destDir, 0755, true);
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+
+            foreach ($_FILES['attachments']['tmp_name'] as $i => $tmp) {
+                if ($_FILES['attachments']['error'][$i] !== UPLOAD_ERR_OK) continue;
+                $mime = $finfo->file($tmp);
+                if (!in_array($mime, $allowed, true) || $_FILES['attachments']['size'][$i] > $maxBytes) {
+                    $_SESSION['error'] = 'Invalid file or file exceeds 5 MB.';
+                    header('Location: ' . url('forms/' . $id . '/edit'));
+                    exit;
+                }
+                $ext      = pathinfo($_FILES['attachments']['name'][$i], PATHINFO_EXTENSION);
+                $fileName = sprintf('%s_%s.%s', time(), bin2hex(random_bytes(4)), $ext);
+                move_uploaded_file($tmp, $destDir . $fileName);
+                $existing[] = 'uploads/forms/' . $fileName;
+            }
+        }
+
+        if (!empty($existing)) {
+            $data['attachments'] = $existing;
         }
 
         $old = json_decode($form['data'], true) ?? [];
@@ -1209,7 +1266,6 @@ class FormController {
                 ->execute([json_encode($data), $id]);
 
             $this->audit('form_edited', 'form', $id, $old, $data);
-
             $_SESSION['success'] = 'Form updated successfully.';
         } catch (\Throwable $e) {
             $_SESSION['error'] = 'Update failed. Please try again.';

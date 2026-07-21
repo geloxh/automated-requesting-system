@@ -146,6 +146,42 @@
                 } else {
                     require __DIR__ . '/show/_fallback.php';
                 }
+
+                // ── Attachments ──
+                if (!empty($data['attachments'])): ?>
+                    <div class="show-dl-row">
+                        <span class="show-dl-label">Attachments</span>
+                        <div class="show-dl-value">
+                            <div class="attach-list">
+                                <?php foreach ((array)$data['attachments'] as $f):
+                                    $ext   = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                                    $name  = htmlspecialchars(basename($f));
+                                    $url   = htmlspecialchars(url($f));
+                                    $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
+                                ?>
+                                <div class="attach-item">
+                                    <?php if ($isImg): ?>
+                                        <img src="<?= $url ?>" class="attach-thumb" alt="<?= $name ?>">
+                                    <?php else: ?>
+                                        <span class="attach-icon"><i class="ti ti-file-type-pdf"></i></span>
+                                    <?php endif; ?>
+                                    <div class="attach-info">
+                                        <a href="<?= $url ?>" target="_blank" class="attach-name"><?= $name ?></a>
+                                    </div>
+                                    <div class="attach-actions">
+                                        <a href="<?= $url ?>" download class="attach-btn" title="Download">
+                                            <i class="ti ti-download"></i>
+                                        </a>
+                                        <a href="<?= $url ?>" target="_blank" class="attach-btn" title="View">
+                                            <i class="ti ti-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif;
             endif; ?>
         </div>
     </div>

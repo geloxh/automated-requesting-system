@@ -3,24 +3,23 @@
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 <?php
-    // Edit mode: $form is set when coming from edit(), absent on create
     $isEdit = isset($form);
     $data = $data ?? [];
     $formAction = $isEdit
         ? url('forms/' . (int)$form['id'] . '/update')
-        : url('forms/request-payment/create');
+        : url('forms/overtime');
     $fieldVal = fn(string $k, string $def = '') =>
         htmlspecialchars($data[$k] ?? $def);
 ?>
-<form method="POST" action="<?= $formAction ?>" class="card p-4 bg-white shadow-sm">
-    <div class="page-heading">Request for Payment</div>
+<form method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
+    <div class="page-heading">Overtime Authorization Request</div>
     <div class="page-subheading">Fill in the details below. Save as draft to continue later, or submit directly for approval.</div>
     <?= \App\Helpers\Csrf::field(); ?>
 
     <div class="form-card">
         <div class="form-section-title">Applicant Details</div>
-        <div class="form-grid g-4">
-            <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" value="<?= htmlspecialchars($currentUser ?? '') ?>" readonly required></div>
+        <div class="form-grid g-3">
+            <div class="form-group"><label>Employee Name <span class="req">*</span></label><input type="text" name="employee_name" value="<?= htmlspecialchars($currentUser ?? '') ?>" readonly required></div>
             <div class="form-group">
                 <label>Department</label>
                 <div class="input-select">
@@ -32,53 +31,26 @@
                     </datalist>
                 </div>
             </div>
-            <div class="form-group"><label>Pages</label><input type="text" name="page_no" placeholder="No. of attachments" value="<?= $fieldVal('page_no') ?>"></div>
-            <div class="form-group"><label>Date</label><input type="date" name="date" required value="<?= $fieldVal('date') ?>"></div>
-        </div>
-        <div class="form-group mt-1">
-            <label>Project Name</label><input type="text" name="project_name" value="<?= $fieldVal('project_name') ?>">
+            <div class="form-group"><label>Date</label><input type="date" name="request_date" required value="<?= $fieldVal('request_date') ?>"></div>
         </div>
     </div>
 
     <div class="form-card">
-        <div class="form-section-title">Payment Details</div>
-        <div class="form-grid g-4">
-            <div class="form-group">
-                <label>Type of Payment</label>
-                <select name="payment_type" required>
-                    <option value="">-- Select --</option>
-                    <option>Cash</option>
-                    <option>Bank Transfer</option>
-                    <option>Cheque</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Payee</label><input type="text" name="payee" required value="<?= $fieldVal('payee') ?>"></div>
-            <div class="form-group"><label>Account Name</label><input type="text" name="account_name" value="<?= $fieldVal('account_name') ?>"></div>
-            <div class="form-group"><label>Bank Name</label><input type="text" name="bank_name" value="<?= $fieldVal('bank_name') ?>"></div>
-            <div class="form-group"><label>Bank Account No.</label><input type="text" name="bank_account_no" value="<?= $fieldVal('bank_account_no') ?>"></div>
-            <div class="form-group"><label>Address</label><input type="text" name="address" value="<?= $fieldVal('address') ?>"></div>
-        </div>
-        <div class="form-group mt-1">
-            <label>Purpose</label><textarea name="purpose" rows="2"><?= $fieldVal('purpose') ?></textarea>
-        </div>
-    </div>
-
-    <div class="form-card">
-        <div class="form-section-title">Item Details</div>
+        <div class="form-section-title">OT Request Details</div>
         <div class="table-scroll">
             <table class="form-table" id="items-table"
                 data-recalc="items"
                 data-add-btn-id="add-row"
                 data-total-id="total_amount"
             >
-                <thead><tr><th>Item</th><th>Description</th><th>Unit Price</th><th>Quantity</th><th>Amount</th><th></th></tr></thead>
+                <thead><tr><th>Date</th><th>Reason/s</th><th>Start</th><th>To</th><th>Total Hours</th><th></th></tr></thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" name="item[]" value="<?= $fieldVal('item[]') ?>"></td>
-                        <td><input type="text" name="description[]" value="<?= $fieldVal('description[]') ?>"></td>
-                        <td><input type="number" step="0.01" name="unit_price[]" class="unit-price" value="<?= $fieldVal('unit_price[]') ?>"></td>
-                        <td><input type="number" name="quantity[]" class="qty" value="<?= $fieldVal('quantity[]') ?>"></td>
-                        <td><input type="number" step="0.01" name="amount[]" class="row-amount" readonly value="<?= $fieldVal('amount[]') ?>"></td>
+                        <td><input type="date" name="ot_date[]" required value="<?= $fieldVal('ot_date[]') ?>"></td>
+                        <td><input type="text" name="reason[]" value="<?= $fieldVal('reason[]') ?>"></td>
+                        <td><input type="time" name="hours_covered[]" value="<?= $fieldVal('hours_covered[]') ?>"></td>
+                        <td><input type="time" name="hours_covered[]" value="<?= $fieldVal('hours_covered[]') ?>"></td>
+                        <td><input type="number" name="hours_total[]" step="0.1" class="ot-hours" value="<?= $fieldVal('hours_total[]') ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>
                 </tbody>
@@ -86,9 +58,62 @@
         </div>
         <button type="button" class="btn btn-ghost btn-sm btn-add-row" id="add-row">+ Add Row</button>
         <div class="form-grid g-4 mt-1">
-            <div class="form-group"><label>Total Amount</label><input type="number" step="0.01" name="total_amount" id="total_amount" readonly value="<?= $fieldVal('total_amount') ?>"></div>
-            <div class="form-group g-span-2"><label>Total Amount (in words)</label><input type="text" name="amount_words" value="<?= $fieldVal('amount_words') ?>"></div>
+            <div class="form-group"><label>Total Hours Rendered</label><input type="number" name="total_hours" id="total_hours" step="0.1" readonly value="<?= $fieldVal('total_hours') ?>"></div>
         </div>
+    </div>
+
+    <div class="form-card">
+        <div class="form-section-title">Supporting Documents</div>
+
+        <!-- Drop zone -->
+        <label class="attach-drop" id="attachDrop">
+            <i class="ti ti-cloud-upload"></i>
+            <span class="attach-drop-main">Click or drag files here</span>
+            <span class="attach-drop-sub">PDF, JPG, PNG — max 5 MB each · multiple allowed</span>
+            <input type="file" name="attachments[]" id="attachInput"
+                multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden-input">
+        </label>
+
+        <!-- Newly picked files (pre-upload preview) -->
+        <div id="attachNewList" class="attach-list"></div>
+
+        <!-- Already-saved files (edit mode) -->
+        <?php if (!empty($data['attachments'])): ?>
+            <div class="attach-saved-label">Attached files</div>
+            <div class="attach-list" id="attachSavedList">
+                <?php foreach ((array)$data['attachments'] as $i => $f):
+                    $ext  = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                    $name = htmlspecialchars(basename($f));
+                    $url  = htmlspecialchars(url($f));
+                    $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
+                ?>
+                <div class="attach-item" id="saved-<?= $i ?>">
+                    <?php if ($isImg): ?>
+                        <img src="<?= $url ?>" class="attach-thumb" alt="<?= $name ?>">
+                    <?php else: ?>
+                        <span class="attach-icon"><i class="ti ti-file-type-pdf"></i></span>
+                    <?php endif; ?>
+                    <div class="attach-info">
+                        <a href="<?= $url ?>" target="_blank" class="attach-name"><?= $name ?></a>
+                    </div>
+                    <div class="attach-actions">
+                        <a href="<?= $url ?>" download class="attach-btn" title="Download">
+                            <i class="ti ti-download"></i>
+                        </a>
+                        <a href="<?= $url ?>" target="_blank" class="attach-btn" title="View">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                        <button type="button" class="attach-btn attach-btn--danger"
+                                title="Remove" data-remove-saved="<?= $i ?>">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                        <!-- hidden input keeps the path unless removed -->
+                        <input type="hidden" name="existing_attachments[]" value="<?= htmlspecialchars($f) ?>">
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="form-card">

@@ -2122,3 +2122,112 @@ textarea { resize: vertical; }
     width: 18px;
     height: 18px;
 }
+
+/* ── Form attachment card ── */
+.attach-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 1.5rem 1rem;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color .15s, background .15s;
+    color: var(--text-muted);
+}
+.attach-drop:hover,
+.attach-drop.is-dragover {
+    border-color: var(--accent);
+    background: #f0f9ff;
+    color: var(--accent);
+}
+.attach-drop i { font-size: 26px; margin-bottom: 2px; }
+.attach-drop-main { font-size: .85rem; font-weight: 600; }
+.attach-drop-sub { font-size: .72rem; color: var(--text-soft); }
+
+.attach-saved-label {
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-muted);
+    margin: .85rem 0 .4rem;
+}
+
+.attach-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+
+.attach-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: .45rem .6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    transition: background .12s;
+}
+.attach-item:hover { background: var(--hover); }
+
+.attach-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.attach-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--danger);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.attach-info { flex: 1; min-width: 0; }
+.attach-name {
+    font-size: .8rem;
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    text-decoration: none;
+}
+.attach-name:hover { text-decoration: underline; color: var(--accent); }
+.attach-size { font-size: .68rem; color: var(--text-soft); }
+
+.attach-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.attach-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .12s, color .12s, border-color .12s;
+}
+.attach-btn:hover { background: var(--surface); color: var(--text-main); }
+.attach-btn--danger:hover { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+
+[data-theme="dark"] .attach-drop:hover,
+[data-theme="dark"] .attach-drop.is-dragover { background: #0c2340; }
+[data-theme="dark"] .attach-item { background: var(--card-bg); }
+[data-theme="dark"] .attach-icon,
+[data-theme="dark"] .attach-btn { background: var(--surface); }

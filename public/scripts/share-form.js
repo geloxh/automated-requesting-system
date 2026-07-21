@@ -127,3 +127,76 @@
             });
     });
 })();
+
+// ── Attachment drop zone ──
+(function () {
+    const drop   = document.getElementById('attachDrop');
+    const input  = document.getElementById('attachInput');
+    const list   = document.getElementById('attachNewList');
+    if (!drop || !input || !list) return;
+
+    const MAX = 5 * 1024 * 1024;
+    const ALLOWED = ['image/jpeg','image/png','application/pdf'];
+
+    function renderFile(file, idx) {
+        const isImg = file.type.startsWith('image/');
+        const size  = (file.size / 1024).toFixed(0) + ' KB';
+        const item  = document.createElement('div');
+        item.className = 'attach-item';
+        item.id = 'new-' + idx;
+
+        const thumb = isImg
+            ? `<img src="${URL.createObjectURL(file)}" class="attach-thumb" alt="">`
+            : `<span class="attach-icon"><i class="ti ti-file-type-pdf"></i></span>`;
+
+        item.innerHTML = `
+            ${thumb}
+            <div class="attach-info">
+                <span class="attach-name">${file.name}</span>
+                <span class="attach-size">${size}</span>
+            </div>
+            <div class="attach-actions">
+                <button type="button" class="attach-btn attach-btn--danger"
+                        title="Remove" data-remove-new="${idx}">
+                    <i class="ti ti-trash"></i>
+                </button>
+            </div>`;
+        list.appendChild(item);
+    }
+
+    // Drag events
+    drop.addEventListener('dragover',  e => { e.preventDefault(); drop.classList.add('is-dragover'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('is-dragover'));
+    drop.addEventListener('drop', e => {
+        e.preventDefault();
+        drop.classList.remove('is-dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    input.addEventListener('change', () => handleFiles(input.files));
+
+    function handleFiles(files) {
+        Array.from(files).forEach((f, i) => {
+            if (!ALLOWED.includes(f.type) || f.size > MAX) {
+                alert(`"${f.name}" is invalid or exceeds 5 MB.`);
+                return;
+            }
+            renderFile(f, Date.now() + i);
+        });
+    }
+
+    // Remove newly picked file
+    list.addEventListener('click', e => {
+        const btn = e.target.closest('[data-remove-new]');
+        if (btn) btn.closest('.attach-item').remove();
+    });
+
+    // Remove already-saved file
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('[data-remove-saved]');
+        if (!btn) return;
+        const idx = btn.dataset.removeSaved;
+        document.getElementById('saved-' + idx)?.remove();
+        document.getElementById('saved-input-' + idx)?.remove();
+    });
+})();
