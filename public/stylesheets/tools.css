@@ -4,12 +4,34 @@
    Notes
    ============================================================ */
 
+/* ── Form controls (this page doesn't load settings.css, so form-control
+   needs its own definition here — was previously unstyled/native) ── */
+.tools-layout .form-control {
+    width: 100%;
+    padding: .5rem .75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: .875rem;
+    color: var(--text-main);
+    background: var(--surface);
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+    box-sizing: border-box;
+}
+.tools-layout .form-control:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.tools-layout select.form-control { cursor: pointer; }
+
 .tools-layout {
     display: grid;
     grid-template-columns: 220px 1fr;
     gap: 24px;
     align-items: start;
 }
+
+.tools-panels { min-width: 0; }
 
 @media (max-width: 900px) {
     .tools-layout { grid-template-columns: 1fr; }
@@ -56,6 +78,34 @@
 }
 .tools-nav-caption:first-child { padding-top: 4px; }
 
+/* ── Mobile: horizontal scrollable tab strip instead of a tall vertical list ── */
+@media (max-width: 900px) {
+    .tools-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        position: sticky;
+        top: var(--header-h);
+        z-index: 10;
+        gap: 6px;
+        padding: 8px;
+    }
+    .tools-nav::-webkit-scrollbar { display: none; }
+    .tools-nav-caption { display: none; }
+    .tools-nav-item {
+        flex: 0 0 auto;
+        width: auto;
+        white-space: nowrap;
+        padding: 9px 14px;
+    }
+}
+@media (max-width: 480px) {
+    .tools-nav-item span { display: none; }
+    .tools-nav-item { padding: 10px; }
+    .tools-nav-item i { font-size: 19px; }
+}
+
 /* ── Panels ── */
 .tools-panel { display: none; }
 .tools-panel.active { display: block; }
@@ -73,8 +123,9 @@
 }
 
 /* ── World Clock ── */
-.clock-add-row { display: flex; gap: 8px; margin-bottom: 16px; }
-.clock-add-row select { flex: 1; }
+.clock-add-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.clock-add-row select { flex: 1; min-width: 180px; }
+.clock-add-row button { flex-shrink: 0; }
 
 .clock-grid {
     display: grid;
@@ -153,6 +204,13 @@
 /* ── Notes ── */
 .notes-toolbar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+
+@media (max-width: 480px) {
+    .calc-mode-toggle button,
+    .conv-unit-toggle button { padding: 11px 8px; font-size: .82rem; }
+    .clock-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .notes-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}
 
 .note-card {
     border-radius: 10px; padding: 14px; min-height: 130px; display: flex; flex-direction: column;
