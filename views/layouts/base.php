@@ -185,6 +185,9 @@
 
         <div id="topbar">
             <div class="topbar-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" title="Open menu" aria-label="Open menu">
+                    <i class="ti ti-menu-2"></i>
+                </button>
                 <?php if (!empty($breadcrumbs)): ?>
                     <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
                         <?php foreach ($breadcrumbs as $idx => $crumb): ?>

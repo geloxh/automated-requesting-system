@@ -39,6 +39,7 @@ document.addEventListener('click', function (e) {
 
 // ── Sidebar toggle (desktop collapse + mobile overlay) ── //
 var sidebarToggle = document.getElementById('sidebarToggle');
+var mobileMenuBtn = document.getElementById('mobileMenuBtn');
 var sidebar = document.getElementById('sidebar');
 var SIDEBAR_KEY = 'sidebar_collapsed';
 
@@ -63,6 +64,15 @@ if (sidebarToggle && sidebar) {
             localStorage.setItem(SIDEBAR_KEY, sidebar.classList.contains('collapsed'));
             updateToggleIcon();
         }
+    });
+}
+
+// mobile hamburger button in the topbar — the only entry point to open
+// the sidebar on mobile, since the in-sidebar toggle is off-screen until opened
+if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        sidebar.classList.add('open');
     });
 }
 
