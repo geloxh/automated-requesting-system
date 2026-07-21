@@ -764,6 +764,8 @@ class FormController {
             $_SESSION['success'] = $isSavingDraft
                 ? 'Draft saved. You can continue editing or submit when ready.'
                 : 'Form submitted successfully and is now pending approval.';
+
+            header('Location: ' . url('forms/view/' . $formId));
             exit;
 
         } catch (\Throwable $e) {
