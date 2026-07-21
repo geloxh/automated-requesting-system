@@ -739,22 +739,31 @@ class FormController {
         $pdo->beginTransaction();
 
         try {
+            $initialStatus = $isSavingDraft ? 'draft' : 'submitted';
+
             $stmt = $pdo->prepare(
                 "INSERT INTO forms (form_type, status, submitted_by, data)
-                VALUES (?, 'draft', ?, ?)"
+                VALUES (?, ?, ?, ?)"
             );
-            $stmt->execute([$type, $_SESSION['user_id'], json_encode($data)]);
+            $stmt->execute([$type, $initialStatus, $_SESSION['user_id'], json_encode($data)]);
             $formId = (int) $pdo->lastInsertId();
 
             $this->seedApprovalRows($pdo, $formId, $type, $data, (int)$_SESSION['user_id']);
-            $this->audit('form_created', 'form', $formId, null, ['type' => $type, 'status' => 'draft']);
+
+            if (!$isSavingDraft) {
+                $pdo->prepare(
+                    "UPDATE approvals SET status = 'approved', approved_at = NOW(), remarks = 'Submitted'
+                    WHERE form_id = ? AND sequence = 1"
+                )->execute([$formId]);
+            }
+
+            $this->audit('form_created', 'form', $formId, null, ['type' => $type, 'status' => $initialStatus]);
 
             $pdo->commit();
 
             $_SESSION['success'] = $isSavingDraft
                 ? 'Draft saved. You can continue editing or submit when ready.'
-                : 'Form saved as draft. Review and submit it for approval.';
-            header("Location: " . url("forms/view/{$formId}"));
+                : 'Form submitted successfully and is now pending approval.';
             exit;
 
         } catch (\Throwable $e) {

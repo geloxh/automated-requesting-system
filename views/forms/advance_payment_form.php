@@ -94,7 +94,6 @@
     <div class="form-card">
         <div class="form-section-title">Supporting Documents</div>
 
-        <!-- Drop zone -->
         <label class="attach-drop" id="attachDrop">
             <i class="ti ti-cloud-upload"></i>
             <span class="attach-drop-main">Choose files here</span>
@@ -103,10 +102,8 @@
                 multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden-input">
         </label>
 
-        <!-- Newly picked files (pre-upload preview) -->
         <div id="attachNewList" class="attach-list"></div>
 
-        <!-- Already-saved files (edit mode) -->
         <?php if (!empty($data['attachments'])): ?>
             <div class="attach-saved-label">Attached files</div>
             <div class="attach-list" id="attachSavedList">
@@ -136,7 +133,6 @@
                                 title="Remove" data-remove-saved="<?= $i ?>">
                             <i class="ti ti-trash"></i>
                         </button>
-                        <!-- hidden input keeps the path unless removed -->
                         <input type="hidden" name="existing_attachments[]" value="<?= htmlspecialchars($f) ?>">
                     </div>
                 </div>
