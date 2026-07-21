@@ -969,7 +969,7 @@
 .chat-profile-link:hover { text-decoration: underline; }
 
 /* ── Mobile (≤ 700px) ── */
-@media (max-width: 700px) {
+@media (max-width: 768px) {
     .chat-layout {
         position: relative;
         height: calc(100vh - 60px);
@@ -1000,7 +1000,7 @@
     .chat-msg { max-width: 80%; }
 }
 
-@media (min-width: 701px) {
+@media (min-width: 769px) {
     .chat-swipe-hint { display: none !important; }
 }
 /* Retry button inside error state */

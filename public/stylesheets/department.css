@@ -312,7 +312,7 @@
 .dept-members-empty { padding: 12px 14px; font-size: 12px; color: var(--text-muted); }
 
 /* ── Responsive ── */
-@media (max-width: 700px) {
+@media (max-width: 768px) {
     .dept-shell  { grid-template-columns: 1fr; height: auto; min-height: unset; }
     .dept-detail { display: none; }
 }

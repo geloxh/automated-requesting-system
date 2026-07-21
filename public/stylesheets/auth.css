@@ -337,7 +337,7 @@ body {
 .icon-sm { width: 14px; height: 14px; }
 
 /* ── Responsive ── */
-@media (max-width: 680px) {
+@media (max-width: 768px) {
     .auth-wrap { grid-template-columns: 1fr; min-height: auto; }
     .auth-panel { display: none; }
     .auth-form-panel { padding: 2rem 1.5rem; }
