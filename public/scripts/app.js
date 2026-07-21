@@ -39,7 +39,6 @@ document.addEventListener('click', function (e) {
 
 // ── Sidebar toggle (desktop collapse + mobile overlay) ── //
 var sidebarToggle = document.getElementById('sidebarToggle');
-var mobileMenuBtn = document.getElementById('mobileMenuBtn');
 var sidebar = document.getElementById('sidebar');
 var SIDEBAR_KEY = 'sidebar_collapsed';
 
@@ -68,17 +67,23 @@ if (sidebarToggle && sidebar) {
 }
 
 // mobile hamburger button in the topbar — the only entry point to open
-// the sidebar on mobile, since the in-sidebar toggle is off-screen until opened
-if (mobileMenuBtn && sidebar) {
-    mobileMenuBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        sidebar.classList.add('open');
-    });
-}
-
-// close mobile overlay on outside click
+// the sidebar on mobile, since the in-sidebar toggle is off-screen until opened.
+// Delegated on document (not a direct getElementById + addEventListener) so it
+// keeps working regardless of script load order or any re-render of the topbar.
 document.addEventListener('click', function (e) {
-    if (window.innerWidth <= 900 && sidebar && !e.target.closest('#sidebar')) {
+    var btn = e.target.closest('#mobileMenuBtn');
+    if (!btn || !sidebar) return;
+    e.preventDefault();
+    e.stopPropagation();
+    sidebar.classList.add('open');
+});
+
+// close mobile overlay on outside click (ignore the button that opens it,
+// and clicks inside the sidebar itself)
+document.addEventListener('click', function (e) {
+    if (window.innerWidth <= 900 && sidebar
+        && !e.target.closest('#sidebar')
+        && !e.target.closest('#mobileMenuBtn')) {
         sidebar.classList.remove('open');
     }
 });

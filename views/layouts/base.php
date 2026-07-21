@@ -185,7 +185,7 @@
 
         <div id="topbar">
             <div class="topbar-left">
-                <button class="mobile-menu-btn" id="mobileMenuBtn" title="Open menu" aria-label="Open menu">
+                <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" title="Open menu" aria-label="Open menu">
                     <i class="ti ti-menu-2"></i>
                 </button>
                 <?php if (!empty($breadcrumbs)): ?>
@@ -231,7 +231,7 @@
 
                 <div class="new-req-wrap" id="newReqWrap">
                     <button type="button" class="btn-new-req" id="newReqBtn" aria-haspopup="true" aria-expanded="false">
-                        <i class="ti ti-plus"></i> New Request <i class="ti ti-chevron-down"></i>
+                        <i class="ti ti-plus"></i> <span>New Request</span> <i class="ti ti-chevron-down"></i>
                     </button>
                     <div class="new-req-dropdown dept-hidden" id="newReqDropdown" role="menu">
                         <a href="<?= url('forms/advance-payment/create') ?>" role="menuitem">

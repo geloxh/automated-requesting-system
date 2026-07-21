@@ -381,7 +381,10 @@ a { text-decoration: none; color: inherit; }
     border: 1px solid var(--border); border-radius: 8px;
     background: var(--card-bg); color: var(--text-main);
     font-size: 18px; cursor: pointer;
+    position: relative; z-index: 60;
+    pointer-events: auto;
 }
+.mobile-menu-btn i { pointer-events: none; }
 .mobile-menu-btn:hover { background: var(--hover); }
 
 /* ── Topbar search ── */
@@ -1617,6 +1620,12 @@ textarea { resize: vertical; }
     .topbar-search { display: none; }
     .topbar-date { display: none; }
     .btn-new-req span { display: none; }
+    .btn-new-req {
+        width: 44px; height: 44px; padding: 0;
+        justify-content: center; gap: 0;
+    }
+    .btn-new-req i:last-child { display: none; } /* hide chevron, keep + */
+    .topbar-right { gap: 6px; }
 }
 
 /* ── Touch targets & safe-area (native feel on phones) ── */
@@ -1888,11 +1897,15 @@ textarea { resize: vertical; }
     align-items: center;
     gap: 4px;
     font-size: 13px;
+    min-width: 0;
+    flex: 1;
 }
 .bc-link {
     color: var(--text-muted);
     text-decoration: none;
     transition: color .15s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .bc-link:hover { color: var(--text-main); }
 .bc-sep {
@@ -1901,11 +1914,20 @@ textarea { resize: vertical; }
     line-height: 1;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 }
 .bc-sep i { font-size: 11px; }
 .bc-current {
     color: var(--text-main);
     font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 600px) {
+    .bc-link, .bc-sep { display: none; }
+    .bc-current { display: block; flex: 1; }
 }
 
 .step-dual-badge {
