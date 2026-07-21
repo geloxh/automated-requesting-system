@@ -21,7 +21,7 @@
         <div class="form-grid g-4">
             <div class="form-group"><label>Car / Plate Number</label><input type="text" name="car_available" required value="<?= $fieldVal('car_available') ?>"></div>
             <div class="form-group"><label>Date</label><input type="date" name="date" required value="<?= $fieldVal('date') ?>"></div>
-            <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" value="<?= htmlspecialchars($currentUser ?? '') ?>" readonly required></div>
+            <div class="form-group"><label>Applicant</label><input type="text" name="employee_name" value="<?= $fieldVal('employee_name', $currentUser ?? '') ?>" readonly required></div>
             <div class="form-group">
                 <label>Department</label>
                 <div class="input-select">
@@ -126,4 +126,4 @@
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
     <button type="submit" name="save_draft" value="1" class="btn btn-light">Save as Draft</button>
-    </form>
+</form>

@@ -19,7 +19,7 @@
     <div class="form-card">
         <div class="form-section-title">Applicant Details</div>
         <div class="form-grid g-3">
-            <div class="form-group"><label>Employee Name <span class="req">*</span></label><input type="text" name="employee_name" value="<?= htmlspecialchars($currentUser ?? '') ?>" readonly required></div>
+            <div class="form-group"><label>Employee Name <span class="req">*</span></label><input type="text" name="employee_name" value="<?= $fieldVal('employee_name', $currentUser ?? '') ?>" readonly required></div>
             <div class="form-group">
                 <label>Department</label>
                 <div class="input-select">
