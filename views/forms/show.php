@@ -9,7 +9,6 @@
     $formId = $form['id'];
     $humanStatus = \App\Helpers\FormLabels::statusLabel($form['status']);
 
-    // Submitter controls: edit/delete allowed on draft, submitted, rejected
     $isOwner = ((int)$form['submitted_by'] === (int)$_SESSION['user_id']) || $roleId == 1;
     $editableStatuses = ['draft', 'submitted', 'rejected'];
     $canEdit = $isOwner && in_array($form['status'], $editableStatuses, true);
@@ -30,7 +29,6 @@
 
 <div class="page-header show-page-header">
 
-    <!-- Left: identity block -->
     <div class="show-identity">
         <button id="btn-back" class="btn btn-ghost btn-sm show-back-btn" data-fallback-url="<?= url('approvals') ?>" title="Go back">
             <i class="ti ti-arrow-left"></i>
@@ -57,65 +55,47 @@
         </span>
     </div>
 
-    <!-- Right: actions -->
     <div class="show-actions">
-
         <button type="button" class="btn btn-secondary btn-sm" id="btn-share-trigger" data-modal="shareModal">
             <i class="ti ti-share"></i> Share
         </button>
-
         <?php if ($canEdit): ?>
         <a href="<?= url('forms/' . $formId . '/edit') ?>" class="btn btn-secondary btn-sm">
             <i class="ti ti-pencil"></i> Edit
         </a>
         <?php endif; ?>
-
         <?php if ($canDelete): ?>
-        <!-- Delete form — CSRF token lives here, modal just triggers submit -->
-        <form method="POST"
-              action="<?= url('forms/' . $formId . '/delete') ?>"
-              id="deleteForm">
+        <form method="POST" action="<?= url('forms/' . $formId . '/delete') ?>" id="deleteForm">
             <?= \App\Helpers\Csrf::field() ?>
-            <button 
-                type="button"
-                class="btn btn-danger btn-sm"
-                id="btn-delete-trigger"
+            <button type="button" class="btn btn-danger btn-sm" id="btn-delete-trigger"
                 data-modal="deleteModal"
-                data-form-title="<?= htmlspecialchars($title . ' #' . $formId) ?>"
-            >
+                data-form-title="<?= htmlspecialchars($title . ' #' . $formId) ?>">
                 <i class="ti ti-trash"></i> Delete
             </button>
         </form>
         <?php endif; ?>
-
     </div>
 
 </div>
 
-<!-- Share-to-chat modal -->
+<!-- Share modal -->
 <div class="ars-modal-backdrop" id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle" hidden>
     <div class="ars-modal">
-        <div class="ars-modal-icon">
-            <i class="ti ti-share"></i>
-        </div>
+        <div class="ars-modal-icon"><i class="ti ti-share"></i></div>
         <h3 class="ars-modal-title" id="shareModalTitle">Share this form</h3>
         <p class="ars-modal-body">
             Send <strong><?= htmlspecialchars($title . ' #' . $formId) ?></strong> to a coworker via Messaging.
         </p>
-
         <div class="form-group">
             <label class="show-field-label">Send to</label>
             <input type="text" id="shareRecipientSearch" placeholder="Search people…" autocomplete="off">
             <div id="shareRecipientList" class="share-recipient-list"></div>
         </div>
-
         <div class="form-group">
             <label class="show-field-label">Note <span class="show-field-hint">optional</span></label>
             <textarea id="shareNote" rows="2" placeholder="Add a message…"></textarea>
         </div>
-
         <div id="shareModalError" class="alert alert-danger" hidden></div>
-
         <div class="ars-modal-actions">
             <button type="button" class="btn btn-ghost btn-sm" data-modal-close="shareModal">Cancel</button>
             <button type="button" class="btn btn-primary btn-sm" id="btn-share-confirm" disabled>
@@ -126,22 +106,15 @@
 </div>
 
 <?php if ($canDelete): ?>
-<!-- Delete confirmation modal — no CSRF here, just UI -->
 <div class="ars-modal-backdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" hidden>
     <div class="ars-modal">
-        <div class="ars-modal-icon ars-modal-icon--danger">
-            <i class="ti ti-trash"></i>
-        </div>
+        <div class="ars-modal-icon ars-modal-icon--danger"><i class="ti ti-trash"></i></div>
         <h3 class="ars-modal-title" id="deleteModalTitle">Delete Form?</h3>
         <p class="ars-modal-body">
-            You're about to permanently delete
-            <strong id="deleteModalFormName"></strong>.
-            This action cannot be undone.
+            You're about to permanently delete <strong id="deleteModalFormName"></strong>. This action cannot be undone.
         </p>
         <div class="ars-modal-actions">
-            <button type="button" class="btn btn-ghost btn-sm" data-modal-close="deleteModal">
-                Cancel
-            </button>
+            <button type="button" class="btn btn-ghost btn-sm" data-modal-close="deleteModal">Cancel</button>
             <button type="button" class="btn btn-danger btn-sm" id="btn-delete-confirm">
                 <i class="ti ti-trash"></i> Yes, Delete
             </button>
@@ -164,66 +137,22 @@
                     <i class="ti ti-file-off empty-state-icon"></i>
                     <p>No form data available.</p>
                 </div>
-            <?php else: ?>
-            <?php
-                $fieldLabels = [
-                    'purpose' => 'Purpose',
-                    'payment_type' => 'Payment Type',
-                    'payee' => 'Payee',
-                    'date' => 'Date',
-                    'employee_name' => 'Employee Name',
-                    'department' => 'Department',
-                    'request_date' => 'Request Date',
-                    'unit_owner' => 'Unit Owner',
-                    'bearer_name' => 'Bearer Name',
-                    'service_type' => 'Service Type',
-                    'leave_type' => 'Leave Type',
-                    'from_date' => 'From Date',
-                    'to_date' => 'To Date',
-                    'payment_term' => 'Payment Term',
-                    'car_available' => 'Car Available',
-                    'trip_type' => 'Trip Type',
-                ];
-            ?>
-            <dl class="show-dl">
-                <?php foreach ($data as $key => $value):
-                    if ($key === 'csrf_token') continue;
-                    $label = $fieldLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
-                    $looksLikeDate = preg_match('/date|_at$/', $key);
-
-                    // Repeatable line-item fields (e.g. item_date[]) arrive here as
-                    // arrays — format each element individually instead of passing
-                    // the whole array to strtotime(), which throws a TypeError.
-                    if (is_array($value)) {
-                        $display = implode(', ', array_map(function ($v) use ($looksLikeDate) {
-                            if ($looksLikeDate && is_string($v) && $v !== '' && strtotime($v) !== false) {
-                                return date('M d, Y', strtotime($v));
-                            }
-                            return $v;
-                        }, $value));
-                    } else {
-                        $isDate = $looksLikeDate && is_string($value) && $value !== '' && strtotime($value) !== false;
-                        $display = $isDate ? date('M d, Y', strtotime($value)) : $value;
-                    }
-                ?>
-                    <div class="show-dl-row">
-                        <dt class="show-dl-label"><?= htmlspecialchars($label) ?></dt>
-                        <dd class="show-dl-value"><?= htmlspecialchars($display) ?></dd>
-                    </div>
-                <?php endforeach; ?>
-                <div class="show-dl-row show-dl-row--muted">
-                    <dt class="show-dl-label">Submitted</dt>
-                    <dd class="show-dl-value"><?= date('M d, Y · g:i A', strtotime($form['created_at'])) ?></dd>
-                </div>
-            </dl>
-            <?php endif; ?>
+            <?php else:
+                // Helper available to all partials
+                $ro = fn(string $k, string $def = '') => htmlspecialchars($data[$k] ?? $def);
+                $partial = __DIR__ . '/show/' . $type . '.php';
+                if (file_exists($partial)) {
+                    require $partial;
+                } else {
+                    require __DIR__ . '/show/_fallback.php';
+                }
+            endif; ?>
         </div>
     </div>
 
     <!-- ── Right column ── -->
     <div class="show-right-col">
 
-        <!-- Approval Trail -->
         <div class="card">
             <div class="card-header card-header--flex">
                 <i class="ti ti-timeline"></i>
@@ -234,7 +163,6 @@
             </div>
         </div>
 
-        <!-- Approver action card -->
         <?php if ($canAct): ?>
         <div class="card card-action show-action-card">
             <div class="card-header card-header--flex">
@@ -253,7 +181,6 @@
                         'complete' => 'Mark as Completed',
                     ];
                     $approveLabel = $actionLabels[$nextAction] ?? 'Approve';
-
                     $nextStepHints = [
                         'checker-approval' => 'Forwards to the Department Head.',
                         'review-approval' => 'Forwards to the Final Approver.',
@@ -266,18 +193,14 @@
                         'submit' => 'Sends this for Checker Approval.',
                     ];
                 ?>
-
-                <!-- CSRF token lives here; no inline handlers -->
                 <form method="POST" id="approvalForm" enctype="multipart/form-data">
                     <?= \App\Helpers\Csrf::field(); ?>
-
                     <?php if (isset($nextStepHints[$nextAction])): ?>
                     <div class="show-next-hint">
                         <i class="ti ti-arrow-right"></i>
                         <?= htmlspecialchars($nextStepHints[$nextAction]) ?>
                     </div>
                     <?php endif; ?>
-
                     <div class="form-group show-remarks-group">
                         <label class="show-field-label">
                             Remarks
@@ -285,20 +208,13 @@
                                 <span class="show-field-hint" id="remarks-hint">required to reject</span>
                             <?php endif; ?>
                         </label>
-                        <textarea 
-                            name="remarks"
-                            rows="3"
-                            id="remarksField"
-                            placeholder="Add a note for the next approver…"
-                        ></textarea>
+                        <textarea name="remarks" rows="3" id="remarksField" placeholder="Add a note for the next approver…"></textarea>
                     </div>
-
                     <div class="form-group show-attach-group">
                         <label class="show-field-label">
                             Signature
                             <span class="show-field-hint">optional — draw or upload</span>
                         </label>
-
                         <div class="sig-tabs" role="tablist">
                             <button type="button" class="sig-tab active" id="sigTabDraw" role="tab" aria-selected="true">
                                 <i class="ti ti-signature"></i> Draw
@@ -307,8 +223,6 @@
                                 <i class="ti ti-paperclip"></i> Upload
                             </button>
                         </div>
-
-                        <!-- Draw-signature panel -->
                         <div class="sig-panel" id="sigPanelDraw" role="tabpanel">
                             <div class="sig-pad-wrap" id="sigPadWrap">
                                 <span class="sig-placeholder" id="sigPlaceholder">Sign here</span>
@@ -324,22 +238,15 @@
                                 </button>
                             </div>
                         </div>
-
-                        <!-- Upload-file panel -->
                         <div class="sig-panel sig-hidden" id="sigPanelUpload" role="tabpanel">
                             <label class="show-file-drop" id="fileDrop">
                                 <i class="ti ti-upload"></i>
-                                <span id="fileDropLabel">Drag &amp; drop, or click to attach</span>
+                                <span id="fileDropLabel">Drag & drop, or click to attach</span>
                                 <span class="show-file-drop-sub">Image or PDF, up to 5&nbsp;MB</span>
-                                <input 
-                                    type="file"
-                                    name="approval_file"
+                                <input type="file" name="approval_file"
                                     accept="image/jpeg,image/png,image/gif,application/pdf"
-                                    class="hidden-input"
-                                    id="approvalFile"
-                                >
+                                    class="hidden-input" id="approvalFile">
                             </label>
-
                             <div class="file-preview sig-hidden" id="filePreview">
                                 <img class="file-preview-thumb sig-hidden" id="filePreviewImg" alt="">
                                 <i class="ti ti-file-type-pdf file-preview-icon sig-hidden" id="filePreviewPdfIcon"></i>
@@ -351,37 +258,25 @@
                                     <i class="ti ti-x"></i>
                                 </button>
                             </div>
-
                             <div class="file-error sig-hidden" id="fileError">
                                 <i class="ti ti-alert-circle"></i>
                                 <span id="fileErrorText"></span>
                             </div>
                         </div>
                     </div>
-
                     <div class="show-action-btns">
                         <?php if ($nextAction): ?>
-                            <button 
-                                type="submit"
-                                name="action"
-                                value="approve"
+                            <button type="submit" name="action" value="approve"
                                 formaction="<?= url('forms/' . $formId . '/approve/' . htmlspecialchars($nextAction)) ?>"
-                                class="btn btn-success btn-block show-btn-approve"
-                            >
+                                class="btn btn-success btn-block show-btn-approve">
                                 <i class="ti ti-circle-check"></i>
                                 <?= htmlspecialchars($approveLabel) ?>
                             </button>
                         <?php endif; ?>
-
                         <?php if ($nextAction !== 'submit'): ?>
-                        <button 
-                            type="submit"
-                            name="action"
-                            value="reject"
+                        <button type="submit" name="action" value="reject"
                             formaction="<?= url('forms/' . $formId . '/reject') ?>"
-                            class="btn btn-outline-danger btn-block"
-                            id="btn-reject"
-                        >
+                            class="btn btn-outline-danger btn-block" id="btn-reject">
                             <i class="ti ti-x"></i> Reject
                         </button>
                         <?php endif; ?>
@@ -391,7 +286,6 @@
         </div>
         <?php endif; ?>
 
-        <!-- Terminal status card -->
         <?php if (!$canAct && in_array($form['status'], ['completed', 'rejected'], true)): ?>
         <div class="card show-terminal-card">
             <div class="card-body">
