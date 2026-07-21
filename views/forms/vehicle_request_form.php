@@ -64,7 +64,7 @@
         <!-- Drop zone -->
         <label class="attach-drop" id="attachDrop">
             <i class="ti ti-cloud-upload"></i>
-            <span class="attach-drop-main">Click or drag files here</span>
+            <span class="attach-drop-main">Choose files here</span>
             <span class="attach-drop-sub">PDF, JPG, PNG — max 5 MB each · multiple allowed</span>
             <input type="file" name="attachments[]" id="attachInput"
                 multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden-input">
@@ -125,5 +125,5 @@
         </div>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
-    <button type="draft" class="btn btn-light">Save as Draft</button>
-</form>
+    <button type="submit" name="save_draft" value="1" class="btn btn-light">Save as Draft</button>
+    </form>
