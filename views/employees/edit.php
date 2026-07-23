@@ -16,7 +16,7 @@
 <div class="form-card">
     <form method="POST" action="<?= url('employees/update/' . $employee['id']) ?>">
         <?= \App\Helpers\Csrf::field() ?>
-
+        
         <div class="form-grid g-2">
             <div class="form-group"><label>Full Name</label><input type="text" name="full_name" value="<?= htmlspecialchars($employee['full_name']) ?>" required></div>
             <div class="form-group">
@@ -86,7 +86,7 @@
                 <small class="text-muted">Optional. If set, approval stages requiring the immediate supervisor need sign-off from BOTH supervisors.</small>
             </div>
             <div class="form-group">
-                <label>Department Head <small class="text-muted">(Admin Forms)</small></label>
+                <label>Master Approver</label>
                 <select name="master_approver_id">
                     <option value="">-- Auto-assign (workload balanced) --</option>
                     <?php foreach ($masterApprovers as $ma): ?>
@@ -95,31 +95,31 @@
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <small class="text-muted">Optional. Routes Overtime, Leave, and Vehicle Request review stage.</small>
+                <small class="text-muted">Optional. Who this employee's Master/Evaluation Approval stage routes to. Leave blank to auto-assign to the least busy Department/Finance Head.</small>
             </div>
             <div class="form-group">
-                <label>Finance Head <small class="text-muted">(Finance Forms)</small></label>
-                <select name="finance_head_id">
+                <label>HR Verifier</label>
+                <select name="hr_verifier_id">
                     <option value="">-- Auto-assign (workload balanced) --</option>
-                    <?php foreach ($financeHeads as $fh): ?>
-                        <option value="<?= $fh['id'] ?>" <?= $employee['finance_head_id'] == $fh['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($fh['full_name']) ?>
+                    <?php foreach ($hrVerifiers as $hv): ?>
+                        <option value="<?= $hv['id'] ?>" <?= $employee['hr_verifier_id'] == $hv['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($hv['full_name']) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <small class="text-muted">Optional. Signs Advance Payment, Request for Payment, Reimbursement, and Liquidation at the Evaluation stage.</small>
+                <small class="text-muted">Optional. Who cross-checks this employee's attendance and co-signs Process Approval on their Reimbursement and Liquidation requests. Leave blank to auto-assign to the least busy HR Verifier.</small>
             </div>
             <div class="form-group g-span-2">
                 <label class="checkbox-label">
-                    <input type="checkbox" name="is_active" value="1" <?= $employee['is_active'] ? 'checked' : '' ?>>
+                    <input type="checkbox" name="is_active" value="1" <?= $employee['is_active'] ? 'checked' : '' ?>> 
                     Account is active and can login
                 </label>
             </div>
         </div>
-
         <div class="form-section-divider">
             <span>Company Information</span>
         </div>
+
         <div class="form-grid g-2">
             <div class="form-group">
                 <label>Job Title</label>

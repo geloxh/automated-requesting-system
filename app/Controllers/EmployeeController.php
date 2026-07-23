@@ -3,7 +3,7 @@
         public function index(): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied. Administrator privileges required.';
-                header('Location: ' . url('dashboard'));
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
@@ -21,7 +21,7 @@
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/employees/index.php';
-            $content   = ob_get_clean();
+            $content = ob_get_clean();
             $pageTitle = 'Employees';
             require __DIR__ . '/../../views/layouts/base.php';
         }
@@ -29,7 +29,7 @@
         public function create(): void {
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: ' . url('dashboard'));
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
@@ -38,17 +38,17 @@
                 return;
             }
 
-            $supervisors     = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
             $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $financeHeads    = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $roles           = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
-            $departments     = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
-            $companies       = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
+            $hrVerifiers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $roles = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
+            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
+            $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/employees/create.php';
-            $content   = ob_get_clean();
+            $content = ob_get_clean();
             $pageTitle = 'Add Employee';
             require __DIR__ . '/../../views/layouts/base.php';
         }
@@ -57,13 +57,9 @@
             \App\Helpers\Csrf::verify();
 
             $data = [];
-            foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'company',
-                      'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'finance_head_id',
-                      'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
+            foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'company', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'hr_verifier_id', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
                 $val = trim($_POST[$f] ?? '');
-                if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'supervisor_id_2',
-                    'master_approver_id', 'finance_head_id', 'username', 'job_title',
-                    'phone', 'date_hired', 'employment_type', 'company'])) {
+                if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'hr_verifier_id', 'username', 'job_title', 'phone', 'date_hired', 'employment_type', 'company'])) {
                     $_SESSION['error'] = "Field '{$f}' is required.";
                     header('Location: ' . url('employees/create'));
                     exit;
@@ -101,14 +97,13 @@
 
             if ($existing && $existing['is_active'] == 0) {
                 try {
-                    $pdo     = db();
+                    $pdo = db();
                     $empCode = \App\Helpers\generateEmployeeCode($pdo);
                     $pdo->prepare(
                         'UPDATE employees SET
                             employee_code = ?, full_name = ?, username = ?, email = ?,
                             password_hash = ?, role_id = ?, department = ?, company = ?,
-                            supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?,
-                            finance_head_id = ?, job_title = ?, phone = ?, date_hired = ?,
+                            supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?, hr_verifier_id = ?, job_title = ?, phone = ?, date_hired = ?,
                             employment_type = ?, employment_status = \'employed\', is_active = 1
                         WHERE id = ?'
                     )->execute([
@@ -120,12 +115,12 @@
                         (int) $data['role_id'],
                         $data['department'] ?: null,
                         $data['company'] ?: null,
-                        $data['supervisor_id']       ? (int) $data['supervisor_id']       : null,
-                        $data['supervisor_id_2']     ? (int) $data['supervisor_id_2']     : null,
-                        $data['master_approver_id']  ? (int) $data['master_approver_id']  : null,
-                        $data['finance_head_id']     ? (int) $data['finance_head_id']     : null,
-                        $data['job_title']  ?: null,
-                        $data['phone']      ?: null,
+                        $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
+                        $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
+                        $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
+                        $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
+                        $data['job_title'] ?: null,
+                        $data['phone'] ?: null,
                         $data['date_hired'] ?: null,
                         $data['employment_type'] ?: 'full_time',
                         (int) $existing['id'],
@@ -143,13 +138,12 @@
 
             // new employee
             try {
-                $pdo     = db();
+                $pdo = db();
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
                     'INSERT INTO employees
                         (employee_code, full_name, username, email, password_hash, role_id,
-                        department, company, supervisor_id, supervisor_id_2, master_approver_id,
-                        finance_head_id, job_title, phone, date_hired,
+                        department, company, supervisor_id, supervisor_id_2, master_approver_id, hr_verifier_id, job_title, phone, date_hired,
                         employment_type, employment_status, is_active)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'employed\', 1)'
                 )->execute([
@@ -160,13 +154,13 @@
                     password_hash($data['password'], PASSWORD_BCRYPT),
                     (int) $data['role_id'],
                     $data['department'] ?: null,
-                    $data['company']    ?: null,
-                    $data['supervisor_id']      ? (int) $data['supervisor_id']      : null,
-                    $data['supervisor_id_2']    ? (int) $data['supervisor_id_2']    : null,
+                    $data['company'] ?: null,
+                    $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
+                    $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
-                    $data['finance_head_id']    ? (int) $data['finance_head_id']    : null,
-                    $data['job_title']  ?: null,
-                    $data['phone']      ?: null,
+                    $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
+                    $data['job_title'] ?: null,
+                    $data['phone'] ?: null,
                     $data['date_hired'] ?: null,
                     $data['employment_type'] ?: 'full_time',
                 ]);
@@ -180,136 +174,24 @@
             header('Location: ' . url('employees'));
             exit;
         }
-
-        public function edit(int $id): void {
-            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
-                $_SESSION['error'] = 'Access denied.';
-                header('Location: ' . url('dashboard')); exit;
-            }
-
-            $stmt = db()->prepare('SELECT * FROM employees WHERE id = ?');
-            $stmt->execute([$id]);
-            $employee    = $stmt->fetch(PDO::FETCH_ASSOC);
-            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
-            $companies   = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
-
-            if (!$employee) {
-                $_SESSION['error'] = 'Employee not found.';
-                header('Location: ' . url('employees')); exit;
-            }
-
-            $supervisors     = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $financeHeads    = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $roles           = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
-
-            define('BASE_LOADED', true);
-            ob_start();
-            require __DIR__ . '/../../views/employees/edit.php';
-            $content   = ob_get_clean();
-            $pageTitle = 'Edit Employee: ' . htmlspecialchars($employee['full_name']);
-            require __DIR__ . '/../../views/layouts/base.php';
-        }
-
-        public function update(int $id): void {
-            \App\Helpers\Csrf::verify();
-            if ((int)($_SESSION['role_id'] ?? 0) !== 1) { exit; }
-
-            $data = [];
-            foreach (['full_name', 'username', 'email', 'role_id', 'department', 'company',
-                      'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'finance_head_id',
-                      'is_active', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
-                $data[$f] = trim($_POST[$f] ?? '');
-            }
-
-            if (empty($data['full_name']) || empty($data['email'])) {
-                $_SESSION['error'] = "Name and Email are required.";
-                header("Location: " . url("employees/edit/{$id}"));
-                exit;
-            }
-
-            if ($data['supervisor_id_2'] !== '' && $data['supervisor_id_2'] === $data['supervisor_id']) {
-                $_SESSION['error'] = 'Second supervisor must be different from the primary supervisor.';
-                header("Location: " . url("employees/edit/{$id}"));
-                exit;
-            }
-
-            $pdo = db();
-            try {
-                $sql = "UPDATE employees SET
-                        full_name = ?, username = ?, email = ?, role_id = ?,
-                        department = ?, company = ?, supervisor_id = ?, supervisor_id_2 = ?,
-                        master_approver_id = ?, finance_head_id = ?, is_active = ?,
-                        job_title = ?, phone = ?, date_hired = ?, employment_type = ?";
-                $params = [
-                    $data['full_name'],
-                    $data['username'] ?: null,
-                    $data['email'],
-                    (int) $data['role_id'],
-                    $data['department'] ?: null,
-                    $data['company']    ?: null,
-                    $data['supervisor_id']      ? (int) $data['supervisor_id']      : null,
-                    $data['supervisor_id_2']    ? (int) $data['supervisor_id_2']    : null,
-                    $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
-                    $data['finance_head_id']    ? (int) $data['finance_head_id']    : null,
-                    isset($_POST['is_active']) ? 1 : 0,
-                    $data['job_title']  ?: null,
-                    $data['phone']      ?: null,
-                    $data['date_hired'] ?: null,
-                    $data['employment_type'] ?: 'full_time',
-                ];
-
-                if (!empty($data['username'])) {
-                    $check = db()->prepare('SELECT id FROM employees WHERE username = ? AND id != ?');
-                    $check->execute([$data['username'], $id]);
-                    if ($check->fetch()) {
-                        $_SESSION['error'] = 'That username is already taken.';
-                        header("Location: " . url("employees/edit/{$id}"));
-                        exit;
-                    }
-                }
-
-                if (!empty($_POST['password'])) {
-                    if (strlen($_POST['password']) < 8) {
-                        throw new Exception("Password too short.");
-                    }
-                    $sql     .= ", password_hash = ?";
-                    $params[] = password_hash($_POST['password'], PASSWORD_BCRYPT);
-                }
-
-                $sql     .= " WHERE id = ?";
-                $params[] = $id;
-
-                $pdo->prepare($sql)->execute($params);
-                $_SESSION['success'] = 'Employee updated successfully.';
-            } catch (\Throwable $e) {
-                $_SESSION['error'] = 'Update failed: ' . $e->getMessage();
-                header("Location: " . url("employees/edit/{$id}"));
-                exit;
-            }
-
-            header('Location: ' . url('employees'));
-            exit;
-        }
-
-        // --- all methods below are unchanged from original ---
-
+        
         public function delete(int $id): void {
             \App\Helpers\Csrf::verify();
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: ' . url('dashboard'));
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
+            // Prevent self-deletion
             if ($id === (int)$_SESSION['user_id']) {
                 $_SESSION['error'] = 'You cannot delete your own account.';
                 header('Location: ' . url('employees'));
                 exit;
             }
 
-            $pdo  = db();
+            $pdo = db();
             $stmt = $pdo->prepare('SELECT id, role_id FROM employees WHERE id = ?');
             $stmt->execute([$id]);
             $employee = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -322,8 +204,11 @@
 
             $pdo->beginTransaction();
             try {
+                // Soft-delete: deactivate instead of hard delete so audit logs & FKs remain intact
                 $pdo->prepare('UPDATE employees SET is_active = 0 WHERE id = ?')->execute([$id]);
 
+                // Reassign any pending approval steps to the next least-loaded
+                // active colleague in the same role
                 $pendingApprovals = $pdo->prepare(
                     'SELECT id FROM approvals WHERE approver_id = ? AND status = \'pending\''
                 );
@@ -331,6 +216,7 @@
                 $rows = $pendingApprovals->fetchAll(PDO::FETCH_ASSOC);
 
                 if (!empty($rows)) {
+                    // Find replacement: least-loaded active employee in same role (excluding deleted)
                     $replacement = $pdo->prepare(
                         'SELECT e.id, COUNT(a.id) AS workload
                          FROM employees e
@@ -344,14 +230,16 @@
                     $replacementEmployee = $replacement->fetch(PDO::FETCH_ASSOC);
 
                     if ($replacementEmployee) {
-                        $pdo->prepare(
+                        $reassign = $pdo->prepare(
                             'UPDATE approvals SET approver_id = ? WHERE approver_id = ? AND status = \'pending\''
-                        )->execute([$replacementEmployee['id'], $id]);
+                        );
+                        $reassign->execute([$replacementEmployee['id'], $id]);
                         $_SESSION['success'] = sprintf(
                             'Employee deactivated. %d pending approval(s) reassigned.',
                             count($rows)
                         );
                     } else {
+                        // No replacement available — flag them so admins can see
                         $_SESSION['success'] = 'Employee deactivated. Warning: no replacement approver found for their ' . count($rows) . ' pending step(s). Please reassign manually.';
                     }
                 } else {
@@ -368,17 +256,123 @@
             exit;
         }
 
+        public function edit(int $id): void {
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+                $_SESSION['error'] = 'Access denied.';
+                header('Location: ' . url('dashboard')); exit;
+            }
+
+            $stmt = db()->prepare('SELECT * FROM employees WHERE id = ?');
+            $stmt->execute([$id]);
+            $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
+            $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
+
+            if (!$employee) {
+                $_SESSION['error'] = 'Employee not found.';
+                header('Location: ' . url('employees')); exit;
+            }
+
+            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $hrVerifiers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $roles = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
+
+            define('BASE_LOADED', true);
+            ob_start();
+            require __DIR__ . '/../../views/employees/edit.php';
+            $content = ob_get_clean();
+            $pageTitle = 'Edit Employee: ' . htmlspecialchars($employee['full_name']);
+            require __DIR__ . '/../../views/layouts/base.php';
+        }
+
+        public function update(int $id): void {
+            \App\Helpers\Csrf::verify();
+            if ((int)($_SESSION['role_id'] ?? 0) !== 1) { 
+                exit; 
+            }
+
+            $data = [];
+            foreach (['full_name', 'username', 'email', 'role_id', 'department', 'company', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'hr_verifier_id', 'is_active', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
+                $data[$f] = trim($_POST[$f] ?? '');
+            }
+
+            // Validation
+            if (empty($data['full_name']) || empty($data['email'])) {
+                $_SESSION['error'] = "Name and Email are required.";
+                header("Location: " . url("employees/edit/{$id}")); 
+                exit;
+            }
+
+            if ($data['supervisor_id_2'] !== '' && $data['supervisor_id_2'] === $data['supervisor_id']) {
+                $_SESSION['error'] = 'Second supervisor must be different from the primary supervisor.';
+                header("Location: " . url("employees/edit/{$id}"));
+                exit;
+            }
+
+            $pdo = db();
+            try {
+                $sql = "UPDATE employees SET 
+                        full_name = ?, username = ?, email = ?, role_id = ?,
+                        department = ?, company = ?, supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?, hr_verifier_id = ?, is_active = ?,
+                        job_title = ?, phone = ?, date_hired = ?, employment_type = ?";
+                $params = [
+                    $data['full_name'], $data['username'] ?: null, $data['email'],
+                    (int)$data['role_id'], $data['department'] ?: null,
+                    $data['company'] ?: null,
+                    $data['supervisor_id'] ? (int)$data['supervisor_id'] : null,
+                    $data['supervisor_id_2'] ? (int)$data['supervisor_id_2'] : null,
+                    $data['master_approver_id'] ? (int)$data['master_approver_id'] : null,
+                    $data['hr_verifier_id'] ? (int)$data['hr_verifier_id'] : null,
+                    isset($_POST['is_active']) ? 1 : 0,
+                    $data['job_title'] ?: null, $data['phone'] ?: null,
+                    $data['date_hired'] ?: null, $data['employment_type'] ?: 'full_time',
+                ];
+
+                if (!empty($data['username'])) {
+                    $check = db()->prepare('SELECT id FROM employees WHERE username = ? AND id != ?');
+                    $check->execute([$data['username'], $id]);
+                    if ($check->fetch()) {
+                        $_SESSION['error'] = 'That username is already taken.';
+                        header("Location: " . url("employees/edit/{$id}"));
+                        exit;
+                    }
+                }
+                // Optional Password update
+                if (!empty($_POST['password'])) {
+                    if (strlen($_POST['password']) < 8) {
+                        throw new Exception("Password too short.");
+                    }
+                    $sql .= ", password_hash = ?";
+                    $params[] = password_hash($_POST['password'], PASSWORD_BCRYPT);
+                }
+
+                $sql .= " WHERE id = ?";
+                $params[] = $id;
+
+                $pdo->prepare($sql)->execute($params);
+                $_SESSION['success'] = 'Employee updated successfully.';
+            } catch (\Throwable $e) {
+                $_SESSION['error'] = 'Update failed: ' . $e->getMessage();
+                header("Location: " . url("employees/edit/{$id}")); 
+                exit;
+            }
+
+            header('Location: ' . url('employees'));
+            exit;
+        }
+
         public function updateStatus(int $id): void {
             \App\Helpers\Csrf::verify();
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied.';
-                header('Location: ' . url('dashboard'));
+                header('Location: ' . url('dashboard')); 
                 exit;
             }
 
             $allowed = ['employed', 'resigned', 'floating'];
-            $status  = trim($_POST['employment_status'] ?? '');
+            $status = trim($_POST['employment_status'] ?? '');
 
             if (!in_array($status, $allowed, true)) {
                 $_SESSION['error'] = 'Invalid employment status.';
@@ -399,7 +393,7 @@
 
             if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
                 $_SESSION['error'] = 'Access denied. Only SysAdmins can perform manual overrides.';
-                header("Location: " . url("forms/view/{$formId}"));
+                header("Location: " . url("forms/view/{$formId}")); 
                 exit;
             }
 
@@ -417,8 +411,10 @@
                 header("Location: " . url("forms/view/{$formId}"));
                 exit;
             }
+
             $remarks = trim($_POST['remarks'] ?? '(SysAdmin override)');
 
+            // Find the next pending approval step
             $step = db()->prepare(
                 'SELECT * FROM approvals WHERE form_id = ? AND status = \'pending\' ORDER BY sequence LIMIT 1'
             );
@@ -437,11 +433,15 @@
 
                 if ($action === 'rejected') {
                     $newStatus = 'rejected';
+
+                    // Mark ALL remaining pending steps as rejected too
                     $pdo->prepare(
                         "UPDATE approvals SET status = 'rejected', remarks = ?, approved_at = NOW()
                          WHERE form_id = ? AND status = 'pending' AND id != ?"
                     )->execute([$remarks, $formId, $approval['id']]);
+
                 } else {
+                    // Fetch form_type to pick the right pipeline status
                     $formTypeRow = db()->prepare('SELECT form_type FROM forms WHERE id = ?');
                     $formTypeRow->execute([$formId]);
                     $formType = $formTypeRow->fetchColumn();
@@ -452,17 +452,18 @@
                     $seqToStatus = $isAdminForm
                         ? [
                             2 => 'immediatehead_approved',
-                            3 => 'department_reviewed',
-                            4 => 'completed',
+                            3 => 'department_reviewed',  // Review Approval
+                            4 => 'completed',            // Grant Approval — now finalizes the form
                         ]
                         : [
                             2 => 'immediatehead_approved',
-                            3 => 'process_approved',
-                            4 => 'finance_reviewed',
-                            5 => 'completed',
+                            3 => 'process_approved',     // Process Approval
+                            4 => 'finance_reviewed',     // Evaluation Approval
+                            5 => 'final_approved',       // Grant Approval
+                            6 => 'completed',
                         ];
 
-                    $seq       = (int) ($approval['sequence'] ?? 0);
+                    $seq = (int) ($approval['sequence'] ?? 0);
                     $newStatus = $seqToStatus[$seq] ?? 'submitted';
                 }
 
@@ -503,15 +504,17 @@
                 FROM employees e
                 LEFT JOIN employees s ON s.id = e.supervisor_id
                 WHERE e.id = ?
-            ');
+                '
+            );
+
             $employee->execute([$_SESSION['user_id']]);
-            $employee    = $employee->fetch();
+            $employee = $employee->fetch();
             $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/profile/index.php';
-            $content   = ob_get_clean();
+            $content = ob_get_clean();
             $pageTitle = 'Profile';
             require __DIR__ . '/../../views/layouts/base.php';
         }
@@ -521,6 +524,7 @@
 
             $section = $_POST['section'] ?? 'account';
 
+            // Password Section
             if ($section === 'password') {
                 if (empty($_POST['new_password'])) {
                     $_SESSION['error'] = 'Please enter a new password.';
@@ -548,18 +552,21 @@
                     exit;
                 }
 
+                $hash = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
                 db()->prepare('UPDATE employees SET password_hash = ? WHERE id = ?')
-                    ->execute([password_hash($_POST['new_password'], PASSWORD_BCRYPT), $_SESSION['user_id']]);
+                    ->execute([$hash, $_SESSION['user_id']]);
 
                 $_SESSION['success'] = 'Password updated.';
                 header('Location: ' . url('profile'));
                 exit;
             }
 
+
+            // Account Section
             $data = [
-                'full_name'  => trim($_POST['full_name'] ?? ''),
+                'full_name' => trim($_POST['full_name'] ?? ''),
                 'department' => trim($_POST['department'] ?? ''),
-                'username'   => trim($_POST['username'] ?? '') ?: null,
+                'username' => trim($_POST['username'] ?? '') ?: null,
             ];
 
             if ($data['full_name'] === '') {
@@ -568,7 +575,7 @@
                 exit;
             }
 
-            if (!empty($data['username'])) {
+            if (!empty($data['username'])) { // Check username uniqueness
                 $check = db()->prepare('SELECT id FROM employees WHERE username = ? AND id != ?');
                 $check->execute([$data['username'], $_SESSION['user_id']]);
                 if ($check->fetch()) {
@@ -578,11 +585,13 @@
                 }
             }
 
-            db()->prepare("UPDATE employees SET full_name = ?, department = ?, username = ? WHERE id = ?")
-                ->execute([$data['full_name'], $data['department'], $data['username'], $_SESSION['user_id']]);
+            $sets = 'full_name = ?, department = ?, username = ?';
+            $params = [$data['full_name'], $data['department'], $data['username'], $_SESSION['user_id']];
+
+            db()->prepare("UPDATE employees SET {$sets} WHERE id = ?")->execute($params);
 
             $_SESSION['user_name'] = $data['full_name'];
-            $_SESSION['success']   = 'Profile updated.';
+            $_SESSION['success'] = 'Profile updated.';
             header('Location: ' . url('profile'));
             exit;
         }
@@ -594,12 +603,13 @@
                 $_SESSION['error'] = 'No file uploaded or upload error.';
                 header('Location: ' . url('profile'));
                 exit;
+                
             }
 
-            $file     = $_FILES['avatar'];
-            $maxSize  = 2 * 1024 * 1024;
-            $allowed  = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
-            $finfo    = new finfo(FILEINFO_MIME_TYPE);
+            $file = $_FILES['avatar'];
+            $maxSize = 2 * 1024 * 1024; // 2MB
+            $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if ($file['size'] > $maxSize) {
@@ -613,7 +623,7 @@
                 header('Location: ' . url('profile'));
                 exit;
             }
-
+            
             $extMap = ['image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
             if (!isset($extMap[$mimeType])) {
                 $_SESSION['error'] = 'Unsupported image format.';
@@ -623,13 +633,14 @@
             $ext = $extMap[$mimeType];
 
             $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-            $destDir  = __DIR__ . '/../../public/uploads/avatars/';
+            $destDir = __DIR__ . '/../../public/uploads/avatars/';
             $destPath = $destDir . $filename;
 
             if (!is_dir($destDir)) {
                 mkdir($destDir, 0755, true);
             }
 
+            // Delete old avatar file if it exists
             $old = db()->prepare('SELECT avatar FROM employees WHERE id = ?');
             $old->execute([$_SESSION['user_id']]);
             $oldAvatar = $old->fetchColumn();
@@ -647,8 +658,10 @@
                 ->execute([$filename, $_SESSION['user_id']]);
 
             $_SESSION['avatar'] = $filename;
+
             $_SESSION['success'] = 'Profile picture updated.';
             header('Location: ' . url('profile'));
             exit;
         }
+
     }

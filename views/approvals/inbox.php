@@ -149,7 +149,7 @@
                 </td>
                 <td class="td-last text-end">
                     <a href="<?= url('forms/view/' . $row['id']) ?>" class="btn btn-primary btn-sm">
-                        <?= \App\Helpers\FormLabels::verb((int)$row['sequence'], $row['form_type']) ?> <i class="ti ti-arrow-right ti-xs"></i>
+                        <?= \App\Helpers\FormLabels::verb((int)$row['sequence']) ?> <i class="ti ti-arrow-right ti-xs"></i>
                     </a>
                 </td>
             </tr>

@@ -49,7 +49,7 @@ Documentation of ARS
 |  1   | Requestor — submits the form |          Requestor                  |    staff@email.com    |
 |  2   |      Checker Approval        |     Immediate Supervisor            |  approver@email.com   |
 |  3   |      Process Approval        |      Finance/Accounting             |   finance@email.com   |
-|      |     Evaluation Approval      |         Finance Head                | financehead@email.com |
+|  4   |     Evaluation Approval      |   Finance Head/Department Head      | financehead@email.com |
 |  5   |   Grant Approval Request     |       Final Approver                |finalapprover@email.com|
 |  6   |   Completion of Approval     |         System Admin                |   sysadmin#email.com  |
 
@@ -60,10 +60,9 @@ Documentation of ARS
 | 1       | IT (SysAdmin)                                   | Full system access. Marks Finance forms as completed after final approval.|
 | 2       | Approver/Immediate Supervisor (ImmediateHead)   | First-level checker. Reviews and approves submitted requests from staff.  |
 | 3       | Regular Employee (Staff)                        | Submits forms/requests. Can only view their own submissions.              |
-| 4       | Department Head(MasterApprover)                 | Reviews approved requests. Handles Review (Admin) or Evaluation(Finance). |
+| 4       | Department Head/Finance Head (MasterApprover)   | Reviews approved requests. Handles Review (Admin) or Evaluation(Finance). |
 | 5       | Accounting/Process Approval(AcquisitionChecker) | Finance-only stage. Processes requests and submit to Finance Head.        |
 | 6       | Management (FinalApprover)                      | Last approval authority. Grants final approval on all form types.         |
 | 7       | Procurement Head (AdminApprover)                | Can cover roles 2, 4, and 6.                                              |
-| 8       | Finance Head (EvaluationApprover)               | Process the Accounting (AcquisitionChecker) signed staff request & docs   |
 
 - **Admin Approver** - Can stand in for those stages on specific form types (Vehicle Request: all three; Leave Application & Overtime: role 4 only). 
