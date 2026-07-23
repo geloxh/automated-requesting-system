@@ -65,7 +65,7 @@
     // ---------------------------------------------------------------
 
     // Multilevel Approval Routes
-   $approvalActions = ['submit', 'checker-approval', 'review-approval', 'process-approval', 'evaluation-approval', 'grant-approval', 'complete'];
+   $approvalActions = ['submit', 'checker-approval', 'review-approval', 'process-approval', 'evaluation-approval', 'grant-approval'];
 
     foreach ($approvalActions as $action) {
         $safeAction = preg_quote($action, '#');

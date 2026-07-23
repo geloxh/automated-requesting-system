@@ -93,7 +93,6 @@
             3 => 'Process Approval',
             4 => 'Evaluation Approval',
             5 => 'Grant Approval Request',
-            6 => 'Completed',
         ];
 
         private const ADMIN_FORMS = ['overtime_authorization', 'leave_application', 'vehicle_request'];
@@ -137,18 +136,27 @@
             return in_array($type, self::ADMIN_FORMS, true);
         }
 
+        private const VERBS_ADMIN = [
+            2 => 'Check',
+            3 => 'Review',
+            4 => 'Approve',   // Grant Approval — Final Approver, completes the form
+        ];
+
+        private const VERBS_FINANCE = [
+            2 => 'Check',
+            3 => 'Process',
+            4 => 'Evaluate',
+            5 => 'Approve',   // Grant Approval — Final Approver, completes the form
+        ];
+
         /**
-         * Returns a context-aware verb for approval action buttons based on the sequence.
+         * Returns a context-aware verb for approval action buttons based on the
+         * sequence number and form category. Falls back to the Finance map when
+         * no form type is given, to preserve prior behaviour for existing callers.
          */
-        public static function verb(int $sequence): string {
-            $verbs = [
-                2 => 'Check',
-                3 => 'Review',
-                4 => 'Process',
-                5 => 'Evaluate',
-                6 => 'Approve',
-            ];
-            return $verbs[$sequence] ?? 'Review';
+        public static function verb(int $sequence, string $formType = ''): string {
+            $map = self::isAdminForm($formType) ? self::VERBS_ADMIN : self::VERBS_FINANCE;
+            return $map[$sequence] ?? 'Review';
         }
 
         /**

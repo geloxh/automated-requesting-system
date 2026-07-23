@@ -19,15 +19,13 @@ $financeTypes = ['advance_payment', 'request_for_payment', 'reimbursement', 'liq
 $isFinance = in_array($form['form_type'], $financeTypes, true);
 
 if ($isFinance) {
-    // Finance pipeline: Draft (Preview) → Submitted (Employee) → Checker (Immediate Head/Supervisor) → Process (Finance/Accounting Review) → Evaluation (Finance Head) → Final Approval (Management) → Approved (View Completed Form)
     $statusOrder = [
-        'draft' => 'Draft (Preview)',
-        'submitted' => 'Submitted (Employee Form Request)',
+        'draft'                  => 'Draft (Preview)',
+        'submitted'              => 'Submitted (Employee Form Request)',
         'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'process_approved' => 'Process (Finance/Accounting Review)',
-        'finance_reviewed' => 'Evaluation (Master Approval)',
-        'final_approved' => 'Final Approval (Management Approval)',
-        'completed' => 'Approved (View Completed Form)',
+        'process_approved'       => 'Process (Finance/Accounting Review)',
+        'finance_reviewed'       => 'Evaluation (Finance Head)',
+        'completed'              => 'Final Approval (Approved & Completed)',
     ];
 } else {
     // Admin pipeline: Draft (Preview) → Submitted (Employee) → Checker (Immediate Head) → Review (Department Head) → Final Approval (Management, finalizes the form)
@@ -88,12 +86,9 @@ $normalizeStepFile = function (?string $path): array {
 
         // Look up approval rows for this step (usually one, sometimes two
         // for a concurrent stage — either dual sign-off, where BOTH must
-        // sign [e.g. Vehicle Request's checker-approval], a race stage,
+        // sign [e.g. Vehicle Request's checker-approval], or a race stage,
         // where EITHER qualified approver acts and the other is auto-skipped
-        // [Final Approval, shared by the real Final Approver and AdminApprover],
-        // or a sequential co-sign stage, where the HR Verifier must approve
-        // before Finance/Accounting can [Reimbursement & Liquidation's
-        // Process (Finance/Accounting Review) stage].
+        // [Final Approval, shared by the real Final Approver and AdminApprover]).
         $rowsAtStep = $stepsBySeq[$i] ?? [];
         $actedRows = array_values(array_filter(
             $rowsAtStep, fn($r) => in_array($r['status'], ['approved', 'rejected'], true)
@@ -102,12 +97,6 @@ $normalizeStepFile = function (?string $path): array {
         $skippedRows = array_values(array_filter($rowsAtStep, fn($r) => $r['status'] === 'skipped'));
         $isDualStage = count($rowsAtStep) > 1;
         $isRaceStage = $isDualStage && count($skippedRows) > 0;
-
-        $hrCosignRow = null;
-        foreach ($rowsAtStep as $r) {
-            if ((int)($r['approver_role_id'] ?? 0) === 8) { $hrCosignRow = $r; break; }
-        }
-        $isSequentialCosign = $isDualStage && !$isRaceStage && $hrCosignRow !== null;
     ?>
     <div class="approval-step <?= $state === 'done' ? 'is-done' : '' ?>
                                <?= $state === 'current' ? 'is-current'  : '' ?>
@@ -120,11 +109,6 @@ $normalizeStepFile = function (?string $path): array {
                 <?= htmlspecialchars($label) ?>
                 <?php if ($isRaceStage): ?>
                     <span class="step-dual-badge">Approved by 1 of <?= count($rowsAtStep) ?> qualified approvers</span>
-                <?php elseif ($isSequentialCosign): ?>
-                    <span class="step-dual-badge">
-                        <?= count($actedRows) ?>/<?= count($rowsAtStep) ?> signed
-                        — HR Verifier reviews first
-                    </span>
                 <?php elseif ($isDualStage): ?>
                     <span class="step-dual-badge"><?= count($actedRows) ?>/<?= count($rowsAtStep) ?> signed</span>
                 <?php endif; ?>
@@ -172,19 +156,7 @@ $normalizeStepFile = function (?string $path): array {
                 </div>
             <?php endforeach; ?>
 
-            <?php if ($isSequentialCosign && $pendingRows): ?>
-                <div class="step-waiting">
-                    <i class="ti ti-hourglass-low"></i>
-                    <?php if ($hrCosignRow['status'] === 'pending'): ?>
-                        Waiting on <?= htmlspecialchars($hrCosignRow['full_name'] ?? 'HR Verifier') ?>
-                        (HR Verifier) to review — Finance/Accounting co-signs after
-                    <?php else: ?>
-                        HR Verifier approved. Waiting on <?= implode(', ', array_map(
-                            fn($r) => htmlspecialchars($r['full_name'] ?? 'checker'), $pendingRows
-                        )) ?> (Finance/Accounting) to co-sign
-                    <?php endif; ?>
-                </div>
-            <?php elseif ($isDualStage && $pendingRows): ?>
+            <?php if ($isDualStage && $pendingRows): ?>
                 <div class="step-waiting">
                     <i class="ti ti-hourglass-low"></i>
                     Waiting on <?= implode($isRaceStage ? ' or ' : ' &amp; ', array_map(

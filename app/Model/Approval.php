@@ -4,55 +4,45 @@ class Approval {
     private $pdo;
 
     /**
-     * Admin pipeline — 5 stages.
-     * Forms: overtime_authorization, leave_application, vehicle_request
-     *
-     * sequence → the approvals.sequence value
-     * role → role_id of the employee allowed to approve at this level
-     * label → human-readable stage name
-     * status → the value written to forms.status after this level passes
-     */
-
-    /**
      * Administrative Forms Stages
-     * Submitted (Employee) -> Checker Approval (Immediate Surpervisor) -> Review Approval (Department Head) -> Grant Approval Request (Final Approval) -> Completion of Approval (Employee Request Approved) 
+     * Submitted (Employee) -> Checker Approval (Immediate Supervisor) -> Review Approval (Department Head) -> Grant Approval Request (Final Approval) -> Completion of Approval (Employee Request Approved)
      */
     private const LEVELS_ADMIN = [
-        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
-        2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
-        3 => ['role' => 4, 'label' => 'Review Approval', 'status' => 'department_reviewed'],
-        4 => ['role' => 6, 'label' => 'Grant Approval Request', 'status' => 'final_approved'],
-        5 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
+        1 => ['role' => 3, 'label' => 'Submitted',                'status' => 'submitted'],
+        2 => ['role' => 2, 'label' => 'Immediate Head Approval',   'status' => 'immediatehead_approved'],
+        3 => ['role' => 4, 'label' => 'Review Approval',           'status' => 'department_reviewed'],
+        4 => ['role' => 6, 'label' => 'Grant Approval Request',    'status' => 'final_approved'],
+        5 => ['role' => 1, 'label' => 'Completed',                 'status' => 'completed'],
     ];
 
     /**
-     * Finance pipeline — 6 stages.
-     * Forms: advance_payment, request_for_payment, reimbursement, liquidation
-     */
-
-    /**
-     * Finance Forms Stages
-     * Submitted (Employee) -> Checker Approval (Immediate Supervisor) -> Process Approval (Approval Acquisition) -> Evaluation Approval (Finance Head) -> Grant Approval Request (Final Approval) -> Completion of Approval (Completed)
+     * Finance Forms Stages (Advance Payment, Request for Payment)
+     * Submitted -> Immediate Head -> Process (Accounting) -> Finance Head -> Final Approver -> Completed
      */
     private const LEVELS_FINANCE = [
-        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
+        1 => ['role' => 3, 'label' => 'Submitted',              'status' => 'submitted'],
         2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
-        3 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
-        4 => ['role' => 4, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
-        5 => ['role' => 6, 'label' => 'Grant Approval Request','status' => 'final_approved'],
-        6 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
+        3 => ['role' => 5, 'label' => 'Process Approval',        'status' => 'process_approved'],
+        4 => ['role' => 8, 'label' => 'Evaluation Approval',     'status' => 'finance_reviewed'],
+        5 => ['role' => 6, 'label' => 'Grant Approval Request',  'status' => 'final_approved'],
+        6 => ['role' => 1, 'label' => 'Completed',               'status' => 'completed'],
     ];
 
-    private const LEVELS_REIMBURSEMENT = [
-        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
-        2 => ['role' => 5, 'label' => 'Checker 1 Approval', 'status' => 'checker1_approved'],
-        3 => ['role' => 5, 'label' => 'Checker 2 Approval', 'status' => 'immediatehead_approved'],
-        4 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
-        5 => ['role' => 4, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
-        6 => ['role' => 6, 'label' => 'Grant Approval', 'status' => 'final_approved'],
-        7 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
+    /**
+     * Reimbursement & Liquidation pipeline — 7 stages.
+     * Submitted -> Immediate Head -> Process (Accounting) -> HR Verifier -> Finance Head -> Final Approver -> Completed
+     */
+    private const LEVELS_REIMB_LIQUID = [
+        1 => ['role' => 3, 'label' => 'Submitted',              'status' => 'submitted'],
+        2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
+        3 => ['role' => 5, 'label' => 'Process Approval',        'status' => 'process_approved'],
+        4 => ['role' => 9, 'label' => 'HR Verification',         'status' => 'hr_verified'],
+        5 => ['role' => 8, 'label' => 'Evaluation Approval',     'status' => 'finance_reviewed'],
+        6 => ['role' => 6, 'label' => 'Grant Approval Request',  'status' => 'final_approved'],
+        7 => ['role' => 1, 'label' => 'Completed',               'status' => 'completed'],
     ];
 
+    private const REIMB_LIQUID_TYPES = ['reimbursement', 'liquidation'];
 
     /** Form types that follow the finance pipeline. */
     private const FINANCE_TYPES = [
@@ -75,19 +65,15 @@ class Approval {
     // CREATE
     // ----------------------------------------------------------------
 
-    /**
-     * Insert a new approval record at level 1 (draft).
-     * Returns the new row ID.
-     */
     public function create(array $data): int {
         $stmt = $this->pdo->prepare("
             INSERT INTO approvals (form_id, approver_id, sequence, status, assigned_at)
             VALUES (:form_id, :approver_id, :sequence, 'pending', NOW())
         ");
         $stmt->execute([
-            ':form_id' => $data['form_id'],
+            ':form_id'     => $data['form_id'],
             ':approver_id' => $data['approver_id'],
-            ':sequence' => $data['sequence'],
+            ':sequence'    => $data['sequence'],
         ]);
         return (int) $this->pdo->lastInsertId();
     }
@@ -119,7 +105,6 @@ class Approval {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /** Return the single pending approval row for a given form. */
     public function currentPending(int $formId): ?array {
         $stmt = $this->pdo->prepare("
             SELECT * FROM approvals
@@ -131,7 +116,6 @@ class Approval {
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    /** Full audit trail for a form, newest last. */
     public function logs(int $formId): array {
         $stmt = $this->pdo->prepare("
             SELECT al.*, e.full_name
@@ -148,24 +132,6 @@ class Approval {
     // PIPELINE ACTIONS
     // ----------------------------------------------------------------
 
-    /**
-     * Advance the approval to the next level.
-     *
-     * @param string $formType  The form_type value from the forms table.
-     *                          Used to select the correct pipeline (admin vs finance).
-     *
-     * Validates:
-     *  - the approval row exists and is still 'pending'
-     *  - the acting user's role matches the current level's required role
-     *    (admin role_id = 1 bypasses the role check)
-     *
-     * On success:
-     *  - marks the current row approved
-     *  - advances forms.status to the next pipeline status,
-     *    OR marks the form completed if already at the final level
-     *
-     * Returns ['ok' => true] or ['ok' => false, 'error' => '...']
-     */
     public function advance(int $id, int $actorId, int $actorRole, string $formType, string $remarks = ''): array {
         $row = $this->find($id);
 
@@ -177,7 +143,7 @@ class Approval {
             return ['ok' => false, 'error' => 'This approval step is no longer pending.'];
         }
 
-        $levels = $this->getLevels($formType);
+        $levels   = $this->getLevels($formType);
         $maxLevel = count($levels);
         $sequence = (int) $row['sequence'];
         $levelCfg = $levels[$sequence] ?? null;
@@ -186,7 +152,6 @@ class Approval {
             return ['ok' => false, 'error' => "Unknown approval sequence: {$sequence}."];
         }
 
-        // Role check — admin (role 1) always passes
         if ($actorRole !== 1 && $actorRole !== $levelCfg['role']) {
             return ['ok' => false, 'error' => 'You are not authorised to approve at this level.'];
         }
@@ -194,13 +159,9 @@ class Approval {
         $this->pdo->beginTransaction();
 
         try {
-            // 1. Mark current step as approved
             $this->updateStatus($id, 'approved', $actorId, $remarks);
-
-            // 2. Log the action
             $this->log($row['form_id'], $sequence, 'approved', $actorId, $levelCfg['status'], $remarks);
 
-            // 3. Move to next level or complete
             if ($sequence >= $maxLevel) {
                 $this->setFormStatus($row['form_id'], 'completed');
             } else {
@@ -217,12 +178,6 @@ class Approval {
         }
     }
 
-    /**
-     * Reject the approval at any active level.
-     * Remarks are required for rejection.
-     *
-     * @param string $formType  The form_type value from the forms table.
-     */
     public function reject(int $id, int $actorId, int $actorRole, string $formType, string $remarks): array {
         if (trim($remarks) === '') {
             return ['ok' => false, 'error' => 'A rejection reason is required.'];
@@ -238,8 +193,7 @@ class Approval {
             return ['ok' => false, 'error' => 'This approval step is no longer pending.'];
         }
 
-        // Only roles that can approve at this level (or admin) may reject
-        $levels = $this->getLevels($formType);
+        $levels   = $this->getLevels($formType);
         $levelCfg = $levels[$row['sequence']] ?? null;
         if ($actorRole !== 1 && $levelCfg && $actorRole !== $levelCfg['role']) {
             return ['ok' => false, 'error' => 'You are not authorised to reject at this level.'];
@@ -265,75 +219,51 @@ class Approval {
     // HELPERS
     // ----------------------------------------------------------------
 
-    /**
-     * Check whether a given actor (by role) can act on the current
-     * pending step of a form. Used by the controller / view.
-     *
-     * @param string $formType  The form_type value from the forms table.
-     */
     public function canAct(int $formId, int $actorId, int $actorRole, string $formType): bool {
-        if ($actorRole === 1) return true; // admin always can
+        if ($actorRole === 1) return true;
 
         $pending = $this->currentPending($formId);
         if (!$pending) return false;
 
-        $levels = $this->getLevels($formType);
+        $levels   = $this->getLevels($formType);
         $required = $levels[$pending['sequence']]['role'] ?? null;
         return $required !== null && $actorRole === $required;
     }
 
-    /**
-     * Return the pipeline levels for a given form type.
-     * Useful for views that render a progress stepper.
-     *
-     * @param string $formType  The form_type value from the forms table.
-     */
     public static function pipeline(string $formType): array {
-        if ($formType === 'reimbursement') return self::LEVELS_REIMBURSEMENT;
+        if (in_array($formType, self::REIMB_LIQUID_TYPES, true)) return self::LEVELS_REIMB_LIQUID;
         return in_array($formType, self::FINANCE_TYPES, true)
             ? self::LEVELS_FINANCE
-            : SELF::LEVELS_ADMIN;
+            : self::LEVELS_ADMIN;
     }
 
     // ----------------------------------------------------------------
     // PRIVATE
     // ----------------------------------------------------------------
 
-    /**
-     * Select the correct levels array based on form type.
-     */
     private function getLevels(string $formType): array {
-        if ($formType === 'reimbursement') return self::LEVELS_REIMBURSEMENT;
+        if (in_array($formType, self::REIMB_LIQUID_TYPES, true)) return self::LEVELS_REIMB_LIQUID;
         return in_array($formType, self::FINANCE_TYPES, true)
             ? self::LEVELS_FINANCE
             : self::LEVELS_ADMIN;
     }
 
     private function updateStatus(int $id, string $status, int $actorId, string $remarks): void {
-        $stmt = $this->pdo->prepare("
+        $this->pdo->prepare("
             UPDATE approvals
-            SET status = :status,
-                remarks = :remarks,
-                approved_at = NOW()
+            SET status = :status, remarks = :remarks, approved_at = NOW()
             WHERE id = :id
-        ");
-        $stmt->execute([
-            ':status' => $status,
-            ':remarks' => $remarks,
-            ':id' => $id,
-        ]);
+        ")->execute([':status' => $status, ':remarks' => $remarks, ':id' => $id]);
     }
 
-    /** Insert a fresh pending row for the next pipeline level. */
     private function insertLevel(int $formId, int $level): void {
-        $stmt = $this->pdo->prepare("
+        $this->pdo->prepare("
             INSERT INTO approvals (form_id, status, sequence, assigned_at, approver_id)
             SELECT form_id, 'pending', :level, NOW(), approver_id
             FROM approvals
             WHERE form_id = :form_id
             LIMIT 1
-        ");
-        $stmt->execute([':level' => $level, ':form_id' => $formId]);
+        ")->execute([':level' => $level, ':form_id' => $formId]);
     }
 
     private function setFormStatus(int $formId, string $status): void {
@@ -342,29 +272,15 @@ class Approval {
     }
 
     private function log(int $formId, int $sequence, string $action, int $actorId, string $resultStatus, string $remarks): void {
-        $newVals = json_encode([
-            'status' => $resultStatus,
-            'remarks' => $remarks,
-            'sequence' => $sequence,
-        ]);
-
         $this->pdo->prepare("
             INSERT INTO audit_logs (performed_by, action, entity_type, entity_id, old_values, new_values, ip_address)
-            VALUES (
-                :actor,
-                :action,
-                'form',
-                :form_id,
-                NULL,
-                :new_vals,
-                :ip
-            )
+            VALUES (:actor, :action, 'form', :form_id, NULL, :new_vals, :ip)
         ")->execute([
-            ':actor' => $actorId,
-            ':action' => $action,
-            ':form_id' => $formId,
-            ':new_vals' => $newVals,
-            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ':actor'    => $actorId,
+            ':action'   => $action,
+            ':form_id'  => $formId,
+            ':new_vals' => json_encode(['status' => $resultStatus, 'remarks' => $remarks, 'sequence' => $sequence]),
+            ':ip'       => $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
     }
 }
