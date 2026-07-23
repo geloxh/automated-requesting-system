@@ -429,6 +429,26 @@ class FormController {
             exit;
         }
 
+        // HR Verifier must review and approve the Process (Finance/Accounting
+        // Review) stage before Finance/Accounting co-signs it, on
+        // Reimbursement and Liquidation forms.
+        if (!$isAdmin && $roleId === 5 && $action === 'process-approval'
+            && in_array($form['form_type'], self::HR_COSIGN_FORM_TYPES, true)
+        ) {
+            $hrRowCheck = db()->prepare(
+                'SELECT a.status FROM approvals a
+                 JOIN employees e ON e.id = a.approver_id
+                 WHERE a.form_id = ? AND a.sequence = ? AND e.role_id = ? LIMIT 1'
+            );
+            $hrRowCheck->execute([$id, $step['sequence'], self::HR_VERIFIER_ROLE]);
+            $hrStatus = $hrRowCheck->fetchColumn();
+            if ($hrStatus !== false && $hrStatus !== 'approved') {
+                $_SESSION['error'] = 'The HR Verifier must review and approve this request before Finance/Accounting can co-sign.';
+                header("Location: " . url("forms/view/{$id}"));
+                exit;
+            }
+        }
+
         $uploadedFilePath = null;
         if (!empty($_FILES['approval_file']['tmp_name'])) {
             $file = $_FILES['approval_file'];
@@ -762,6 +782,23 @@ class FormController {
         return [];
     }
 
+    // On Reimbursement / Liquidation forms, the Process (Finance/Accounting
+    // Review) stage seeds two co-signers at the same sequence: the HR
+    // Verifier and the Finance/Accounting checker. They no longer sign in
+    // parallel — the HR Verifier must review and approve FIRST, then
+    // Finance/Accounting co-signs, and only then does the form move on to
+    // Evaluation (Finance Head). Returns true once there's nothing to wait
+    // on (either there's no HR Verifier row at this sequence, or it's
+    // already approved).
+    private function hrVerifierClearedForCosign(array $steps, int $sequence): bool {
+        foreach ($steps as $s) {
+            if ((int)$s['sequence'] === $sequence && (int)($s['approver_role_id'] ?? 0) === self::HR_VERIFIER_ROLE) {
+                return $s['status'] === 'approved';
+            }
+        }
+        return true;
+    }
+
     private function canActOnForm(array $form, array $steps): bool {
         if (in_array($form['status'], ['completed', 'rejected'], true)) return false;
         if ($_SESSION['role_id'] == 1) return true;
@@ -777,12 +814,19 @@ class FormController {
         foreach ($steps as $step) {
             if ((int)$step['approver_id'] !== $userId || $step['status'] !== 'pending') continue;
             $mySeq = (int)$step['sequence'];
+
+            // Finance/Accounting (role 5) can't act on the co-sign stage
+            // until the HR Verifier has approved their row first.
+            if ($roleId === 5
+                && in_array($form['form_type'], self::HR_COSIGN_FORM_TYPES, true)
+                && !$this->hrVerifierClearedForCosign($steps, $mySeq)
+            ) continue;
+
             $blocked = false;
             foreach ($steps as $other) {
                 if ((int)$other['approver_id'] !== $userId
                     && $other['status'] === 'pending'
                     && (int)$other['sequence'] < $mySeq
-                    && (int)($other['approver_role_id'] ?? 0) !== self::HR_VERIFIER_ROLE
                 ) { $blocked = true; break; }
             }
             if (!$blocked) return true;
