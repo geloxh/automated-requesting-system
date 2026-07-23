@@ -2,7 +2,7 @@
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
     
     $uri = $uri ?? '/';
-    $roleLabels = [ 1 => 'Sys Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver' ];
+    $roleLabels = [ 1 => 'Sys Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver', 8 => 'HR Verifier' ];
     $roleName = $roleLabels[$_SESSION['role_id']] ?? 'User';
     $initials = strtoupper(substr($_SESSION['user_name'], 0, 2));
     $sidebarAvatarUrl = avatar_url($_SESSION['avatar'] ?? null);
@@ -36,7 +36,16 @@
                         'SELECT COUNT(*) FROM approvals a
                          JOIN forms f ON f.id = a.form_id
                          WHERE a.approver_id = ? AND a.status = "pending"
-                         AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )'
+                         AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )
+                         AND NOT EXISTS (
+                             SELECT 1 FROM approvals a3
+                             JOIN employees e3 ON e3.id = a3.approver_id
+                             WHERE a3.form_id = a.form_id
+                               AND a3.status = "pending"
+                               AND a3.sequence < a.sequence
+                               AND a3.approver_id <> a.approver_id
+                               AND e3.role_id <> 8
+                         )'
                     );
                     $ars->execute([$userId]);
                 }

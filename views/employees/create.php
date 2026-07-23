@@ -88,6 +88,16 @@
                 </select>
                 <small class="text-muted">Optional. Who this employee's Master/Evaluation Approval stage routes to. Leave blank to auto-assign to the least busy Department/Finance Head.</small>
             </div>
+            <div class="form-group">
+                <label>HR Verifier</label>
+                <select name="hr_verifier_id">
+                    <option value="">-- Auto-assign (workload balanced) --</option>
+                    <?php foreach ($hrVerifiers as $hv): ?>
+                        <option value="<?= $hv['id'] ?>"><?= htmlspecialchars($hv['full_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Optional. Who cross-checks this employee's attendance and co-signs Process Approval on their Reimbursement and Liquidation requests. Leave blank to auto-assign to the least busy HR Verifier.</small>
+            </div>
         </div>
 
         <div class="form-section-divider">

@@ -40,6 +40,7 @@
 
             $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
             $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $hrVerifiers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
             $roles = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
             $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
             $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
@@ -56,9 +57,9 @@
             \App\Helpers\Csrf::verify();
 
             $data = [];
-            foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'company', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
+            foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'company', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'hr_verifier_id', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
                 $val = trim($_POST[$f] ?? '');
-                if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'username', 'job_title', 'phone', 'date_hired', 'employment_type', 'company'])) {
+                if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'hr_verifier_id', 'username', 'job_title', 'phone', 'date_hired', 'employment_type', 'company'])) {
                     $_SESSION['error'] = "Field '{$f}' is required.";
                     header('Location: ' . url('employees/create'));
                     exit;
@@ -102,7 +103,7 @@
                         'UPDATE employees SET
                             employee_code = ?, full_name = ?, username = ?, email = ?,
                             password_hash = ?, role_id = ?, department = ?, company = ?,
-                            supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?, job_title = ?, phone = ?, date_hired = ?,
+                            supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?, hr_verifier_id = ?, job_title = ?, phone = ?, date_hired = ?,
                             employment_type = ?, employment_status = \'employed\', is_active = 1
                         WHERE id = ?'
                     )->execute([
@@ -117,6 +118,7 @@
                         $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
                         $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                         $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
+                        $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
                         $data['job_title'] ?: null,
                         $data['phone'] ?: null,
                         $data['date_hired'] ?: null,
@@ -141,9 +143,9 @@
                 $pdo->prepare(
                     'INSERT INTO employees
                         (employee_code, full_name, username, email, password_hash, role_id,
-                        department, company, supervisor_id, supervisor_id_2, master_approver_id, job_title, phone, date_hired,
+                        department, company, supervisor_id, supervisor_id_2, master_approver_id, hr_verifier_id, job_title, phone, date_hired,
                         employment_type, employment_status, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'employed\', 1)'
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'employed\', 1)'
                 )->execute([
                     $empCode,
                     $data['full_name'],
@@ -156,6 +158,7 @@
                     $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
                     $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
+                    $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
                     $data['job_title'] ?: null,
                     $data['phone'] ?: null,
                     $data['date_hired'] ?: null,
@@ -272,6 +275,7 @@
 
             $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
             $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $hrVerifiers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
             $roles = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
 
             define('BASE_LOADED', true);
@@ -289,7 +293,7 @@
             }
 
             $data = [];
-            foreach (['full_name', 'username', 'email', 'role_id', 'department', 'company', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'is_active', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
+            foreach (['full_name', 'username', 'email', 'role_id', 'department', 'company', 'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'hr_verifier_id', 'is_active', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
                 $data[$f] = trim($_POST[$f] ?? '');
             }
 
@@ -310,7 +314,7 @@
             try {
                 $sql = "UPDATE employees SET 
                         full_name = ?, username = ?, email = ?, role_id = ?,
-                        department = ?, company = ?, supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?, is_active = ?,
+                        department = ?, company = ?, supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?, hr_verifier_id = ?, is_active = ?,
                         job_title = ?, phone = ?, date_hired = ?, employment_type = ?";
                 $params = [
                     $data['full_name'], $data['username'] ?: null, $data['email'],
@@ -319,6 +323,7 @@
                     $data['supervisor_id'] ? (int)$data['supervisor_id'] : null,
                     $data['supervisor_id_2'] ? (int)$data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int)$data['master_approver_id'] : null,
+                    $data['hr_verifier_id'] ? (int)$data['hr_verifier_id'] : null,
                     isset($_POST['is_active']) ? 1 : 0,
                     $data['job_title'] ?: null, $data['phone'] ?: null,
                     $data['date_hired'] ?: null, $data['employment_type'] ?: 'full_time',

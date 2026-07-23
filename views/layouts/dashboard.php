@@ -16,7 +16,7 @@
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
-    } elseif (in_array($roleId, [ 2, 4, 5, 6, 7 ], true)) {
+    } elseif (in_array($roleId, [ 2, 4, 5, 6, 7, 8 ], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -112,7 +112,7 @@
 
     // ── Pending alert ── //
     $dashPending = 0;
-    if (in_array($roleId, [2, 4, 5, 6, 7], true)) {
+    if (in_array($roleId, [ 2, 4, 5, 6, 7, 8 ], true)) {
         $cacheKey = "pending_count_{$userId}";
         $dashPending = (int) ($_SESSION[$cacheKey] ?? 0);
     }
@@ -167,7 +167,7 @@
             <span class="card-panel-title">Recent Activity</span>
             <?php $allLink = ($roleId === 1)
                 ? url('requests')
-                : (in_array($roleId, [2, 4, 5, 6, 7], true)
+                : (in_array($roleId, [ 2, 4, 5, 6, 7, 8 ], true)
                     ? url('approvals')
                     : url('my-submissions'));
             ?>

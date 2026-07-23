@@ -124,8 +124,18 @@
                 <td><?= htmlspecialchars($row['owner_name']) ?></td>
                 <td class="muted"><?= htmlspecialchars($row['department'] ?? '—') ?></td>
                 <td>
+                    <?php
+                        $stepLabel = \App\Helpers\FormLabels::stepLabel((int)$row['sequence'], $row['form_type']);
+                        // HR Verifier co-signs Process Approval alongside the
+                        // Finance/Accounting Checker on the same sequence for
+                        // Reimbursement/Liquidation — label it distinctly so
+                        // HR knows what they're confirming.
+                        if ((int)($_SESSION['role_id'] ?? 0) === 8 && in_array($row['form_type'], ['reimbursement', 'liquidation'], true)) {
+                            $stepLabel .= ' — HR Attendance Verification';
+                        }
+                    ?>
                     <span class="badge badge-primary">
-                        <?= htmlspecialchars(\App\Helpers\FormLabels::stepLabel((int)$row['sequence'], $row['form_type'])) ?>
+                        <?= htmlspecialchars($stepLabel) ?>
                     </span>
                 </td>
                 <td class="muted"><?= date('M d, Y', strtotime($row['created_at'])) ?></td>

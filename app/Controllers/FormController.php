@@ -1,7 +1,6 @@
 <?php
 class FormController {
     private array $typeMap = [
-        // Full slugs (used in navbar dropdowns and direct links)
         'advance-payment' => 'advance_payment',
         'overtime-authorization' => 'overtime_authorization',
         'request-for-payment' => 'request_for_payment',
@@ -9,7 +8,6 @@ class FormController {
         'reimbursement' => 'reimbursement',
         'liquidation' => 'liquidation',
         'vehicle-request' => 'vehicle_request',
-        // Short aliases (used in sidebar links)
         'overtime' => 'overtime_authorization',
         'request-payment' => 'request_for_payment',
         'leave' => 'leave_application',
@@ -24,56 +22,29 @@ class FormController {
         'liquidation' => ['employee_name', 'department', 'request_date'],
         'vehicle_request' => ['car_available', 'employee_name', 'date', 'trip_type'],
     ];
-    
-    /**
-     * Role map (align with the employees table):
-     *   1 = SysAdmin
-     *   2 = Approver / Manager (Immediate Supervisor)
-     *   3 = Regular Employee
-     *   4 = Department Head / Finance Head
-     *   5 = Checker / Approval Acquisition
-     *   6 = Final Approver
-     *   7 = AdminApprover (combined 2 + 4 + 6 approval authority only)
-     */
 
-    /** Stage roles that AdminApprover (7) is allowed to stand in for. */
     private const ADMIN_APPROVER_COVERS = [2, 4, 6];
 
-    /**
-     * Which stages (by required role_id) AdminApprover (7) may stand in
-     * for, per form type — i.e. act on the stage's pending row even when
-     * it's assigned to the real approver, not just when they own it.
-     *
-     *   - Vehicle Request: Immediate Head (2), Master/Review (4), Final (6)
-     *   - Leave Application / Overtime Authorization: Master/Review (4) only
-     *
-     * Form types not listed here get no stand-in coverage at all.
-     */
     private const ADMIN_APPROVER_STANDIN_COVERAGE = [
         'vehicle_request' => [2, 4, 6],
         'leave_application' => [4],
         'overtime_authorization' => [4],
     ];
 
-    /**
-     * True if AdminApprover (7) may stand in on a stage requiring
-     * $stageRoleId for the given form type — see
-     * ADMIN_APPROVER_STANDIN_COVERAGE above.
-     */
+    private const HR_VERIFIER_ROLE = 8;
+
+    private const HR_COSIGN_FORM_TYPES = ['reimbursement', 'liquidation'];
+
     private function adminApproverStandsInFor(string $formType, int $stageRoleId): bool {
         $covered = self::ADMIN_APPROVER_STANDIN_COVERAGE[$formType] ?? [];
         return in_array($stageRoleId, $covered, true);
     }
 
-    /**
-     * True if $actorRole is permitted to act on a stage that requires
-     * $requiredRole. Handles the plain match plus the AdminApprover
-     * carve-out. Does NOT handle the role_id === 1 (SysAdmin) bypass —
-     * callers already check that separately.
-     */
-    private function roleSatisfiesStage(int $actorRole, int $requiredRole): bool {
+    private function roleSatisfiesStage(int $actorRole, int $requiredRole, string $formType = ''): bool {
         if ($actorRole === $requiredRole) return true;
         if ($actorRole === 7 && in_array($requiredRole, self::ADMIN_APPROVER_COVERS, true)) return true;
+        if ($actorRole === self::HR_VERIFIER_ROLE && $requiredRole === 5
+            && in_array($formType, self::HR_COSIGN_FORM_TYPES, true)) return true;
         return false;
     }
 
@@ -83,52 +54,19 @@ class FormController {
     ];
 
     private const PIPELINE_ADMIN = [
-        'submit' => [
-            'sequence' => 1, 'from' => 'draft', 'to' => 'submitted',
-            'role_id' => 3, 'label' => 'Submitted',
-        ],
-        'checker-approval' => [
-            'sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved',
-            'role_id' => 2, 'label' => 'Immediate Head Approval',
-        ],
-        'review-approval' => [
-            'sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'department_reviewed',
-            'role_id' => 4, 'label' => 'Review Approval',
-        ],
-        'grant-approval' => [
-            // Final Approver's sign-off is the last step for Admin forms —
-            // once they approve, the form is done. No separate SysAdmin
-            // "complete" step is needed.
-            'sequence' => 4, 'from' => 'department_reviewed', 'to' => 'completed',
-            'role_id' => 6, 'label' => 'Grant Approval Request',
-        ],
+        'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
+        'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved', 'role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'review-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'department_reviewed', 'role_id' => 4, 'label' => 'Review Approval'],
+        'grant-approval' => ['sequence' => 4, 'from' => 'department_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
     private const PIPELINE_FINANCE = [
-        'submit' => [
-            'sequence' => 1, 'from' => 'draft', 'to' => 'submitted',
-            'role_id' => 3, 'label' => 'Submitted',
-        ],
-        'checker-approval' => [
-            'sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved',
-            'role_id' => 2, 'label' => 'Immediate Head Approval',
-        ],
-        'process-approval' => [
-            'sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved',
-            'role_id' => 5, 'label' => 'Process Approval',
-        ],
-        'evaluation-approval' => [
-            'sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed',
-            'role_id' => 4, 'label' => 'Evaluation Approval',
-        ],
-        'grant-approval' => [
-            'sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'final_approved',
-            'role_id' => 6, 'label' => 'Grant Approval Request',
-        ],
-        'complete' => [
-            'sequence' => 6, 'from' => 'final_approved', 'to' => 'completed',
-            'role_id' => 1, 'label' => 'Completed',
-        ],
+        'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
+        'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved', 'role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved', 'role_id' => 5, 'label' => 'Process Approval'],
+        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed', 'role_id' => 4, 'label' => 'Evaluation Approval'],
+        'grant-approval' => ['sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'final_approved', 'role_id' => 6, 'label' => 'Grant Approval Request'],
+        'complete' => ['sequence' => 6, 'from' => 'final_approved', 'to' => 'completed', 'role_id' => 1, 'label' => 'Completed'],
     ];
 
     private function getPipeline(string $formType): array {
@@ -137,9 +75,6 @@ class FormController {
             : self::PIPELINE_ADMIN;
     }
 
-    // ----------------------------------------------------------------
-    // GET /forms/{slug}
-    // ----------------------------------------------------------------
     public function index(string $slug): void {
         $type = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
@@ -152,7 +87,7 @@ class FormController {
                 WHERE f.form_type = ? ORDER BY f.created_at DESC LIMIT 50'
             );
             $stmt->execute([$type]);
-        } elseif (in_array($roleId, [2, 4, 5, 6, 7])) {
+        } elseif (in_array($roleId, [2, 4, 5, 6, 7, 8])) {
             $stmt = db()->prepare(
                 'SELECT DISTINCT f.id, f.status, f.created_at, e.full_name
                 FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -180,14 +115,9 @@ class FormController {
         $forms = $stmt->fetchAll();
         $formType = $type;
         $pageTitle = \App\Helpers\FormLabels::get($type);
-
         $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
     }
 
-    // ----------------------------------------------------------------
-    // GET /forms/{slug}/create — show blank form
-    // POST /forms/{slug}/create — save form
-    // ----------------------------------------------------------------
     public function create(string $slug): void {
         $type = $this->resolveType($slug);
 
@@ -201,17 +131,10 @@ class FormController {
         $noSuffix = ['list', 'show', 'request_for_payment'];
         $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
         $pageTitle = \App\Helpers\FormLabels::get($type);
-
         $departments = db()->query('SELECT name FROM departments ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
-
         $currentUser = $_SESSION['user_name'] ?? '';
         $currentDept = $_SESSION['department'] ?? '';
-
-        // Breadcrumb for form creation pages
-        $breadcrumbs = [
-            ['label' => 'New Request'],
-            ['label' => $pageTitle],
-        ];
+        $breadcrumbs = [['label' => 'New Request'], ['label' => $pageTitle]];
 
         $this->render("forms/{$viewName}", compact(
             'fields', 'formType', 'slug', 'pageTitle',
@@ -219,14 +142,11 @@ class FormController {
         ));
     }
 
-    // ----------------------------------------------------------------
-    // GET /forms/view/{id}
-    // ----------------------------------------------------------------
     public function show(int $id): void {
         $form = $this->findForm($id);
 
         $approvals = db()->prepare(
-            'SELECT a.*, e.full_name FROM approvals a
+            'SELECT a.*, e.full_name, e.role_id AS approver_role_id FROM approvals a
             JOIN employees e ON e.id = a.approver_id
             WHERE a.form_id = ? ORDER BY a.sequence'
         );
@@ -236,9 +156,7 @@ class FormController {
         $pipeline = $this->getPipeline($form['form_type']);
         $statusToAction = [];
         foreach ($pipeline as $action => $step) {
-            if ($step['from'] !== '*') {
-                $statusToAction[$step['from']] = $action;
-            }
+            if ($step['from'] !== '*') $statusToAction[$step['from']] = $action;
         }
         $nextAction = $statusToAction[$form['status']] ?? null;
 
@@ -247,8 +165,6 @@ class FormController {
         $formLabel = \App\Helpers\FormLabels::all();
         $typeLabel = \App\Helpers\FormLabels::get($form['form_type']);
         $pageTitle = $typeLabel . ' #' . $id;
-
-        // Breadcrumb
         $breadcrumbs = [
             ['label' => $typeLabel, 'url' => url('forms/' . (array_search($form['form_type'], $this->typeMap) ?: 'list'))],
             ['label' => '#' . $id],
@@ -263,50 +179,23 @@ class FormController {
     public function search(): void {
         header('Content-Type: application/json');
         $q = trim($_GET['q'] ?? '');
-        $uid = (int)$_SESSION['user_id'];
-        $role = (int)$_SESSION['role_id'];
-
         if (strlen($q) < 2) { echo json_encode([]); exit; }
-
         $like = '%' . $q . '%';
-
-        // admins see all forms, others see only their own
-        if ($role === 1) {
-            $ars = db()->prepare(
-                "SELECT f.id, f.form_type, f.status, f.created_at,
-                e.full_name AS submitted_by
-                FROM forms f
-                JOIN employees e ON e.id = f.submitted_by
-                WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
-                ORDER BY f.created_at DESC LIMIT 8"
-            );
-            $ars->execute([$like, $like, $like]);
-        } else {
-            $ars = db()->prepare(
-                "SELECT f.id, f.form_type, f.status, f.created_at,
-                e.full_name AS submitted_by
-                FROM forms f
-                JOIN employees e ON e.id = f.submitted_by
-                WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
-                ORDER BY f.created_at DESC LIMIT 8"
-            );
-            $ars->execute([$like, $like, $like]);
-        } 
-
+        $ars = db()->prepare(
+            "SELECT f.id, f.form_type, f.status, f.created_at, e.full_name AS submitted_by
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            WHERE f.form_type LIKE ? OR e.full_name LIKE ? OR CAST(f.id AS CHAR) LIKE ?
+            ORDER BY f.created_at DESC LIMIT 8"
+        );
+        $ars->execute([$like, $like, $like]);
         echo json_encode($ars->fetchAll(PDO::FETCH_ASSOC));
         exit;
     }
 
-    // ----------------------------------------------------------------
-    // POST /forms/{id}/approve/{action}
-    // ----------------------------------------------------------------
     public function approve(int $id, string $action): void {
         $this->processApproval($id, $action);
     }
 
-    // ----------------------------------------------------------------
-    // POST /forms/{id}/reject
-    // ----------------------------------------------------------------
     public function reject(int $id): void {
         \App\Helpers\Csrf::verify();
 
@@ -322,14 +211,8 @@ class FormController {
             exit;
         }
 
-        // AdminApprover (role 7) stand-in — see processApproval() and
-        // ADMIN_APPROVER_STANDIN_COVERAGE for the full explanation and the
-        // exact stages covered per form type.
         $isAdminApproverStandIn = $roleId === 7;
 
-        // Non-admins must own a pending step at the current active stage —
-        // except the AdminApprover stand-in on a covered stage, who may act
-        // on the active stage regardless of who it's assigned to.
         if ($roleId !== 1) {
             $activeSeqStmt = db()->prepare(
                 'SELECT MIN(sequence) FROM approvals WHERE form_id = ? AND status = \'pending\''
@@ -344,9 +227,6 @@ class FormController {
             }
 
             if ($isAdminApproverStandIn) {
-                // Only fall back to "any pending row" if the active stage is
-                // one AdminApprover actually covers for this form type —
-                // never the employee's own submit stage.
                 $pipeline = $this->getPipeline($form['form_type']);
                 $activeStepRole = null;
                 foreach ($pipeline as $pStep) {
@@ -362,14 +242,12 @@ class FormController {
 
             if ($isAdminApproverStandIn) {
                 $myStep = db()->prepare(
-                    'SELECT id FROM approvals
-                     WHERE form_id = ? AND sequence = ? AND status = \'pending\' LIMIT 1'
+                    'SELECT id FROM approvals WHERE form_id = ? AND sequence = ? AND status = \'pending\' LIMIT 1'
                 );
                 $myStep->execute([$id, $activeSequence]);
             } else {
                 $myStep = db()->prepare(
-                    'SELECT id FROM approvals
-                     WHERE form_id = ? AND sequence = ? AND approver_id = ? AND status = \'pending\' LIMIT 1'
+                    'SELECT id FROM approvals WHERE form_id = ? AND sequence = ? AND approver_id = ? AND status = \'pending\' LIMIT 1'
                 );
                 $myStep->execute([$id, $activeSequence, $userId]);
             }
@@ -403,11 +281,9 @@ class FormController {
                  WHERE form_id = ? AND status = 'pending'"
             )->execute([$remarks, $id]);
 
-            $pdo->prepare("UPDATE forms SET status = 'rejected' WHERE id = ?")
-                ->execute([$id]);
+            $pdo->prepare("UPDATE forms SET status = 'rejected' WHERE id = ?")->execute([$id]);
 
-            $this->audit(
-                'form_rejected', 'form', $id,
+            $this->audit('form_rejected', 'form', $id,
                 ['status' => $form['status']],
                 ['status' => 'rejected', 'remarks' => $remarks]
             );
@@ -425,11 +301,8 @@ class FormController {
         exit;
     }
 
-    // GET /my-submissions
     public function mySubmissions(): void {
         $userId = $_SESSION['user_id'];
-        $statusFilter = $_GET['status'] ?? '';
-
         $stmt = db()->prepare(
             "SELECT f.id, f.form_type, f.status, f.created_at, e.full_name,
                     (SELECT MIN(sequence) FROM approvals WHERE form_id = f.id AND status = 'pending') AS current_step
@@ -450,13 +323,11 @@ class FormController {
         require __DIR__ . '/../../views/layouts/base.php';
     }
 
-    // GET /requests — admin: all forms
     public function allRequests(): void {
         if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
-            $_SESSION['error'] = 'Access denied. You do not have permission to view all requests.';
+            $_SESSION['error'] = 'Access denied.';
             header('Location: ' . url('dashboard')); exit;
         }
-
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -488,11 +359,6 @@ class FormController {
         $userId = (int) $_SESSION['user_id'];
         $roleId = (int) $_SESSION['role_id'];
         $isAdmin = $roleId === 1;
-
-        // AdminApprover (role 7) stand-in: the combined-authority account
-        // may act on certain stages even when the pending row is assigned
-        // to the real approver — see ADMIN_APPROVER_STANDIN_COVERAGE for
-        // exactly which stages are covered per form type.
         $isAdminApproverStandIn = $roleId === 7;
 
         $pipeline = $this->getPipeline($form['form_type']);
@@ -503,10 +369,6 @@ class FormController {
         }
 
         $step = $pipeline[$action];
-
-        // Narrow the stand-in to the specific stage(s) this form type
-        // allows AdminApprover to cover — not "submit", and not stages
-        // outside the coverage map (e.g. Immediate Head on Leave/Overtime).
         $isAdminApproverStandIn = $isAdminApproverStandIn
             && $this->adminApproverStandsInFor($form['form_type'], (int) $step['role_id']);
 
@@ -525,16 +387,12 @@ class FormController {
             exit;
         }
 
-        // ── Find the matching pending approval row first ──
         $approvalRow = db()->prepare(
             'SELECT * FROM approvals WHERE form_id = ? AND sequence = ? AND approver_id = ? AND status = \'pending\' LIMIT 1'
         );
         $approvalRow->execute([$id, $step['sequence'], $userId]);
         $approval = $approvalRow->fetch();
 
-        // Admin override / AdminApprover stand-in: neither may hold a row
-        // of their own at this stage, but should still be able to act —
-        // fall back to any pending row so their remarks/file land somewhere.
         if (!$approval && ($isAdmin || $isAdminApproverStandIn)) {
             $fallback = db()->prepare(
                 'SELECT * FROM approvals WHERE form_id = ? AND sequence = ? AND status = \'pending\' LIMIT 1'
@@ -544,7 +402,6 @@ class FormController {
         }
 
         if (!$isAdmin && !$isAdminApproverStandIn && $action !== 'submit') {
-            // Must have a row AND it must be assigned to this user
             if (!$approval || (int)$approval['approver_id'] !== $userId) {
                 $_SESSION['error'] = 'No pending approval step found for you at this stage.';
                 header("Location: " . url("forms/view/{$id}"));
@@ -552,16 +409,14 @@ class FormController {
             }
         }
 
-        // Row must exist even for the stand-in (e.g. no pending row means
-        // this stage was already actioned or isn't active yet).
         if ($isAdminApproverStandIn && !$isAdmin && !$approval) {
             $_SESSION['error'] = 'No pending approval step found at this stage.';
             header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
-        // Role check (after approver check so errors are specific)
-        $actorAllowed = $isAdmin || $isAdminApproverStandIn || $action === 'submit' || $this->roleSatisfiesStage($roleId, $step['role_id']);
+        $actorAllowed = $isAdmin || $isAdminApproverStandIn || $action === 'submit'
+            || $this->roleSatisfiesStage($roleId, $step['role_id'], $form['form_type']);
         if (!$actorAllowed) {
             $_SESSION['error'] = 'You are not authorized to perform this action.';
             header("Location: " . url("forms/view/{$id}"));
@@ -574,7 +429,6 @@ class FormController {
             exit;
         }
 
-        // ── Optional file upload ──
         $uploadedFilePath = null;
         if (!empty($_FILES['approval_file']['tmp_name'])) {
             $file = $_FILES['approval_file'];
@@ -621,14 +475,6 @@ class FormController {
                 ]);
             }
 
-            // Only advance the form once EVERY approval row at this stage has
-            // been approved — UNLESS this is the Final Approval stage (role
-            // 6), where the real Final Approver and AdminApprover are BOTH
-            // qualified and it's a race: whoever acts first wins, and the
-            // other's still-pending row is auto-skipped rather than required.
-            // Dual sign-off stages (Vehicle Request's checker-approval) still
-            // wait for every row. Admin overrides still force the form
-            // through regardless.
             $isRaceStage = (int) $step['role_id'] === 6;
 
             if ($isRaceStage) {
@@ -649,8 +495,7 @@ class FormController {
             }
 
             if ($advanced) {
-                $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')
-                    ->execute([$step['to'], $id]);
+                $pdo->prepare('UPDATE forms SET status = ? WHERE id = ?')->execute([$step['to'], $id]);
             }
 
             $this->audit(
@@ -664,7 +509,6 @@ class FormController {
                 ? $step['label'] . ' recorded successfully.'
                 : $step['label'] . ' recorded. Waiting on the other checker before this moves forward.';
 
-            // Invalidate session pending-count cache so sidebar updates immediately
             unset($_SESSION["pending_count_{$userId}"], $_SESSION["pending_count_ts_{$userId}"]);
 
             if ($advanced) {
@@ -699,7 +543,8 @@ class FormController {
                     header("Location: " . url("forms/{$slug}/create"));
                     exit;
                 }
-                $ext      = pathinfo($_FILES['attachments']['name'][$i], PATHINFO_EXTENSION);
+                $ext      = pathinfo($_FILES['attachments']['name'][$i],
+                PATHINFO_EXTENSION);
                 $fileName = sprintf('%s_%s.%s', time(), bin2hex(random_bytes(4)), $ext);
                 move_uploaded_file($tmp, $destDir . $fileName);
                 $uploadedPaths[] = 'uploads/forms/' . $fileName;
@@ -742,8 +587,7 @@ class FormController {
             $initialStatus = $isSavingDraft ? 'draft' : 'submitted';
 
             $stmt = $pdo->prepare(
-                "INSERT INTO forms (form_type, status, submitted_by, data)
-                VALUES (?, ?, ?, ?)"
+                "INSERT INTO forms (form_type, status, submitted_by, data) VALUES (?, ?, ?, ?)"
             );
             $stmt->execute([$type, $initialStatus, $_SESSION['user_id'], json_encode($data)]);
             $formId = (int) $pdo->lastInsertId();
@@ -779,14 +623,11 @@ class FormController {
     private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data, int $submitterId): void {
         $pipeline = $this->getPipeline($type);
 
-        // Sequence 1 = the submitter's own "submit" step — seed it so remarks
-        // and file attachments added at submission time are persisted.
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
         );
         $insert->execute([$formId, $submitterId, 1]);
 
-        // Sequences 2+ = the actual approval chain
         $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
         foreach ($stagesNeedingApprover as $action => $step) {
             $approvers = $this->resolveApproversByRole($pdo, $step['role_id'], $data, $submitterId, $type);
@@ -796,22 +637,20 @@ class FormController {
             foreach ($approvers as $approverId) {
                 $insert->execute([$formId, $approverId, $step['sequence']]);
             }
+
+            if ($action === 'process-approval' && in_array($type, self::HR_COSIGN_FORM_TYPES, true)) {
+                $hrApprovers = $this->resolveApproversByRole($pdo, self::HR_VERIFIER_ROLE, $data, $submitterId, $type);
+                if (empty($hrApprovers)) {
+                    throw new \RuntimeException("No active HR Attendance Verifier found for stage '{$step['label']}'. Please ensure an HR Verifier is correctly configured.");
+                }
+                foreach ($hrApprovers as $hrApproverId) {
+                    $insert->execute([$formId, $hrApproverId, $step['sequence']]);
+                }
+            }
         }
     }
 
-    /**
-     * Resolve the approver(s) for a pipeline stage. Returns an array because
-     * some stages can have more than one concurrent approver — the caller
-     * inserts one approvals row per ID, and the form only advances once all
-     * of them have approved (see the "advance" logic in handleAction()).
-     */
     private function resolveApproversByRole(\PDO $pdo, int $roleId, array $data, int $submitterId, string $formType = ''): array {
-        // Role 2 = Immediate Supervisor. Most employees have a single
-        // supervisor (one approver). Employees with a dual reporting line
-        // also have supervisor_id_2 set — but dual sign-off (requiring BOTH
-        // supervisors) is only enforced for Vehicle Request forms. Every
-        // other form type uses the primary supervisor only, even if a
-        // second supervisor is configured on the employee.
         if ($roleId === 2) {
             $stmt = $pdo->prepare(
                 'SELECT supervisor_id, supervisor_id_2 FROM employees WHERE id = ? AND is_active = 1'
@@ -821,30 +660,18 @@ class FormController {
             if (!$row) return [];
 
             $isDualSignoffForm = $formType === 'vehicle_request';
-
             $supervisorIds = array_unique(array_filter([
                 $row['supervisor_id'] ? (int) $row['supervisor_id'] : null,
                 ($isDualSignoffForm && $row['supervisor_id_2']) ? (int) $row['supervisor_id_2'] : null,
             ]));
             if (empty($supervisorIds)) return [];
 
-            // Confirm each supervisor still exists/is active — a supervisor
-            // could have been deactivated after being assigned.
             $placeholders = implode(',', array_fill(0, count($supervisorIds), '?'));
-            $check = $pdo->prepare(
-                "SELECT id FROM employees WHERE id IN ($placeholders) AND is_active = 1"
-            );
+            $check = $pdo->prepare("SELECT id FROM employees WHERE id IN ($placeholders) AND is_active = 1");
             $check->execute(array_values($supervisorIds));
             return array_map('intval', $check->fetchAll(\PDO::FETCH_COLUMN));
         }
 
-
-        // Role 4 = Department/Finance Head (Master Approval on Admin forms,
-        // Evaluation Approval on Finance forms). The SysAdmin assigns each
-        // employee's Master Approver directly on their employee record
-        // (Employees → Edit → Master Approver), the same way supervisors
-        // are assigned. If one is set and still active/eligible, route to
-        // them directly instead of workload-balancing.
         if ($roleId === 4) {
             $stmt = $pdo->prepare(
                 'SELECT master_approver_id FROM employees WHERE id = ? AND is_active = 1'
@@ -857,24 +684,12 @@ class FormController {
                     'SELECT id FROM employees WHERE id = ? AND role_id IN (4, 7) AND is_active = 1'
                 );
                 $check->execute([(int) $assignedId]);
-                if ($check->fetchColumn()) {
-                    return [(int) $assignedId];
-                }
-                // Assigned approver is invalid/inactive/no longer eligible —
-                // fall through to automatic workload-balanced assignment
-                // below instead of blocking the submission.
+                if ($check->fetchColumn()) return [(int) $assignedId];
             }
         }
 
-        // Role 6 = Final Approver. Both the real Final Approver AND
-        // AdminApprover are qualified here — assign BOTH as concurrent
-        // approvers. Unlike dual sign-off (role 2), this is a race: the
-        // form advances as soon as EITHER one approves (see the "race
-        // stage" handling in handleAction()), and the other's pending row
-        // is auto-skipped rather than required.
         if ($roleId === 6) {
             $ids = [];
-
             $realApprover = $pdo->query(
                 "SELECT e.id, COUNT(a.id) AS workload
                  FROM employees e
@@ -896,15 +711,31 @@ class FormController {
             return array_values(array_unique($ids));
         }
 
-        // All other roles: workload-balanced, filtered by department (except global roles)
+        if ($roleId === self::HR_VERIFIER_ROLE) {
+            $stmt = $pdo->prepare(
+                'SELECT hr_verifier_id FROM employees WHERE id = ? AND is_active = 1'
+            );
+            $stmt->execute([$submitterId]);
+            $assignedId = $stmt->fetchColumn();
+
+            if ($assignedId) {
+                $check = $pdo->prepare(
+                    'SELECT id FROM employees WHERE id = ? AND role_id = ? AND is_active = 1'
+                );
+                $check->execute([(int) $assignedId, self::HR_VERIFIER_ROLE]);
+                if ($check->fetchColumn()) return [(int) $assignedId];
+            }
+        }
+
+        // Workload-balanced fallback (department filter skipped for global roles)
         $dept = $data['department'] ?? null;
         $sql = "SELECT e.id, COUNT(a.id) AS workload
-                 FROM employees e
-                 LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = 'pending'
-                 WHERE e.role_id = ? AND e.is_active = 1";
+                FROM employees e
+                LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = 'pending'
+                WHERE e.role_id = ? AND e.is_active = 1";
         $params = [$roleId];
 
-        if ($dept && !in_array($roleId, [1, 4, 5, 6, 7], true)) {
+        if ($dept && !in_array($roleId, [1, 4, 5, 6, 7, 8], true)) {
             $sql .= ' AND e.department = ?';
             $params[] = $dept;
         }
@@ -915,10 +746,6 @@ class FormController {
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         if ($row) return [(int) $row['id']];
 
-        // No active employee actually holds the required role — for
-        // Department Head (4) stages only, fall back to AdminApprover (7)
-        // as a last resort so the form isn't stuck with nobody to approve
-        // it. (Role 6 is handled entirely above and never reaches here.)
         if ($roleId === 4) {
             $fallback = $pdo->prepare(
                 "SELECT e.id, COUNT(a.id) AS workload
@@ -940,41 +767,54 @@ class FormController {
         if ($_SESSION['role_id'] == 1) return true;
 
         $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
 
-        // Form owner may submit their own draft.
         if ($form['status'] === 'draft' && (int)$form['submitted_by'] === $userId) return true;
 
-        // Determine the lowest pending sequence — that is the only active stage.
-        $pendingSequences = array_column(
-            array_filter($steps, fn($s) => $s['status'] === 'pending'),
-            'sequence'
-        );
-        if (empty($pendingSequences)) return false;
-        $activeSequence = min($pendingSequences);
-
-        // The user may act only if they own the row AT the active sequence.
+        // A pending row is "active" for user X when no pending row at a strictly
+        // lower sequence belongs to a different approver — mirrors NOT EXISTS
+        // logic in ApprovalController::inbox().
         foreach ($steps as $step) {
-            if (
-                (int)$step['approver_id'] === $userId
-                && $step['status'] === 'pending'
-                && (int)$step['sequence'] === (int)$activeSequence
-            ) {
-                return true;
+            if ((int)$step['approver_id'] !== $userId || $step['status'] !== 'pending') continue;
+            $mySeq = (int)$step['sequence'];
+            $blocked = false;
+            foreach ($steps as $other) {
+                if ((int)$other['approver_id'] !== $userId
+                    && $other['status'] === 'pending'
+                    && (int)$other['sequence'] < $mySeq
+                    && (int)($other['approver_role_id'] ?? 0) !== self::HR_VERIFIER_ROLE
+                ) { $blocked = true; break; }
+            }
+            if (!$blocked) return true;
+        }
+
+        // AdminApprover (role 7) stand-in
+        if ($roleId === 7) {
+            foreach ($steps as $step) {
+                if ($step['status'] !== 'pending') continue;
+                $mySeq = (int)$step['sequence'];
+                $blocked = false;
+                foreach ($steps as $other) {
+                    if ($other['status'] === 'pending' && (int)$other['sequence'] < $mySeq) {
+                        $blocked = true; break;
+                    }
+                }
+                if (!$blocked) {
+                    $pipeline = $this->getPipeline($form['form_type']);
+                    foreach ($pipeline as $pStep) {
+                        if ((int)$pStep['sequence'] === $mySeq
+                            && $this->adminApproverStandsInFor($form['form_type'], (int)$pStep['role_id'])
+                        ) return true;
+                    }
+                }
             }
         }
 
-        // AdminApprover (role 7) stand-in. They may act on the active stage
-        // even without owning its row, as long as this form type's
-        // coverage map allows it — see ADMIN_APPROVER_STANDIN_COVERAGE.
-        if ((int)$_SESSION['role_id'] === 7) {
-            $pipeline = $this->getPipeline($form['form_type']);
-            foreach ($pipeline as $pStep) {
-                if (
-                    (int)$pStep['sequence'] === (int)$activeSequence
-                    && $this->adminApproverStandsInFor($form['form_type'], (int)$pStep['role_id'])
-                ) {
-                    return true;
-                }
+        // HR Verifier (role 8) co-sign
+        if ($roleId === self::HR_VERIFIER_ROLE
+            && in_array($form['form_type'], self::HR_COSIGN_FORM_TYPES, true)) {
+            foreach ($steps as $step) {
+                if ((int)$step['approver_id'] === $userId && $step['status'] === 'pending') return true;
             }
         }
 
@@ -988,23 +828,15 @@ class FormController {
         $stmt->execute([$id]);
         $form = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$form) {
-            return $this->renderError(404, 'Not Found', 'The form you are looking for does not exist.');
-        }
+        if (!$form) return $this->renderError(404, 'Not Found', 'The form you are looking for does not exist.');
 
         $roleId = (int) $_SESSION['role_id'];
         $userId = (int) $_SESSION['user_id'];
 
-        // Admins see everything
         if ($roleId === 1) return $form;
-
-        // Submitter can always view their own form
         if ((int)$form['submitted_by'] === $userId) return $form;
 
-        // Any approver assigned anywhere in the pipeline can view the form
-        $assigned = db()->prepare(
-            'SELECT id FROM approvals WHERE form_id = ? AND approver_id = ? LIMIT 1'
-        );
+        $assigned = db()->prepare('SELECT id FROM approvals WHERE form_id = ? AND approver_id = ? LIMIT 1');
         $assigned->execute([$id, $userId]);
         if ($assigned->fetch()) return $form;
 
@@ -1017,40 +849,37 @@ class FormController {
             $formRow = $pdo->prepare(
                 'SELECT f.form_type, f.status, f.submitted_by,
                         e.full_name AS submitter_name, e.email AS submitter_email
-                 FROM forms f JOIN employees e ON e.id = f.submitted_by
-                 WHERE f.id = ?'
+                 FROM forms f JOIN employees e ON e.id = f.submitted_by WHERE f.id = ?'
             );
             $formRow->execute([$formId]);
             $form = $formRow->fetch(\PDO::FETCH_ASSOC);
             if (!$form) return;
 
             $submittedBy = (int) $form['submitted_by'];
-            $formLabel = \App\Helpers\FormLabels::get($form['form_type']);
-            $stageName = $step['label'];
-            $newStatus = $step['to'];
+            $formLabel   = \App\Helpers\FormLabels::get($form['form_type']);
+            $stageName   = $step['label'];
+            $newStatus   = $step['to'];
 
             $outcome = match($newStatus) {
-                'completed' => 'completed',
-                'final_approved' => 'final_approved',
-                'rejected' => 'rejected',
-                default => 'approved_step',
+                'completed'     => 'completed',
+                'final_approved'=> 'final_approved',
+                'rejected'      => 'rejected',
+                default         => 'approved_step',
             };
 
             $submitterMsg = match($outcome) {
-                'completed' => "Your {$formLabel} #{$formId} has been fully completed.",
+                'completed'      => "Your {$formLabel} #{$formId} has been fully completed.",
                 'final_approved' => "Your {$formLabel} #{$formId} reached final approval.",
-                'rejected' => "Your {$formLabel} #{$formId} was rejected at {$stageName}.",
-                default => "Your {$formLabel} #{$formId} passed {$stageName}.",
+                'rejected'       => "Your {$formLabel} #{$formId} was rejected at {$stageName}.",
+                default          => "Your {$formLabel} #{$formId} passed {$stageName}.",
             };
             $submitterType = match($outcome) {
                 'completed', 'final_approved' => 'success',
-                'rejected' => 'danger',
-                default => 'info',
+                'rejected'                    => 'danger',
+                default                       => 'info',
             };
 
-            \App\Controllers\NotificationController::create(
-                $submittedBy, $submitterMsg, $submitterType, $formId
-            );
+            \App\Controllers\NotificationController::create($submittedBy, $submitterMsg, $submitterType, $formId);
             \App\Services\NotificationService::notifySubmitter(
                 $form['submitter_email'], $form['submitter_name'],
                 $formLabel, $formId, $outcome, $stageName, $remarks
@@ -1089,16 +918,14 @@ class FormController {
             $row = $pdo->prepare(
                 'SELECT f.form_type, f.submitted_by,
                         e.full_name AS submitter_name, e.email AS submitter_email
-                 FROM forms f JOIN employees e ON e.id = f.submitted_by
-                 WHERE f.id = ?'
+                 FROM forms f JOIN employees e ON e.id = f.submitted_by WHERE f.id = ?'
             );
             $row->execute([$formId]);
             $form = $row->fetch(\PDO::FETCH_ASSOC);
             if (!$form) return;
 
             $stageRow = $pdo->prepare(
-                'SELECT sequence FROM approvals
-                 WHERE form_id = ? AND status = \'rejected\'
+                'SELECT sequence FROM approvals WHERE form_id = ? AND status = \'rejected\'
                  ORDER BY sequence DESC LIMIT 1'
             );
             $stageRow->execute([$formId]);
@@ -1108,9 +935,7 @@ class FormController {
 
             $rejectMsg = "Your {$typeLabel} #{$formId} was rejected at {$stageName}"
                        . ($remarks ? ": \"{$remarks}\"" : '.');
-            \App\Controllers\NotificationController::create(
-                (int) $form['submitted_by'], $rejectMsg, 'danger', $formId
-            );
+            \App\Controllers\NotificationController::create((int) $form['submitted_by'], $rejectMsg, 'danger', $formId);
             \App\Services\NotificationService::notifySubmitter(
                 $form['submitter_email'], $form['submitter_name'],
                 $typeLabel, $formId, 'rejected', $stageName, $remarks
@@ -1122,10 +947,10 @@ class FormController {
 
     private function renderError(int $code, string $title, string $message): never {
         http_response_code($code);
-        $errorCode = $code;
-        $errorTitle = $title;
+        $errorCode    = $code;
+        $errorTitle   = $title;
         $errorMessage = $message;
-        $pageTitle = "{$code} — {$title}";
+        $pageTitle    = "{$code} — {$title}";
         define('BASE_LOADED', true);
         ob_start();
         require __DIR__ . '/../../views/error/error.php';
@@ -1147,24 +972,17 @@ class FormController {
     }
 
     private function resolveType(string $slug): string {
-        if (!isset($this->typeMap[$slug])) {
-            return $this->renderError(404, 'Not Found', 'Unknown form type.');
-        }
+        if (!isset($this->typeMap[$slug])) return $this->renderError(404, 'Not Found', 'Unknown form type.');
         return $this->typeMap[$slug];
     }
 
-    // ----------------------------------------------------------------
-    // GET /forms/{id}/edit
-    // ----------------------------------------------------------------
     public function edit(int $id): void {
         $form = $this->findForm($id);
 
-        // Only the submitter (or admin) can edit
         if ($_SESSION['role_id'] != 1 && $form['submitted_by'] != $_SESSION['user_id']) {
             $this->renderError(403, 'Access Denied', 'You can only edit your own submissions.');
         }
 
-        // Only allow editing when the form has not yet entered approval
         $editableStatuses = ['draft', 'submitted', 'rejected'];
         if (!in_array($form['status'], $editableStatuses, true)) {
             $_SESSION['error'] = 'This form cannot be edited while it is in approval or completed.';
@@ -1172,9 +990,9 @@ class FormController {
             exit;
         }
 
-        $data = json_decode($form['data'], true) ?? [];
-        $type = $form['form_type'];
-        $slug = array_search($type, $this->typeMap) ?: $type;
+        $data      = json_decode($form['data'], true) ?? [];
+        $type      = $form['form_type'];
+        $slug      = array_search($type, $this->typeMap) ?: $type;
         $formLabel = \App\Helpers\FormLabels::all();
         $typeLabel = \App\Helpers\FormLabels::get($type);
         $pageTitle = 'Edit ' . $typeLabel . ' #' . $id;
@@ -1198,9 +1016,6 @@ class FormController {
         ));
     }
 
-    // ----------------------------------------------------------------
-    // POST /forms/{id}/update
-    // ----------------------------------------------------------------
     public function update(int $id): void {
         \App\Helpers\Csrf::verify();
 
@@ -1240,10 +1055,8 @@ class FormController {
             }
         }
 
-        // Keep only the saved attachments the user did NOT delete
         $existing = array_values(array_filter($_POST['existing_attachments'] ?? []));
 
-        // Append any newly uploaded files
         if (!empty($_FILES['attachments']['name'][0])) {
             $allowed  = ['image/jpeg', 'image/png', 'application/pdf'];
             $maxBytes = 5 * 1024 * 1024;
@@ -1266,16 +1079,13 @@ class FormController {
             }
         }
 
-        if (!empty($existing)) {
-            $data['attachments'] = $existing;
-        }
+        if (!empty($existing)) $data['attachments'] = $existing;
 
         $old = json_decode($form['data'], true) ?? [];
 
         try {
             db()->prepare('UPDATE forms SET data = ?, updated_at = NOW() WHERE id = ?')
                 ->execute([json_encode($data), $id]);
-
             $this->audit('form_edited', 'form', $id, $old, $data);
             $_SESSION['success'] = 'Form updated successfully.';
         } catch (\Throwable $e) {
@@ -1286,9 +1096,6 @@ class FormController {
         exit;
     }
 
-    // ----------------------------------------------------------------
-    // POST /forms/{id}/delete
-    // ----------------------------------------------------------------
     public function delete(int $id): void {
         \App\Helpers\Csrf::verify();
 
@@ -1298,7 +1105,6 @@ class FormController {
             $this->renderError(403, 'Access Denied', 'You can only delete your own submissions.');
         }
 
-        // Block deletion once approval is underway
         $deletableStatuses = ['draft', 'submitted', 'rejected'];
         if (!in_array($form['status'], $deletableStatuses, true)) {
             $_SESSION['error'] = 'This form cannot be deleted while it is in approval or completed.';
@@ -1313,7 +1119,6 @@ class FormController {
             $pdo->prepare('DELETE FROM forms WHERE id = ?')->execute([$id]);
             $this->audit('form_deleted', 'form', $id, ['type' => $form['form_type'], 'status' => $form['status']], null);
             $pdo->commit();
-
             $_SESSION['success'] = 'Form #' . $id . ' has been deleted.';
         } catch (\Throwable $e) {
             $pdo->rollBack();
