@@ -213,8 +213,7 @@
                         'review-approval' => 'Approve — Review',
                         'process-approval' => 'Approve — Process',
                         'evaluation-approval' => 'Approve — Evaluation',
-                        'grant-approval' => 'Grant Final Approval',
-                        'complete' => 'Mark as Completed',
+                        'grant-approval' => 'Approve & Complete',
                     ];
                     $approveLabel = $actionLabels[$nextAction] ?? 'Approve';
                     $nextStepHints = [
@@ -222,10 +221,10 @@
                         'review-approval' => 'Forwards to the Final Approver.',
                         'process-approval' => 'Forwards to the Finance Head.',
                         'evaluation-approval' => 'Forwards to the Final Approver.',
-                        'grant-approval' => \App\Helpers\FormLabels::isAdminForm($form['form_type'])
-                            ? 'Approves and completes this request.'
-                            : 'Marks this request as Final Approved.',
-                        'complete' => 'Closes the request as fully completed.',
+                        // Grant Approval is the Final Approver's sign-off — it now
+                        // finalises the request immediately for both Admin and
+                        // Finance forms, marking it Completed / Approved.
+                        'grant-approval' => 'Approves and completes this request.',
                         'submit' => 'Sends this for Checker Approval.',
                     ];
                 ?>

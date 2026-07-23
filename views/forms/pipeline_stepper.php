@@ -19,15 +19,13 @@ $financeTypes = ['advance_payment', 'request_for_payment', 'reimbursement', 'liq
 $isFinance = in_array($form['form_type'], $financeTypes, true);
 
 if ($isFinance) {
-    // Finance pipeline: Draft (Preview) → Submitted (Employee) → Checker (Immediate Head/Supervisor) → Process (Finance/Accounting Review) → Evaluation (Finance Head) → Final Approval (Management) → Approved (View Completed Form)
     $statusOrder = [
-        'draft' => 'Draft (Preview)',
-        'submitted' => 'Submitted (Employee Form Request)',
+        'draft'                  => 'Draft (Preview)',
+        'submitted'              => 'Submitted (Employee Form Request)',
         'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'process_approved' => 'Process (Finance/Accounting Review)',
-        'finance_reviewed' => 'Evaluation (Master Approval)',
-        'final_approved' => 'Final Approval (Management Approval)',
-        'completed' => 'Approved (View Completed Form)',
+        'process_approved'       => 'Process (Finance/Accounting Review)',
+        'finance_reviewed'       => 'Evaluation (Finance Head)',
+        'completed'              => 'Final Approval (Approved & Completed)',
     ];
 } else {
     // Admin pipeline: Draft (Preview) → Submitted (Employee) → Checker (Immediate Head) → Review (Department Head) → Final Approval (Management, finalizes the form)
