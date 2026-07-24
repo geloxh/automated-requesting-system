@@ -511,26 +511,13 @@ class FormController {
                 }
             }
 
-            $isRaceStage = (int) $step['role_id'] === 6;
+            $remaining = $pdo->prepare(
+                "SELECT COUNT(*) FROM approvals WHERE form_id = ? AND sequence = ? AND status = 'pending'"
+            );
+            $remaining->execute([$id, $step['sequence']]);
+            $stillPending = (int) $remaining->fetchColumn();
+            $advanced = $isAdmin || $stillPending === 0;
 
-            if ($isRaceStage) {
-                $pdo->prepare(
-                    "UPDATE approvals SET status = 'skipped',
-                            remarks = 'Auto-skipped — already approved by another qualified approver',
-                            updated_at = NOW()
-                    WHERE form_id = ? AND sequence = ? AND status = 'pending'"
-                )->execute([$id, $step['sequence']]);
-                $advanced = true;
-            } else {
-                $remaining = $pdo->prepare(
-                    "SELECT COUNT(*) FROM approvals WHERE form_id = ? AND sequence = ? AND status = 'pending'"
-                );
-                $remaining->execute([$id, $step['sequence']]);
-                $stillPending = (int) $remaining->fetchColumn();
-                $advanced     = $isAdmin || $stillPending === 0;
-            }
-
-            // FIX 3c: Restore missing UPDATE forms, audit, commit, success message, notifications
             if ($advanced) {
                 $pdo->prepare("UPDATE forms SET status = ?, updated_at = NOW() WHERE id = ?")
                     ->execute([$step['to'], $id]);
@@ -727,24 +714,21 @@ class FormController {
         }
 
         if ($roleId === 6) {
-            $ids = [];
-            $realApprover = $pdo->query(
+            $row = $pdo->query(
                 "SELECT e.id FROM employees e
                 LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = 'pending'
                 WHERE e.role_id = 6 AND e.is_active = 1
                 GROUP BY e.id ORDER BY COUNT(a.id) ASC, e.id ASC LIMIT 1"
             )->fetch(\PDO::FETCH_ASSOC);
-            if ($realApprover) $ids[] = (int) $realApprover['id'];
+            if ($row) return [(int) $row['id']];
 
-            $adminApprover = $pdo->query(
+            $fallback = $pdo->query(
                 "SELECT e.id FROM employees e
                 LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = 'pending'
                 WHERE e.role_id = 7 AND e.is_active = 1
                 GROUP BY e.id ORDER BY COUNT(a.id) ASC, e.id ASC LIMIT 1"
             )->fetch(\PDO::FETCH_ASSOC);
-            if ($adminApprover) $ids[] = (int) $adminApprover['id'];
-
-            return array_values(array_unique($ids));
+            return $fallback ? [(int) $fallback['id']] : [];
         }
 
         if ($roleId === self::FINANCE_HEAD_ROLE) {
