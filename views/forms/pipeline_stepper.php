@@ -23,7 +23,7 @@ if ($isFinance) {
         'draft' => 'Draft (Preview)',
         'submitted' => 'Submitted (Employee Form Request)',
         'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'process_approved' => 'Process (HR & Accounting Co-sign)',
+        'process_approved' => 'Process (Accounting Co-sign)',
         'finance_reviewed' => 'Evaluation (Finance Head)',
         'completed' => 'Final Approval (Approved & Completed)',
     ];
@@ -33,7 +33,7 @@ if ($isFinance) {
         'draft' => 'Draft (Preview)',
         'submitted' => 'Submitted (Employee Form Request)',
         'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'department_reviewed' => 'Review (Master Approval)',
+        'department_reviewed' => 'Review (Evaluation Approval)',
         'completed' => 'Final Approval (Approved)',
     ];
 }

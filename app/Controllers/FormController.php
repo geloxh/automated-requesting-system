@@ -49,7 +49,8 @@ class FormController {
 
     private const FORM_CATEGORIES = [
         'admin' => ['overtime_authorization', 'leave_application', 'vehicle_request'],
-        'finance' => ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'],
+        'finance' => ['advance_payment', 'request_for_payment'],
+        'reimb_liquid' => ['reimbursement', 'liquidation'],
     ];
 
     private const PIPELINE_ADMIN = [
@@ -61,29 +62,28 @@ class FormController {
 
     private const PIPELINE_FINANCE = [
         'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
-        'checker-approval'    => ['sequence' => 2, 'from' => 'submitted',            'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
-        'process-approval'    => ['sequence' => 3, 'from' => 'immediatehead_approved','to' => 'process_approved',    'role_id' => 5, 'label' => 'Process Approval'],
-        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved',    'to' => 'finance_reviewed',     'role_id' => 8, 'label' => 'Evaluation Approval'],
-        'grant-approval'      => ['sequence' => 5, 'from' => 'finance_reviewed',    'to' => 'completed',            'role_id' => 6, 'label' => 'Grant Approval Request'],
+        'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved', 'role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved','to' => 'process_approved', 'role_id' => 5, 'label' => 'Process Approval'],
+        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed', 'role_id' => 8, 'label' => 'Evaluation Approval'],
+        'grant-approval' => ['sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
     private const PIPELINE_REIMB_LIQUID = [
-        'submit'              => ['sequence' => 1, 'from' => 'draft',                'to' => 'submitted',            'role_id' => 3, 'label' => 'Submitted'],
-        'checker-approval'    => ['sequence' => 2, 'from' => 'submitted',            'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
-        'process-approval'    => ['sequence' => 3, 'from' => 'immediatehead_approved','to' => 'process_approved',    'role_id' => 9, 'label' => 'Process Approval'],
-        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved',    'to' => 'finance_reviewed',     'role_id' => 8, 'label' => 'Evaluation Approval'],
-        'grant-approval'      => ['sequence' => 5, 'from' => 'finance_reviewed',    'to' => 'completed',            'role_id' => 6, 'label' => 'Grant Approval Request'],
+        'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
+        'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved','to' => 'process_approved', 'role_id' => 9, 'label' => 'Process Approval'],
+        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed', 'role_id' => 8, 'label' => 'Evaluation Approval'],
+        'grant-approval' => ['sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
     private function getPipeline(string $formType): array {
         if (in_array($formType, self::REIMB_LIQUID_TYPES, true)) return self::PIPELINE_REIMB_LIQUID;
-        return in_array($formType, self::FORM_CATEGORIES['finance'], true)
-            ? self::PIPELINE_FINANCE
-            : self::PIPELINE_ADMIN;
+        if (in_array($formType, self::FORM_CATEGORIES['finance'], true)) return self::PIPELINE_FINANCE;
+        return self::PIPELINE_ADMIN;
     }
 
     public function index(string $slug): void {
-        $type   = $this->resolveType($slug);
+        $type = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
@@ -120,8 +120,8 @@ class FormController {
             $stmt->execute([$type, $userId]);
         }
 
-        $forms     = $stmt->fetchAll();
-        $formType  = $type;
+        $forms = $stmt->fetchAll();
+        $formType = $type;
         $pageTitle = \App\Helpers\FormLabels::get($type);
         $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
     }
@@ -134,11 +134,11 @@ class FormController {
             return;
         }
 
-        $fields      = $this->fields[$type];
-        $formType    = $type;
-        $noSuffix    = ['list', 'show', 'request_for_payment'];
-        $viewName    = in_array($type, $noSuffix) ? $type : "{$type}_form";
-        $pageTitle   = \App\Helpers\FormLabels::get($type);
+        $fields = $this->fields[$type];
+        $formType = $type;
+        $noSuffix = ['list', 'show', 'request_for_payment'];
+        $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $pageTitle = \App\Helpers\FormLabels::get($type);
         $departments = db()->query('SELECT name FROM departments ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
         $currentUser = $_SESSION['user_name'] ?? '';
         $currentDept = $_SESSION['department'] ?? '';
@@ -161,15 +161,15 @@ class FormController {
         $approvals->execute([$id]);
         $approvalSteps = $approvals->fetchAll();
 
-        $pipeline       = $this->getPipeline($form['form_type']);
+        $pipeline = $this->getPipeline($form['form_type']);
         $statusToAction = [];
         foreach ($pipeline as $action => $step) {
             if ($step['from'] !== '*') $statusToAction[$step['from']] = $action;
         }
         $nextAction = $statusToAction[$form['status']] ?? null;
 
-        $canAct    = $this->canActOnForm($form, $approvalSteps);
-        $data      = json_decode($form['data'], true) ?? [];
+        $canAct = $this->canActOnForm($form, $approvalSteps);
+        $data = json_decode($form['data'], true) ?? [];
         $formLabel = \App\Helpers\FormLabels::all();
         $typeLabel = \App\Helpers\FormLabels::get($form['form_type']);
         $pageTitle = $typeLabel . ' #' . $id;
@@ -486,7 +486,7 @@ class FormController {
             }
 
             $isFinanceProcessStage = $action === 'process-approval'
-                && in_array($form['form_type'], self::FORM_CATEGORIES['finance'], true) 
+                && in_array($form['form_type'], self::REIMB_LIQUID_TYPES, true)
                 && $roleId === 9;
 
             if ($isFinanceProcessStage) {
@@ -645,7 +645,7 @@ class FormController {
 
     private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data, int $submitterId): void {
         $pipeline = $this->getPipeline($type);
-        $isHrFirstCoSign = in_array($type, self::FORM_CATEGORIES['finance'], true); // covers ALL finance incl. reimb/liquid
+        $isHrFirstCoSign = in_array($type, self::REIMB_LIQUID_TYPES, true);
 
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
