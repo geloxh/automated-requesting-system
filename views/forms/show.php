@@ -219,7 +219,7 @@
                     $nextStepHints = [
                         'checker-approval' => 'Forwards to the Department Head.',
                         'review-approval' => 'Forwards to the Final Approver.',
-                        'process-approval' => 'Forwards to the Finance Head.',
+                        'process-approval' => 'Both HR and Accounting must sign before this advances. Forwards to the Finance Head.',
                         'evaluation-approval' => 'Forwards to the Final Approver.',
                         // Grant Approval is the Final Approver's sign-off — it now
                         // finalises the request immediately for both Admin and

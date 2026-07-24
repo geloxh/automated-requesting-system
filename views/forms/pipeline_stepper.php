@@ -20,12 +20,12 @@ $isFinance = in_array($form['form_type'], $financeTypes, true);
 
 if ($isFinance) {
     $statusOrder = [
-        'draft'                  => 'Draft (Preview)',
-        'submitted'              => 'Submitted (Employee Form Request)',
+        'draft' => 'Draft (Preview)',
+        'submitted' => 'Submitted (Employee Form Request)',
         'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'process_approved'       => 'Process (Finance/Accounting Review)',
-        'finance_reviewed'       => 'Evaluation (Finance Head)',
-        'completed'              => 'Final Approval (Approved & Completed)',
+        'process_approved' => 'Process (HR & Accounting Co-sign)',
+        'finance_reviewed' => 'Evaluation (Finance Head)',
+        'completed' => 'Final Approval (Approved & Completed)',
     ];
 } else {
     // Admin pipeline: Draft (Preview) → Submitted (Employee) → Checker (Immediate Head) → Review (Department Head) → Final Approval (Management, finalizes the form)

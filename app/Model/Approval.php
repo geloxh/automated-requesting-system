@@ -8,11 +8,11 @@ class Approval {
      * Submitted (Employee) -> Checker Approval (Immediate Supervisor) -> Review Approval (Department Head) -> Grant Approval Request (Final Approval) -> Completion of Approval (Employee Request Approved)
      */
     private const LEVELS_ADMIN = [
-        1 => ['role' => 3, 'label' => 'Submitted',                'status' => 'submitted'],
-        2 => ['role' => 2, 'label' => 'Immediate Head Approval',   'status' => 'immediatehead_approved'],
-        3 => ['role' => 4, 'label' => 'Review Approval',           'status' => 'department_reviewed'],
-        4 => ['role' => 6, 'label' => 'Grant Approval Request',    'status' => 'final_approved'],
-        5 => ['role' => 1, 'label' => 'Completed',                 'status' => 'completed'],
+        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
+        2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
+        3 => ['role' => 4, 'label' => 'Review Approval', 'status' => 'department_reviewed'],
+        4 => ['role' => 6, 'label' => 'Grant Approval Request', 'status' => 'final_approved'],
+        5 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
     ];
 
     /**
@@ -20,12 +20,12 @@ class Approval {
      * Submitted -> Immediate Head -> Process (Accounting) -> Finance Head -> Final Approver -> Completed
      */
     private const LEVELS_FINANCE = [
-        1 => ['role' => 3, 'label' => 'Submitted',              'status' => 'submitted'],
+        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
         2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
-        3 => ['role' => 5, 'label' => 'Process Approval',        'status' => 'process_approved'],
-        4 => ['role' => 8, 'label' => 'Evaluation Approval',     'status' => 'finance_reviewed'],
-        5 => ['role' => 6, 'label' => 'Grant Approval Request',  'status' => 'final_approved'],
-        6 => ['role' => 1, 'label' => 'Completed',               'status' => 'completed'],
+        3 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
+        4 => ['role' => 8, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
+        5 => ['role' => 6, 'label' => 'Grant Approval Request', 'status' => 'final_approved'],
+        6 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
     ];
 
     /**
@@ -33,13 +33,13 @@ class Approval {
      * Submitted -> Immediate Head -> Process (Accounting) -> HR Verifier -> Finance Head -> Final Approver -> Completed
      */
     private const LEVELS_REIMB_LIQUID = [
-        1 => ['role' => 3, 'label' => 'Submitted',              'status' => 'submitted'],
+        1 => ['role' => 3, 'label' => 'Submitted', 'status' => 'submitted'],
         2 => ['role' => 2, 'label' => 'Immediate Head Approval', 'status' => 'immediatehead_approved'],
-        3 => ['role' => 5, 'label' => 'Process Approval',        'status' => 'process_approved'],
-        4 => ['role' => 9, 'label' => 'HR Verification',         'status' => 'hr_verified'],
-        5 => ['role' => 8, 'label' => 'Evaluation Approval',     'status' => 'finance_reviewed'],
-        6 => ['role' => 6, 'label' => 'Grant Approval Request',  'status' => 'final_approved'],
-        7 => ['role' => 1, 'label' => 'Completed',               'status' => 'completed'],
+        3 => ['role' => 5, 'label' => 'Process Approval', 'status' => 'process_approved'],
+        4 => ['role' => 9, 'label' => 'HR Verification', 'status' => 'hr_verified'],
+        5 => ['role' => 8, 'label' => 'Evaluation Approval', 'status' => 'finance_reviewed'],
+        6 => ['role' => 6, 'label' => 'Grant Approval Request', 'status' => 'final_approved'],
+        7 => ['role' => 1, 'label' => 'Completed', 'status' => 'completed'],
     ];
 
     private const REIMB_LIQUID_TYPES = ['reimbursement', 'liquidation'];
@@ -71,9 +71,9 @@ class Approval {
             VALUES (:form_id, :approver_id, :sequence, 'pending', NOW())
         ");
         $stmt->execute([
-            ':form_id'     => $data['form_id'],
+            ':form_id' => $data['form_id'],
             ':approver_id' => $data['approver_id'],
-            ':sequence'    => $data['sequence'],
+            ':sequence' => $data['sequence'],
         ]);
         return (int) $this->pdo->lastInsertId();
     }
@@ -143,7 +143,7 @@ class Approval {
             return ['ok' => false, 'error' => 'This approval step is no longer pending.'];
         }
 
-        $levels   = $this->getLevels($formType);
+        $levels = $this->getLevels($formType);
         $maxLevel = count($levels);
         $sequence = (int) $row['sequence'];
         $levelCfg = $levels[$sequence] ?? null;
@@ -193,7 +193,7 @@ class Approval {
             return ['ok' => false, 'error' => 'This approval step is no longer pending.'];
         }
 
-        $levels   = $this->getLevels($formType);
+        $levels = $this->getLevels($formType);
         $levelCfg = $levels[$row['sequence']] ?? null;
         if ($actorRole !== 1 && $levelCfg && $actorRole !== $levelCfg['role']) {
             return ['ok' => false, 'error' => 'You are not authorised to reject at this level.'];
@@ -276,11 +276,11 @@ class Approval {
             INSERT INTO audit_logs (performed_by, action, entity_type, entity_id, old_values, new_values, ip_address)
             VALUES (:actor, :action, 'form', :form_id, NULL, :new_vals, :ip)
         ")->execute([
-            ':actor'    => $actorId,
-            ':action'   => $action,
-            ':form_id'  => $formId,
+            ':actor' => $actorId,
+            ':action' => $action,
+            ':form_id' => $formId,
             ':new_vals' => json_encode(['status' => $resultStatus, 'remarks' => $remarks, 'sequence' => $sequence]),
-            ':ip'       => $_SERVER['REMOTE_ADDR'] ?? null,
+            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
         ]);
     }
 }

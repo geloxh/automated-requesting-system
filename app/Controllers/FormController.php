@@ -1,39 +1,39 @@
 <?php
 class FormController {
     private array $typeMap = [
-        'advance-payment'        => 'advance_payment',
+        'advance-payment' => 'advance_payment',
         'overtime-authorization' => 'overtime_authorization',
-        'request-for-payment'    => 'request_for_payment',
-        'leave-application'      => 'leave_application',
-        'reimbursement'          => 'reimbursement',
-        'liquidation'            => 'liquidation',
-        'vehicle-request'        => 'vehicle_request',
-        'overtime'               => 'overtime_authorization',
-        'request-payment'        => 'request_for_payment',
-        'leave'                  => 'leave_application',
+        'request-for-payment' => 'request_for_payment',
+        'leave-application' => 'leave_application',
+        'reimbursement' => 'reimbursement',
+        'liquidation' => 'liquidation',
+        'vehicle-request' => 'vehicle_request',
+        'overtime' => 'overtime_authorization',
+        'request-payment' => 'request_for_payment',
+        'leave' => 'leave_application',
     ];
 
     private array $fields = [
-        'advance_payment'        => ['purpose', 'payment_type', 'payee', 'date'],
+        'advance_payment' => ['purpose', 'payment_type', 'payee', 'date'],
         'overtime_authorization' => ['employee_name', 'department', 'request_date'],
-        'request_for_payment'    => ['payee', 'payment_type', 'purpose', 'date'],
-        'leave_application'      => ['leave_type', 'from_date', 'to_date', 'payment_term'],
-        'reimbursement'          => ['employee_name', 'department', 'request_date'],
-        'liquidation'            => ['employee_name', 'department', 'request_date'],
-        'vehicle_request'        => ['car_available', 'employee_name', 'date', 'trip_type'],
+        'request_for_payment' => ['payee', 'payment_type', 'purpose', 'date'],
+        'leave_application' => ['leave_type', 'from_date', 'to_date', 'payment_term'],
+        'reimbursement' => ['employee_name', 'department', 'request_date'],
+        'liquidation' => ['employee_name', 'department', 'request_date'],
+        'vehicle_request' => ['car_available', 'employee_name', 'date', 'trip_type'],
     ];
 
     private const ADMIN_APPROVER_COVERS = [2, 4, 6];
 
     private const ADMIN_APPROVER_STANDIN_COVERAGE = [
-        'vehicle_request'        => [2, 4, 6],
-        'leave_application'      => [4],
+        'vehicle_request' => [2, 4, 6],
+        'leave_application' => [4],
         'overtime_authorization' => [4],
     ];
 
-    private const FINANCE_HEAD_ROLE   = 8;
-    private const HR_VERIFIER_ROLE    = 9;
-    private const REIMB_LIQUID_TYPES  = ['reimbursement', 'liquidation'];
+    private const FINANCE_HEAD_ROLE = 8;
+    private const HR_VERIFIER_ROLE = 9;
+    private const REIMB_LIQUID_TYPES = ['reimbursement', 'liquidation'];
 
     private function adminApproverStandsInFor(string $formType, int $stageRoleId): bool {
         $covered = self::ADMIN_APPROVER_STANDIN_COVERAGE[$formType] ?? [];
@@ -47,32 +47,32 @@ class FormController {
     }
 
     private const FORM_CATEGORIES = [
-        'admin'   => ['overtime_authorization', 'leave_application', 'vehicle_request'],
+        'admin' => ['overtime_authorization', 'leave_application', 'vehicle_request'],
         'finance' => ['advance_payment', 'request_for_payment', 'reimbursement', 'liquidation'],
     ];
 
     private const PIPELINE_ADMIN = [
-        'submit'          => ['sequence' => 1, 'from' => 'draft',                  'to' => 'submitted',             'role_id' => 3, 'label' => 'Submitted'],
-        'checker-approval'=> ['sequence' => 2, 'from' => 'submitted',              'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
-        'review-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'department_reviewed',   'role_id' => 4, 'label' => 'Review Approval'],
-        'grant-approval'  => ['sequence' => 4, 'from' => 'department_reviewed',    'to' => 'completed',             'role_id' => 6, 'label' => 'Grant Approval Request'],
+        'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
+        'checker-approval'=> ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'review-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'department_reviewed', 'role_id' => 4, 'label' => 'Review Approval'],
+        'grant-approval' => ['sequence' => 4, 'from' => 'department_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
     private const PIPELINE_FINANCE = [
-        'submit'              => ['sequence' => 1, 'from' => 'draft',                  'to' => 'submitted',             'role_id' => 3, 'label' => 'Submitted'],
-        'checker-approval'    => ['sequence' => 2, 'from' => 'submitted',              'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
-        'process-approval'    => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved',      'role_id' => 5, 'label' => 'Process Approval'],
-        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved',       'to' => 'finance_reviewed',      'role_id' => 8, 'label' => 'Evaluation Approval'],
-        'grant-approval'      => ['sequence' => 5, 'from' => 'finance_reviewed',       'to' => 'completed',             'role_id' => 6, 'label' => 'Grant Approval Request'],
+        'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
+        'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved',  'role_id' => 5, 'label' => 'Process Approval'],
+        'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed', 'role_id' => 8, 'label' => 'Evaluation Approval'],
+        'grant-approval' => ['sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
     private const PIPELINE_REIMB_LIQUID = [
-        'submit'              => ['sequence' => 1, 'from' => 'draft',                  'to' => 'submitted',             'role_id' => 3, 'label' => 'Submitted'],
-        'checker-approval'    => ['sequence' => 2, 'from' => 'submitted',              'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
-        'process-approval'    => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved',      'role_id' => 5, 'label' => 'Process Approval'],
-        'hr-verification'     => ['sequence' => 4, 'from' => 'process_approved',       'to' => 'hr_verified',           'role_id' => 9, 'label' => 'HR Verification'],
-        'evaluation-approval' => ['sequence' => 5, 'from' => 'hr_verified',            'to' => 'finance_reviewed',      'role_id' => 8, 'label' => 'Evaluation Approval'],
-        'grant-approval'      => ['sequence' => 6, 'from' => 'finance_reviewed',       'to' => 'completed',             'role_id' => 6, 'label' => 'Grant Approval Request'],
+        'submit' => ['sequence' => 1, 'from' => 'draft',  'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
+        'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
+        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved', 'role_id' => 5, 'label' => 'Process Approval'],
+        'hr-verification' => ['sequence' => 4, 'from' => 'process_approved', 'to' => 'hr_verified', 'role_id' => 9, 'label' => 'HR Verification'],
+        'evaluation-approval' => ['sequence' => 5, 'from' => 'hr_verified', 'to' => 'finance_reviewed', 'role_id' => 8, 'label' => 'Evaluation Approval'],
+        'grant-approval' => ['sequence' => 6, 'from' => 'finance_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
     private function getPipeline(string $formType): array {
@@ -83,7 +83,7 @@ class FormController {
     }
 
     public function index(string $slug): void {
-        $type   = $this->resolveType($slug);
+        $type = $this->resolveType($slug);
         $userId = $_SESSION['user_id'];
         $roleId = $_SESSION['role_id'];
 
@@ -119,8 +119,8 @@ class FormController {
             $stmt->execute([$type, $userId]);
         }
 
-        $forms     = $stmt->fetchAll();
-        $formType  = $type;
+        $forms = $stmt->fetchAll();
+        $formType = $type;
         $pageTitle = \App\Helpers\FormLabels::get($type);
         $this->render('forms/list', compact('forms', 'formType', 'slug', 'pageTitle'));
     }
@@ -133,11 +133,11 @@ class FormController {
             return;
         }
 
-        $fields      = $this->fields[$type];
-        $formType    = $type;
-        $noSuffix    = ['list', 'show', 'request_for_payment'];
-        $viewName    = in_array($type, $noSuffix) ? $type : "{$type}_form";
-        $pageTitle   = \App\Helpers\FormLabels::get($type);
+        $fields = $this->fields[$type];
+        $formType = $type;
+        $noSuffix = ['list', 'show', 'request_for_payment'];
+        $viewName = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $pageTitle = \App\Helpers\FormLabels::get($type);
         $departments = db()->query('SELECT name FROM departments ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
         $currentUser = $_SESSION['user_name'] ?? '';
         $currentDept = $_SESSION['department'] ?? '';
@@ -206,12 +206,12 @@ class FormController {
     public function reject(int $id): void {
         \App\Helpers\Csrf::verify();
 
-        $form    = $this->findForm($id);
+        $form = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
-        $userId  = (int) $_SESSION['user_id'];
-        $roleId  = (int) $_SESSION['role_id'];
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
 
-        $allowedRoles = [1, 2, 4, 5, 6, 7, 8];
+        $allowedRoles = [1, 2, 4, 5, 6, 7, 8, 9];
         if (!in_array($roleId, $allowedRoles, true)) {
             $_SESSION['error'] = 'You are not authorised to reject this form.';
             header("Location: " . url("forms/view/{$id}"));
@@ -234,7 +234,7 @@ class FormController {
             }
 
             if ($isAdminApproverStandIn) {
-                $pipeline       = $this->getPipeline($form['form_type']);
+                $pipeline = $this->getPipeline($form['form_type']);
                 $activeStepRole = null;
                 foreach ($pipeline as $pStep) {
                     if ((int)$pStep['sequence'] === (int)$activeSequence) {
@@ -311,7 +311,7 @@ class FormController {
 
     public function mySubmissions(): void {
         $userId = $_SESSION['user_id'];
-        $stmt   = db()->prepare(
+        $stmt = db()->prepare(
             "SELECT f.id, f.form_type, f.status, f.created_at, e.full_name,
                     (SELECT MIN(sequence) FROM approvals WHERE form_id = f.id AND status = 'pending') AS current_step
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -319,7 +319,7 @@ class FormController {
             ORDER BY f.created_at DESC LIMIT 50"
         );
         $stmt->execute([$userId]);
-        $forms     = $stmt->fetchAll();
+        $forms = $stmt->fetchAll();
         $formLabel = \App\Helpers\FormLabels::all();
         $pageTitle = 'My Submissions';
         $breadcrumbs = [['label' => 'My Submissions']];
@@ -343,7 +343,7 @@ class FormController {
             ORDER BY f.created_at DESC LIMIT 100'
         );
         $stmt->execute();
-        $forms     = $stmt->fetchAll();
+        $forms = $stmt->fetchAll();
         $formLabel = \App\Helpers\FormLabels::all();
         $pageTitle = 'All Requests';
         $breadcrumbs = [['label' => 'All Requests']];
@@ -362,10 +362,10 @@ class FormController {
     private function processApproval(int $id, string $action): void {
         \App\Helpers\Csrf::verify();
 
-        $form    = $this->findForm($id);
+        $form = $this->findForm($id);
         $remarks = trim($_POST['remarks'] ?? '');
-        $userId  = (int) $_SESSION['user_id'];
-        $roleId  = (int) $_SESSION['role_id'];
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
         $isAdmin = $roleId === 1;
         $isAdminApproverStandIn = $roleId === 7;
 
@@ -424,7 +424,7 @@ class FormController {
         }
 
         $actorAllowed = $isAdmin || $isAdminApproverStandIn || $action === 'submit'
-            || $this->roleSatisfiesStage($roleId, $step['role_id'], $form['form_type']);
+            || $this->roleSatisfiesStage($roleId, $step['role_id'], $form['form_type']) || ($action === 'process-approval' && $roleId === 9);
         if (!$actorAllowed) {
             $_SESSION['error'] = 'You are not authorized to perform this action.';
             header("Location: " . url("forms/view/{$id}"));
@@ -439,10 +439,10 @@ class FormController {
 
         $uploadedFilePath = null;
         if (!empty($_FILES['approval_file']['tmp_name'])) {
-            $file     = $_FILES['approval_file'];
-            $allowed  = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            $file = $_FILES['approval_file'];
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
             $maxBytes = 5 * 1024 * 1024;
-            $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if (!in_array($mimeType, $allowed, true)) {
@@ -455,7 +455,7 @@ class FormController {
                 header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
-            $ext     = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
             $destDir = __DIR__ . '/../../public/uploads/approvals/';
             if (!is_dir($destDir)) mkdir($destDir, 0755, true);
             $fileName = sprintf('%d_%d_%s.%s', $id, time(), bin2hex(random_bytes(4)), $ext);
@@ -541,9 +541,9 @@ class FormController {
 
         $uploadedPaths = [];
         if (!empty($_FILES['attachments']['name'][0])) {
-            $allowed  = ['image/jpeg', 'image/png', 'application/pdf'];
+            $allowed = ['image/jpeg', 'image/png', 'application/pdf'];
             $maxBytes = 5 * 1024 * 1024;
-            $destDir  = __DIR__ . '/../../public/uploads/forms/';
+            $destDir = __DIR__ . '/../../public/uploads/forms/';
             if (!is_dir($destDir)) mkdir($destDir, 0755, true);
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
 
@@ -555,7 +555,7 @@ class FormController {
                     header("Location: " . url("forms/{$slug}/create"));
                     exit;
                 }
-                $ext      = pathinfo($_FILES['attachments']['name'][$i], PATHINFO_EXTENSION);
+                $ext = pathinfo($_FILES['attachments']['name'][$i], PATHINFO_EXTENSION);
                 $fileName = sprintf('%s_%s.%s', time(), bin2hex(random_bytes(4)), $ext);
                 move_uploaded_file($tmp, $destDir . $fileName);
                 $uploadedPaths[] = 'uploads/forms/' . $fileName;
@@ -563,8 +563,8 @@ class FormController {
         }
 
         $isSavingDraft = isset($_POST['save_draft']);
-        $required      = $this->fields[$type];
-        $data          = [];
+        $required = $this->fields[$type];
+        $data = [];
 
         if (!$isSavingDraft) {
             foreach ($required as $field) {
@@ -633,6 +633,8 @@ class FormController {
 
     private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data, int $submitterId): void {
         $pipeline = $this->getPipeline($type);
+        $isFinance = in_array($type, self::FORM_CATEGORIES['finance'], true)
+                    && !in_array($type, self::REIMB_LIQUID_TYPES, true);
 
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
@@ -641,9 +643,23 @@ class FormController {
 
         $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
         foreach ($stagesNeedingApprover as $step) {
+            // Finance process-approval (seq 3): seed BOTH HR (role 9) and Accounting (role 5)
+            if ($isFinance && $step['sequence'] === 3) {
+                $hrIds = $this->resolveApproversByRole($pdo, 9, $data, $submitterId, $type);
+                $accIds = $this->resolveApproversByRole($pdo, 5, $data, $submitterId, $type);
+                $both = array_unique(array_merge($hrIds, $accIds));
+                if (empty($both)) {
+                    throw new \RuntimeException("No active HR or Accounting approver found for Process Approval stage.");
+                }
+                foreach ($both as $approverId) {
+                    $insert->execute([$formId, $approverId, 3]);
+                }
+                continue;
+            }
+
             $approvers = $this->resolveApproversByRole($pdo, $step['role_id'], $data, $submitterId, $type);
             if (empty($approvers)) {
-                throw new \RuntimeException("No active approver found for stage '{$step['label']}'. Please ensure your supervisor and department approvers are correctly configured.");
+                throw new \RuntimeException("No active approver found for stage '{$step['label']}'.");
             }
             foreach ($approvers as $approverId) {
                 $insert->execute([$formId, $approverId, $step['sequence']]);
@@ -729,8 +745,8 @@ class FormController {
         }
 
         // Workload-balanced fallback
-        $dept   = $data['department'] ?? null;
-        $sql    = "SELECT e.id, COUNT(a.id) AS workload
+        $dept = $data['department'] ?? null;
+        $sql = "SELECT e.id, COUNT(a.id) AS workload
                 FROM employees e
                 LEFT JOIN approvals a ON a.approver_id = e.id AND a.status = 'pending'
                 WHERE e.role_id = ? AND e.is_active = 1";
