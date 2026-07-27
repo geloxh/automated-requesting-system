@@ -16,7 +16,23 @@
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
-    } elseif (in_array($roleId, [ 2, 4, 5, 6, 7, 8, 9 ], true)) {
+    } elseif ($roleId === 6) {
+        // FinalApprover shared queue: see forms assigned to them PLUS any
+        // pending Grant Approval row assigned to any other Final Approver.
+        $stmt = db()->prepare(
+            'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            JOIN approvals a ON a.form_id = f.id
+            WHERE (
+                a.approver_id = ?
+                OR f.submitted_by = ?
+                OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 6)
+            )
+            AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY f.created_at DESC'
+        );
+        $stmt->execute([$userId, $userId]);
+    } elseif (in_array($roleId, [ 2, 4, 5, 7, 8, 9 ], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -25,7 +41,7 @@
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute([ $userId, $userId ]);
+        $stmt->execute([$userId, $userId]);
     } else {
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name
@@ -93,7 +109,7 @@
     ];
 
     // ── Form volume ── //
-    $typeCounts = [];
+    $typeCounts   = [];
     foreach ($forms as $f) {
         $typeCounts[$f['form_type']] = ($typeCounts[$f['form_type']] ?? 0) + 1;
     }
@@ -184,7 +200,7 @@
                 $ago = (new DateTime())->diff(new DateTime($form['created_at']));
                 $timeStr = $ago->days >= 1
                     ? date('M d', strtotime($form['created_at']))
-                    : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago-> i >= 1 ? $ago -> i . 'm ago' : 'Just now'));
+                    : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
                 $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
             ?>
             <a href="<?= url('forms/view/' . $form['id']) ?>" class="activity-item activity-link">

@@ -22,9 +22,9 @@ if ($isFinance) {
     $statusOrder = [
         'draft' => 'Draft (Preview)',
         'submitted' => 'Submitted (Employee Form Request)',
-        'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'process_approved' => 'Process (Accounting Co-sign)',
-        'finance_reviewed' => 'Evaluation (Finance Head)',
+        'immediatehead_approved' => 'Checker (Immediate Head Checking)',
+        'process_approved' => 'Process (Accounting Checking)',
+        'finance_reviewed' => 'Evaluation (Finance Head Checking)',
         'completed' => 'Final Approval (Approved & Completed)',
     ];
 } else {
@@ -32,8 +32,8 @@ if ($isFinance) {
     $statusOrder = [
         'draft' => 'Draft (Preview)',
         'submitted' => 'Submitted (Employee Form Request)',
-        'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'department_reviewed' => 'Evaluation (Procurement Approval)',
+        'immediatehead_approved' => 'Checker (Immediate Head Checking)',
+        'department_reviewed' => 'Evaluation (Dept. Head Checking)',
         'completed' => 'Final (Management Approval)',
     ];
 }
