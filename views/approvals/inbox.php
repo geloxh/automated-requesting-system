@@ -246,7 +246,7 @@
                         // Finance/Accounting Checker on the same sequence for
                         // Reimbursement/Liquidation — label it distinctly so
                         // HR knows what they're confirming.
-                        if ((int)($_SESSION['role_id'] ?? 0) === 8 && in_array($row['form_type'], ['reimbursement', 'liquidation'], true)) {
+                        if ((int)($_SESSION['role_id'] ?? 0) === 9 && in_array($row['form_type'], ['reimbursement', 'liquidation'], true)) {
                             $stepLabel .= ' — HR Attendance Verification';
                         }
                     ?>
