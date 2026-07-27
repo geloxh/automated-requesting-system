@@ -25,8 +25,11 @@ class FormController {
 
     private const ADMIN_APPROVER_COVERS = [2, 4, 6];
 
+    // Values are the pipeline STAGE'S role_id (not sequence numbers) — e.g.
+    // 3 = Staff/Submit, 2 = Immediate Head/Checker, 4 = Dept Head/Review,
+    // 6 = Final Approver/Grant.
     private const ADMIN_APPROVER_STANDIN_COVERAGE = [
-        'vehicle_request' => [2, 4, 6],
+        'vehicle_request' => [2, 3, 4, 6],
         'leave_application' => [4],
         'overtime_authorization' => [4],
     ];
@@ -367,21 +370,35 @@ class FormController {
     }
 
     public function allRequests(): void {
-        if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+        $roleId = (int) ($_SESSION['role_id'] ?? 0);
+        if ($roleId !== 1 && $roleId !== 7) {
             $_SESSION['error'] = 'Access denied.';
             header('Location: ' . url('dashboard')); exit;
         }
-        $stmt = db()->prepare(
-            'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
+
+        // AdminApprover (role 7) can stand in on Vehicle Request approvals
+        // only, so their All Requests view is scoped to that form type.
+        // SysAdmin (role 1) continues to see every form type.
+        $isAdminApproverScoped = $roleId === 7;
+
+        $sql = 'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
             FROM forms f JOIN employees e ON e.id = f.submitted_by
-            WHERE f.status NOT IN ("draft","cancelled")
-            ORDER BY f.created_at DESC LIMIT 100'
-        );
+            WHERE f.status != "cancelled"';
+        if ($isAdminApproverScoped) {
+            // AdminApprover can also stand in on the Submit stage for Vehicle
+            // Request, so drafts are left visible for them to act on.
+            $sql .= ' AND f.form_type = "vehicle_request"';
+        } else {
+            $sql .= ' AND f.status != "draft"';
+        }
+        $sql .= ' ORDER BY f.created_at DESC LIMIT 100';
+
+        $stmt = db()->prepare($sql);
         $stmt->execute();
         $forms       = $stmt->fetchAll();
         $formLabel   = \App\Helpers\FormLabels::all();
-        $pageTitle   = 'All Requests';
-        $breadcrumbs = [['label' => 'All Requests']];
+        $pageTitle   = $isAdminApproverScoped ? 'All Vehicle Requests' : 'All Requests';
+        $breadcrumbs = [['label' => $pageTitle]];
 
         define('BASE_LOADED', true);
         ob_start();
@@ -480,7 +497,7 @@ class FormController {
             exit;
         }
 
-        if ($action === 'submit' && !$isAdmin && (int)$form['submitted_by'] !== $userId) {
+        if ($action === 'submit' && !$isAdmin && !$isAdminApproverStandIn && (int)$form['submitted_by'] !== $userId) {
             $_SESSION['error'] = 'Only the form owner can submit this form.';
             header("Location: " . url("forms/view/{$id}"));
             exit;

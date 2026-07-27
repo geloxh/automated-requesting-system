@@ -263,9 +263,9 @@
         exit;
     }
 
-    // GET /requests — all requests (admin only)
+    // GET /requests — all requests (SysAdmin: everything; AdminApprover: Vehicle Requests only)
     if ($uri === '/requests') {
-        \App\Middleware\RoleMiddleware::requireRole(1);
+        \App\Middleware\RoleMiddleware::requireAnyRole([1, 7]);
         (new FormController)->allRequests();
         exit;
     }

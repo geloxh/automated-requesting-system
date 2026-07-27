@@ -1,5 +1,10 @@
-<div class="page-heading">All Requests</div>
-<div class="page-subheading">Complete record of all submitted forms across all departments.</div>
+<?php $isVehicleOnly = ($pageTitle ?? '') === 'All Vehicle Requests'; ?>
+<div class="page-heading"><?= $isVehicleOnly ? 'All Vehicle Requests' : 'All Requests' ?></div>
+<div class="page-subheading">
+    <?= $isVehicleOnly
+        ? 'Complete record of all submitted Vehicle Request forms across all departments.'
+        : 'Complete record of all submitted forms across all departments.' ?>
+</div>
 
 <?php
     $badgeMap = \App\Helpers\FormLabels::allBadges();

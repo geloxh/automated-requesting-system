@@ -137,12 +137,14 @@
         }
 
         private const VERBS_ADMIN = [
+            1 => 'Submit',
             2 => 'Check',
             3 => 'Review',
             4 => 'Approve',   // Grant Approval — Final Approver, completes the form
         ];
 
         private const VERBS_FINANCE = [
+            1 => 'Submit',
             2 => 'Check',
             3 => 'Process',
             4 => 'Evaluate',
