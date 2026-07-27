@@ -16,7 +16,7 @@
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
-    } elseif (in_array($roleId, [ 2, 4, 5, 6, 7, 8 ], true)) {
+    } elseif (in_array($roleId, [ 2, 4, 5, 6, 7, 8, 9 ], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -25,7 +25,7 @@
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute([$userId, $userId]);
+        $stmt->execute([ $userId, $userId ]);
     } else {
         $stmt = db()->prepare(
             'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name
@@ -93,7 +93,7 @@
     ];
 
     // ── Form volume ── //
-    $typeCounts   = [];
+    $typeCounts = [];
     foreach ($forms as $f) {
         $typeCounts[$f['form_type']] = ($typeCounts[$f['form_type']] ?? 0) + 1;
     }
@@ -112,7 +112,7 @@
 
     // ── Pending alert ── //
     $dashPending = 0;
-    if (in_array($roleId, [ 2, 4, 5, 6, 7, 8 ], true)) {
+    if (in_array($roleId, [ 2, 4, 5, 6, 7, 8, 9 ], true)) {
         $cacheKey = "pending_count_{$userId}";
         $dashPending = (int) ($_SESSION[$cacheKey] ?? 0);
     }
@@ -167,7 +167,7 @@
             <span class="card-panel-title">Recent Activity</span>
             <?php $allLink = ($roleId === 1)
                 ? url('requests')
-                : (in_array($roleId, [ 2, 4, 5, 6, 7, 8 ], true)
+                : (in_array($roleId, [ 2, 4, 5, 6, 7, 8, 9 ], true)
                     ? url('approvals')
                     : url('my-submissions'));
             ?>
@@ -184,7 +184,7 @@
                 $ago = (new DateTime())->diff(new DateTime($form['created_at']));
                 $timeStr = $ago->days >= 1
                     ? date('M d', strtotime($form['created_at']))
-                    : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago->i >= 1 ? $ago->i . 'm ago' : 'Just now'));
+                    : ($ago->h >= 1 ? $ago->h . 'h ago' : ($ago-> i >= 1 ? $ago -> i . 'm ago' : 'Just now'));
                 $humanStatus = $statusLabels[$form['status']] ?? ucwords(str_replace('_', ' ', $form['status']));
             ?>
             <a href="<?= url('forms/view/' . $form['id']) ?>" class="activity-item activity-link">

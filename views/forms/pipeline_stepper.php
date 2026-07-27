@@ -33,11 +33,11 @@ if ($isFinance) {
         'draft' => 'Draft (Preview)',
         'submitted' => 'Submitted (Employee Form Request)',
         'immediatehead_approved' => 'Checker (Immediate Head Approval)',
-        'department_reviewed' => 'Review (Evaluation Approval)',
-        'completed' => 'Final Approval (Approved)',
+        'department_reviewed' => 'Evaluation (Procurement Approval)',
+        'completed' => 'Final (Management Approval)',
     ];
 }
-
+ 
 $formStatus = $form['status'] ?? 'draft';
 $isRejected = $formStatus === 'rejected';
 $statusKeys = array_keys($statusOrder);

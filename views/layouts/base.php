@@ -2,7 +2,7 @@
     if (!defined('BASE_LOADED')) die('Direct access not allowed');
     
     $uri = $uri ?? '/';
-    $roleLabels = [ 1 => 'Sys Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver', 8 => 'HR Verifier' ];
+    $roleLabels = [ 1 => 'Sys Admin', 2 => 'Immediate Head', 3 => 'Staff', 4 => 'Dept. Head', 5 => 'Acquisition Checker', 6 => 'Final Approver', 7 => 'Admin Approver', 8 => 'Finance Head', 9 => 'HR Verifier' ];
     $roleName = $roleLabels[$_SESSION['role_id']] ?? 'User';
     $initials = strtoupper(substr($_SESSION['user_name'], 0, 2));
     $sidebarAvatarUrl = avatar_url($_SESSION['avatar'] ?? null);

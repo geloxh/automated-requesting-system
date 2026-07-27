@@ -153,7 +153,12 @@ class Approval {
         }
 
         if ($actorRole !== 1 && $actorRole !== $levelCfg['role']) {
-            return ['ok' => false, 'error' => 'You are not authorised to approve at this level.'];
+            $isMasterCoveringChecker = $actorRole === 4
+                && $sequence === 2
+                && !in_array($formType, self::FINANCE_TYPES, true);
+            if (!$isMasterCoveringChecker) {
+                return ['ok' => false, 'error' => 'You are not authorised to approve at this level.'];
+            }
         }
 
         $this->pdo->beginTransaction();
@@ -195,8 +200,14 @@ class Approval {
 
         $levels = $this->getLevels($formType);
         $levelCfg = $levels[$row['sequence']] ?? null;
+        
         if ($actorRole !== 1 && $levelCfg && $actorRole !== $levelCfg['role']) {
-            return ['ok' => false, 'error' => 'You are not authorised to reject at this level.'];
+            $isMasterCoveringChecker = $actorRole === 4
+                && (int)$row['sequence'] === 2
+                && !in_array($formType, self::FINANCE_TYPES, true);
+            if (!$isMasterCoveringChecker) {
+                return ['ok' => false, 'error' => 'You are not authorised to reject at this level.'];
+            }
         }
 
         $this->pdo->beginTransaction();
@@ -225,9 +236,14 @@ class Approval {
         $pending = $this->currentPending($formId);
         if (!$pending) return false;
 
-        $levels   = $this->getLevels($formType);
+        $levels = $this->getLevels($formType);
         $required = $levels[$pending['sequence']]['role'] ?? null;
-        return $required !== null && $actorRole === $required;
+
+        if ($required !== null && $actorRole === $required) return true;
+        $isMasterCoveringChecker = $actorRole === 4
+            && $pending['sequence'] === 2
+            && !in_array($formType, self::FINANCE_TYPES, true);
+        return $isMasterCoveringChecker;
     }
 
     public static function pipeline(string $formType): array {
