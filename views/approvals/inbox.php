@@ -1,5 +1,20 @@
-<div class="page-heading">Approval Inbox</div>
-<div class="page-subheading">Review and act on requests routed to you for approval.</div>
+<?php $viewMode = $viewMode ?? 'pending'; ?>
+
+<div class="page-heading"><?= $viewMode === 'history' ? 'Approval History' : 'Approval Inbox' ?></div>
+<div class="page-subheading">
+    <?= $viewMode === 'history'
+        ? 'Requests you (or a peer sharing your approval stage) already approved or rejected.'
+        : 'Review and act on requests routed to you for approval.' ?>
+</div>
+
+<div class="sort-toggle" style="margin-bottom: 1rem;">
+    <a href="<?= url('approvals') ?>" class="sort-btn <?= $viewMode === 'pending' ? 'active' : '' ?>">
+        <i class="ti ti-inbox"></i> Pending
+    </a>
+    <a href="<?= url('approvals?view=history') ?>" class="sort-btn <?= $viewMode === 'history' ? 'active' : '' ?>">
+        <i class="ti ti-history"></i> History
+    </a>
+</div>
 
 <?php
     $formLabel = $formLabel ?? [];
@@ -16,15 +31,116 @@
     sort($uniqueTypes);
 ?>
 
-<?php if (empty($approvals)): ?> 
+<?php if (empty($approvals)): ?>
     <div class="empty-state">
-        <i class="ti ti-inbox-off empty-state-icon"></i>
-        <div class="inbox-empty-title">You're all caught up!</div>
-        <div class="inbox-empty0sub">No pending approvals at this time.</div>
+        <i class="ti <?= $viewMode === 'history' ? 'ti-history' : 'ti-inbox-off' ?> empty-state-icon"></i>
+        <div class="inbox-empty-title"><?= $viewMode === 'history' ? 'Nothing here yet' : "You're all caught up!" ?></div>
+        <div class="inbox-empty0sub">
+            <?= $viewMode === 'history'
+                ? 'No approved or rejected requests to show yet.'
+                : 'No pending approvals at this time.' ?>
+        </div>
         <a href="<?= url('my-submissions') ?>" class="btn btn-ghost btn-sm">
             <i class="ti ti-send"></i> View My Submissions
         </a>
     </div>
+<?php elseif ($viewMode === 'history'): ?>
+
+<?php
+    $totalActioned = count($approvals);
+    $approvedCount = count(array_filter($approvals, fn($r) => $r['step_status'] === 'approved'));
+    $rejectedCount = count(array_filter($approvals, fn($r) => $r['step_status'] === 'rejected'));
+?>
+
+<div class="kpi-grid">
+    <a href="?view=history" class="kpi-card blue kpi-card--link">
+        <div class="kpi-icon blue"><i class="ti ti-history"></i></div>
+        <div class="kpi-label">Total Actioned</div>
+        <div class="kpi-value"><?= $totalActioned ?></div>
+        <div class="kpi-delta">Most recent 100 decisions</div>
+    </a>
+    <a href="?view=history" class="kpi-card green kpi-card--link">
+        <div class="kpi-icon green"><i class="ti ti-circle-check"></i></div>
+        <div class="kpi-label">Approved</div>
+        <div class="kpi-value"><?= $approvedCount ?></div>
+        <div class="kpi-delta">Steps you or a peer approved</div>
+    </a>
+    <a href="?view=history" class="kpi-card purple kpi-card--link">
+        <div class="kpi-icon purple"><i class="ti ti-circle-x"></i></div>
+        <div class="kpi-label">Rejected</div>
+        <div class="kpi-value"><?= $rejectedCount ?></div>
+        <div class="kpi-delta">Steps you or a peer rejected</div>
+    </a>
+</div>
+
+<div class="table-wrap">
+    <div class="filter-bar" data-filter-bar>
+        <input type="search" placeholder="Search by name, department, form…" data-search-input aria-label="Search history">
+        <select data-filter-select aria-label="Filter by form type">
+            <option value="">All form types</option>
+            <?php foreach ($uniqueTypes as $ft): ?>
+                <option value="<?= htmlspecialchars($formLabel[$ft] ?? $ft) ?>"><?= htmlspecialchars($formLabel[$ft] ?? $ft) ?></option>
+            <?php endforeach; ?>
+        </select>
+        <span class="badge badge-warning"><?= count($approvals) ?> record<?= count($approvals) === 1 ? '' : 's' ?></span>
+        <span class="filter-count" data-filter-count></span>
+    </div>
+    <table data-filterable data-search-col="0,1,2,3,5" data-filter-col="0">
+        <thead>
+            <tr>
+                <th class="th-first">Form</th>
+                <th>Submitted By</th>
+                <th>Department</th>
+                <th>Stage</th>
+                <th>Result</th>
+                <th>Acted By</th>
+                <th>Date Actioned</th>
+                <th class="td-last"></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($approvals as $row):
+            $ic = $iconMap[$row['form_type']] ?? ['bg' => '#e2e8f0', 'color' => '#64748b', 'icon' => 'ti-file'];
+            $typeLabel = $formLabel[$row['form_type']] ?? $row['form_type'];
+            $stepLabel = \App\Helpers\FormLabels::stepLabel((int)$row['sequence'], $row['form_type']);
+            $isApproved = $row['step_status'] === 'approved';
+        ?>
+            <tr>
+                <td class="td-first">
+                    <div class="inbox-form-cell">
+                        <div class="activity-icon activity-icon-dynamic"
+                            data-bg="<?= htmlspecialchars($ic['bg']) ?>"
+                            data-color="<?= htmlspecialchars($ic['color']) ?>"
+                        >
+                        </div>
+                        <div>
+                            <div class="inbox-form-name"><?= htmlspecialchars($typeLabel) ?></div>
+                            <div class="inbox-form-id">#<?= $row['id'] ?></div>
+                        </div>
+                    </div>
+                </td>
+                <td><?= htmlspecialchars($row['owner_name']) ?></td>
+                <td class="muted"><?= htmlspecialchars($row['department'] ?? '—') ?></td>
+                <td><span class="badge badge-primary"><?= htmlspecialchars($stepLabel) ?></span></td>
+                <td>
+                    <span class="badge <?= $isApproved ? 'badge-success' : 'badge-danger' ?>">
+                        <i class="ti <?= $isApproved ? 'ti-circle-check' : 'ti-circle-x' ?>"></i>
+                        <?= $isApproved ? 'Approved' : 'Rejected' ?>
+                    </span>
+                </td>
+                <td class="muted"><?= htmlspecialchars($row['acted_by_name']) ?></td>
+                <td class="muted"><?= $row['approved_at'] ? date('M d, Y', strtotime($row['approved_at'])) : '—' ?></td>
+                <td class="td-last text-end">
+                    <a href="<?= url('forms/view/' . $row['id']) ?>" class="btn btn-ghost btn-sm">
+                        View <i class="ti ti-arrow-right ti-xs"></i>
+                    </a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
 <?php else: ?>
 
 <?php
@@ -110,7 +226,7 @@
                 data-days="<?= (int)$row['days_pending'] ?>">
                 <td class="td-first">
                     <div class="inbox-form-cell">
-                        <<div class="activity-icon activity-icon-dynamic"
+                        <div class="activity-icon activity-icon-dynamic"
                             data-bg="<?= htmlspecialchars($ic['bg']) ?>"
                             data-color="<?= htmlspecialchars($ic['color']) ?>"
                         >
