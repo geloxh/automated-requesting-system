@@ -229,6 +229,7 @@ class FormController {
         $isMasterApproverStandIn = $roleId === 4;
         $isFinalApproverStandIn = $roleId === 6;
         $isHrVerifierStandIn = $roleId === 9;
+        $isFinanceHeadStandIn = $roleId === 8;
 
         if ($roleId !== 1) {
             $activeSeqStmt = db()->prepare(
@@ -243,7 +244,7 @@ class FormController {
                 exit;
             }
 
-            if ($isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn) {
+            if ($isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $isFinanceHeadStandIn) {
                 $pipeline       = $this->getPipeline($form['form_type']);
                 $activeStepRole = null;
                 foreach ($pipeline as $pStep) {
@@ -264,9 +265,12 @@ class FormController {
                 if ($activeStepRole !== 9) {
                     $isHrVerifierStandIn = false;
                 }
+                if ($activeStepRole !== 8) {
+                    $isFinanceHeadStandIn = false;
+                }
             }
 
-            if ($isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn) {
+            if ($isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $isFinanceHeadStandIn) {
                 $myStep = db()->prepare(
                     'SELECT id FROM approvals WHERE form_id = ? AND sequence = ? AND status = \'pending\' LIMIT 1'
                 );
@@ -419,6 +423,9 @@ class FormController {
         // pending Process Approval (HR Verification) row on Reimbursement /
         // Liquidation forms, not just the one auto-assigned to them.
         $isHrVerifierStandIn = $roleId === 9 && (int) $step['role_id'] === 9;
+        // FinanceHead (role 8) shared queue: any Finance Head may act on a
+        // pending Evaluation Approval row, not just the one auto-assigned to them.
+        $isFinanceHeadStandIn = $roleId === 8 && (int) $step['role_id'] === 8;
 
         if ($step['from'] !== '*' && $form['status'] !== $step['from']) {
             $_SESSION['error'] = sprintf(
@@ -441,7 +448,7 @@ class FormController {
         $approvalRow->execute([$id, $step['sequence'], $userId]);
         $approval = $approvalRow->fetch();
 
-        if (!$approval && ($isAdmin || $isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn)) {
+        if (!$approval && ($isAdmin || $isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $isFinanceHeadStandIn)) {
             $fallback = db()->prepare(
                 'SELECT * FROM approvals WHERE form_id = ? AND sequence = ? AND status = \'pending\' LIMIT 1'
             );
@@ -450,7 +457,7 @@ class FormController {
         }
 
         // FIX 3a: Removed stale `|| ($action === 'process-approval' && $roleId === 9)` hack
-        if (!$isAdmin && !$isAdminApproverStandIn && !$isMasterApproverStandIn && !$isFinalApproverStandIn && !$isHrVerifierStandIn && $action !== 'submit') {
+        if (!$isAdmin && !$isAdminApproverStandIn && !$isMasterApproverStandIn && !$isFinalApproverStandIn && !$isHrVerifierStandIn && !$isFinanceHeadStandIn && $action !== 'submit') {
             if (!$approval || (int)$approval['approver_id'] !== $userId) {
                 $_SESSION['error'] = 'No pending approval step found for you at this stage.';
                 header("Location: " . url("forms/view/{$id}"));
@@ -458,14 +465,14 @@ class FormController {
             }
         }
 
-        if (($isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn) && !$isAdmin && !$approval) {
+        if (($isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $isFinanceHeadStandIn) && !$isAdmin && !$approval) {
             $_SESSION['error'] = 'No pending approval step found at this stage.';
             header("Location: " . url("forms/view/{$id}"));
             exit;
         }
 
         // FIX 3b: roleSatisfiesStage now handles role 9 → role 5, so no extra hack needed
-        $actorAllowed = $isAdmin || $isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $action === 'submit'
+        $actorAllowed = $isAdmin || $isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $isFinanceHeadStandIn || $action === 'submit'
             || $this->roleSatisfiesStage($roleId, $step['role_id'], $form['form_type']);
         if (!$actorAllowed) {
             $_SESSION['error'] = 'You are not authorized to perform this action.';
@@ -531,7 +538,7 @@ class FormController {
                 );
                 $updated->execute([
                     $actingApproverId,
-                    $remarks ?: ($isAdmin ? '(Admin override)' : ($isAdminApproverStandIn ? '(AdminApprover stand-in)' : ($isFinalApproverStandIn ? '(FinalApprover — first to act)' : ($isHrVerifierStandIn ? '(HRVerifier — first to act)' : $step['label'])))),
+                    $remarks ?: ($isAdmin ? '(Admin override)' : ($isAdminApproverStandIn ? '(AdminApprover stand-in)' : ($isFinalApproverStandIn ? '(FinalApprover — first to act)' : ($isHrVerifierStandIn ? '(HRVerifier — first to act)' : ($isFinanceHeadStandIn ? '(FinanceHead — first to act)' : $step['label']))))),
                     $uploadedFilePath,
                     $approval['id'],
                 ]);
@@ -967,6 +974,24 @@ class FormController {
             }
         }
 
+        // FinanceHead (role 8) shared queue: any Finance Head may act on any
+        // pending Evaluation Approval row, regardless of who it was
+        // auto-assigned to.
+        if ($roleId === 8) {
+            foreach ($steps as $step) {
+                if ($step['status'] !== 'pending') continue;
+                if ((int)$step['approver_role_id'] !== 8) continue;
+                $mySeq   = (int)$step['sequence'];
+                $blocked = false;
+                foreach ($steps as $other) {
+                    if ($other['status'] === 'pending' && (int)$other['sequence'] < $mySeq) {
+                        $blocked = true; break;
+                    }
+                }
+                if (!$blocked) return true;
+            }
+        }
+
         return false;
     }
 
@@ -1023,6 +1048,19 @@ class FormController {
             );
             $hrRow->execute([$id]);
             if ($hrRow->fetch()) return $form;
+        }
+
+        // FinanceHead (role 8) shared queue: allow viewing any form that has
+        // ever had an Evaluation Approval row (pending, approved, or
+        // completed) — not just the ones still pending — so any Finance Head
+        // can see requests another Finance Head already acted on.
+        if ($roleId === 8) {
+            $financeRow = db()->prepare(
+                "SELECT a.id FROM approvals a JOIN employees e ON e.id = a.approver_id
+                 WHERE a.form_id = ? AND e.role_id = 8 LIMIT 1"
+            );
+            $financeRow->execute([$id]);
+            if ($financeRow->fetch()) return $form;
         }
 
         return $this->renderError(403, 'Access Denied', 'You do not have permission to view this form.');
