@@ -16,6 +16,27 @@
             ORDER BY f.created_at DESC LIMIT 50'
         );
         $stmt->execute();
+    } elseif ($roleId === 7) {
+        // AdminApprover is never the literal approver_id on a row — they only
+        // ever act through the fallback in FormController::processApproval().
+        // So show forms at any sequence/form-type they cover, per
+        // FormController::ADMIN_APPROVER_STANDIN_COVERAGE:
+        //   - Vehicle Request: Checker/Dept Head/Final (2, 4, 6)
+        //   - Leave Application / Overtime: Dept Head only (4)
+        $stmt = db()->prepare(
+            'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            LEFT JOIN approvals a ON a.form_id = f.id
+            WHERE (
+                f.submitted_by = ?
+                OR a.approver_id = ?
+                OR (f.form_type = "vehicle_request" AND a.sequence IN (2, 3, 4))
+                OR (f.form_type IN ("leave_application", "overtime_authorization") AND a.sequence = 3)
+            )
+            AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY f.created_at DESC'
+        );
+        $stmt->execute([$userId, $userId]);
     } elseif ($roleId === 6) {
         // FinalApprover shared queue: see forms assigned to them PLUS any
         // pending Grant Approval row assigned to any other Final Approver.
@@ -65,7 +86,7 @@
             ORDER BY f.created_at DESC'
         );
         $stmt->execute([$userId, $userId]);
-    } elseif (in_array($roleId, [ 2, 4, 5, 7 ], true)) {
+    } elseif (in_array($roleId, [ 2, 4, 5 ], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by

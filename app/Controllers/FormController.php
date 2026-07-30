@@ -25,11 +25,8 @@ class FormController {
 
     private const ADMIN_APPROVER_COVERS = [2, 4, 6];
 
-    // Values are the pipeline STAGE'S role_id (not sequence numbers) — e.g.
-    // 3 = Staff/Submit, 2 = Immediate Head/Checker, 4 = Dept Head/Review,
-    // 6 = Final Approver/Grant.
     private const ADMIN_APPROVER_STANDIN_COVERAGE = [
-        'vehicle_request' => [2, 3, 4, 6],
+        'vehicle_request' => [2, 4, 6],
         'leave_application' => [4],
         'overtime_authorization' => [4],
     ];
@@ -370,35 +367,21 @@ class FormController {
     }
 
     public function allRequests(): void {
-        $roleId = (int) ($_SESSION['role_id'] ?? 0);
-        if ($roleId !== 1 && $roleId !== 7) {
+        if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
             $_SESSION['error'] = 'Access denied.';
             header('Location: ' . url('dashboard')); exit;
         }
-
-        // AdminApprover (role 7) can stand in on Vehicle Request approvals
-        // only, so their All Requests view is scoped to that form type.
-        // SysAdmin (role 1) continues to see every form type.
-        $isAdminApproverScoped = $roleId === 7;
-
-        $sql = 'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
+        $stmt = db()->prepare(
+            'SELECT f.id, f.form_type, f.status, f.created_at, e.full_name, e.department
             FROM forms f JOIN employees e ON e.id = f.submitted_by
-            WHERE f.status != "cancelled"';
-        if ($isAdminApproverScoped) {
-            // AdminApprover can also stand in on the Submit stage for Vehicle
-            // Request, so drafts are left visible for them to act on.
-            $sql .= ' AND f.form_type = "vehicle_request"';
-        } else {
-            $sql .= ' AND f.status != "draft"';
-        }
-        $sql .= ' ORDER BY f.created_at DESC LIMIT 100';
-
-        $stmt = db()->prepare($sql);
+            WHERE f.status NOT IN ("draft","cancelled")
+            ORDER BY f.created_at DESC LIMIT 100'
+        );
         $stmt->execute();
         $forms       = $stmt->fetchAll();
         $formLabel   = \App\Helpers\FormLabels::all();
-        $pageTitle   = $isAdminApproverScoped ? 'All Vehicle Requests' : 'All Requests';
-        $breadcrumbs = [['label' => $pageTitle]];
+        $pageTitle   = 'All Requests';
+        $breadcrumbs = [['label' => 'All Requests']];
 
         define('BASE_LOADED', true);
         ob_start();
@@ -497,7 +480,7 @@ class FormController {
             exit;
         }
 
-        if ($action === 'submit' && !$isAdmin && !$isAdminApproverStandIn && (int)$form['submitted_by'] !== $userId) {
+        if ($action === 'submit' && !$isAdmin && (int)$form['submitted_by'] !== $userId) {
             $_SESSION['error'] = 'Only the form owner can submit this form.';
             header("Location: " . url("forms/view/{$id}"));
             exit;
@@ -1039,6 +1022,31 @@ class FormController {
             );
             $checkerPending->execute([$id]);
             if ($checkerPending->fetch()) return $form;
+        }
+
+        // AdminApprover (role 7) stand-in: unlike other stand-in roles, an
+        // AdminApprover is NEVER the literal approver_id on a row — they only
+        // ever act through the fallback in processApproval(). So visibility
+        // has to be derived from the pipeline definition (which sequences
+        // this form type lets them cover — see ADMIN_APPROVER_STANDIN_COVERAGE)
+        // rather than from approver_id, and covers any status (pending,
+        // approved, or completed) so they can also see what they already acted on.
+        if ($roleId === 7) {
+            $pipeline = $this->getPipeline($form['form_type']);
+            $coveredSequences = [];
+            foreach ($pipeline as $pStep) {
+                if ($this->adminApproverStandsInFor($form['form_type'], (int) $pStep['role_id'])) {
+                    $coveredSequences[] = (int) $pStep['sequence'];
+                }
+            }
+            if (!empty($coveredSequences)) {
+                $placeholders = implode(',', array_fill(0, count($coveredSequences), '?'));
+                $coveredRow = db()->prepare(
+                    "SELECT id FROM approvals WHERE form_id = ? AND sequence IN ({$placeholders}) LIMIT 1"
+                );
+                $coveredRow->execute(array_merge([$id], $coveredSequences));
+                if ($coveredRow->fetch()) return $form;
+            }
         }
 
         // FinalApprover (role 6) shared queue: allow viewing any form that has

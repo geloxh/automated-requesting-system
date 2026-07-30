@@ -31,6 +31,26 @@
                          AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )'
                     );
                     $ars->execute();
+                } elseif ($roleId === 7) {
+                    // AdminApprover is never the literal approver_id on a row —
+                    // they only ever act through the fallback in
+                    // FormController::processApproval(). So count pending rows
+                    // at any sequence/form-type they cover, per
+                    // FormController::ADMIN_APPROVER_STANDIN_COVERAGE:
+                    //   - Vehicle Request: Checker/Dept Head/Final (2, 4, 6)
+                    //   - Leave Application / Overtime: Dept Head only (4)
+                    $ars = db()->prepare(
+                        'SELECT COUNT(*) FROM approvals a
+                         JOIN forms f ON f.id = a.form_id
+                         WHERE a.status = "pending"
+                         AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )
+                         AND (
+                             a.approver_id = ?
+                             OR (f.form_type = "vehicle_request" AND a.sequence IN (2, 3, 4))
+                             OR (f.form_type IN ("leave_application", "overtime_authorization") AND a.sequence = 3)
+                         )'
+                    );
+                    $ars->execute([$userId]);
                 } elseif ($roleId === 6) {
                     // FinalApprover shared queue: count rows assigned to them
                     // PLUS any pending row assigned to any other Final Approver.
