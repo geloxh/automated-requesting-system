@@ -10,6 +10,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login — ARS</title>
+
+    <link rel="manifest" href="<?= url('manifest.json') ?>">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="icon" type="image/x-icon" href="<?= url('favicon.ico') ?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= url('images/icons/icon-32.png') ?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= url('images/icons/icon-16.png') ?>">
+    <link rel="apple-touch-icon" href="<?= url('images/icons/icon-180.png') ?>">
+    <script src="<?= url('scripts/pwa-register.js') ?>"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">

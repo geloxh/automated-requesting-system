@@ -224,6 +224,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars(($pageTitle ?? 'Dashboard') . ' · ARS') ?></title>
+
+    <!-- PWA: lets the app be "installed" from the browser and pinned to the
+         Windows taskbar / Start Menu (or Dock/Home Screen on other OSes)
+         with its own icon and standalone window, instead of a browser tab. -->
+    <link rel="manifest" href="<?= url('manifest.json') ?>">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="icon" type="image/x-icon" href="<?= url('favicon.ico') ?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= url('images/icons/icon-32.png') ?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= url('images/icons/icon-16.png') ?>">
+    <link rel="apple-touch-icon" href="<?= url('images/icons/icon-180.png') ?>">
+    <script src="<?= url('scripts/pwa-register.js') ?>"></script>
+
     <link rel="stylesheet" href="<?= url('stylesheets/app.css') ?>">
     <link rel="stylesheet" href="<?= url('stylesheets/chat.css') ?>">
     <style nonce="<?= htmlspecialchars($GLOBALS['csp_nonce'] ?? '') ?>">:root{<?= $accentVars ?>}</style>
