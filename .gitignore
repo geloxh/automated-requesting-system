@@ -9,3 +9,6 @@ config/arsdb.sql
 public/uploads/avatars
 
 INSTRUCTIONS.md
+
+backup_2026-07-30
+restore.ps1

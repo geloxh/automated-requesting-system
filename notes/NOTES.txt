@@ -92,3 +92,43 @@ rasj bdwt nfkl mnko
  ### Employee Creation Error
  Failed to create employee: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'default.png' for key 'avatar'
  solutions: `ALTER TABLE employees DROP INDEX avatar;
+
+ ### Docker Backup
+```
+$date = Get-Date -Format "yyyy-MM-dd"
+$backupDir = "backup_$date"
+New-Item -ItemType Directory -Path $backupDir
+
+$backupPath = "$PWD\$backupDir"
+
+# Database
+docker exec ars_db mariadb-dump -u root -proot arsdb > "$backupDir\arsdb.sql"
+
+# Volumes
+docker run --rm -v automated-requesting-system_uploads_data:/data -v "${backupPath}:/backup" alpine tar czf /backup/uploads.tar.gz -C /data .
+docker run --rm -v automated-requesting-system_storage_data:/data -v "${backupPath}:/backup" alpine tar czf /backup/storage.tar.gz -C /data .
+
+# App image
+docker save automated-requesting-system-app -o "$backupDir\app_image.tar"
+
+Write-Host "Backup done -> $backupDir"
+
+```
+- create restore.ps1
+
+```
+param([string]$backupDir)
+
+docker load -i "$backupDir\app_image.tar"
+docker compose up -d db
+Start-Sleep -Seconds 15
+docker exec -i ars_db mariadb -u root -proot arsdb < "$backupDir\arsdb.sql"
+docker run --rm -v automated-requesting-system_uploads_data:/data -v "${PWD}/$backupDir:/backup" alpine tar xzf /backup/uploads.tar.gz -C /data
+docker run --rm -v automated-requesting-system_storage_data:/data -v "${PWD}/$backupDir:/backup" alpine tar xzf /backup/storage.tar.gz -C /data
+docker compose up -d
+
+Write-Host "Restore done"
+```
+
+- run this: 
+``` .\restore.ps1 -backupDir "backup_2025-07-14" ```
