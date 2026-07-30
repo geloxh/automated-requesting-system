@@ -263,10 +263,17 @@
         exit;
     }
 
-    // GET /requests — all requests (SysAdmin: everything; AdminApprover: Vehicle Requests only)
+    // GET /requests — all requests (admin only)
     if ($uri === '/requests') {
-        \App\Middleware\RoleMiddleware::requireAnyRole([1, 7]);
+        \App\Middleware\RoleMiddleware::requireRole(1);
         (new FormController)->allRequests();
+        exit;
+    }
+
+    // GET /requests/export — CSV download of all completed requests (SysAdmin only)
+    if ($uri === '/requests/export') {
+        \App\Middleware\RoleMiddleware::requireRole(1);
+        (new FormController)->exportCompletedRequests();
         exit;
     }
 

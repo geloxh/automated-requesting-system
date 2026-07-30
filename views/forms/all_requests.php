@@ -1,9 +1,24 @@
-<?php $isVehicleOnly = ($pageTitle ?? '') === 'All Vehicle Requests'; ?>
-<div class="page-heading"><?= $isVehicleOnly ? 'All Vehicle Requests' : 'All Requests' ?></div>
-<div class="page-subheading">
-    <?= $isVehicleOnly
-        ? 'Complete record of all submitted Vehicle Request forms across all departments.'
-        : 'Complete record of all submitted forms across all departments.' ?>
+<div class="page-heading-row" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+    <div>
+        <div class="page-heading">All Requests</div>
+        <div class="page-subheading">Complete record of all submitted forms across all departments.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:.5rem;">
+        <span class="muted" style="font-size:13px;">Export completed:</span>
+        <a href="<?= url('requests/export?format=csv') ?>" class="btn btn-ghost btn-sm">
+            <i class="ti ti-file-type-csv"></i> CSV
+        </a>
+        <a href="<?= url('requests/export?format=xlsx') ?>" class="btn btn-ghost btn-sm">
+            <i class="ti ti-file-spreadsheet"></i> Excel
+        </a>
+        <a href="<?= url('requests/export?format=docx') ?>" class="btn btn-ghost btn-sm">
+            <i class="ti ti-file-type-doc"></i> Word
+        </a>
+        <a href="<?= url('requests/export?format=pdf') ?>" class="btn btn-ghost btn-sm" target="_blank" rel="noopener"
+           title="Opens a print-ready page — choose &quot;Save as PDF&quot; in the print dialog">
+            <i class="ti ti-file-type-pdf"></i> PDF
+        </a>
+    </div>
 </div>
 
 <?php

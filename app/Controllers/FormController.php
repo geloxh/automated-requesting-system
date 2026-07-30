@@ -390,6 +390,94 @@ class FormController {
         require __DIR__ . '/../../views/layouts/base.php';
     }
 
+    /**
+     * GET /requests/export?format=csv|xlsx|docx|pdf — SysAdmin-only download
+     * of every completed form request, in the chosen format. Each row/section
+     * includes the full submitted form data (not just summary columns) plus
+     * the approval trail, not just metadata.
+     *
+     * xlsx and docx are the well-established "HTML dressed as Office file"
+     * trick — an HTML table/document served with the Excel/Word MIME type
+     * and file extension. Both Excel and Word open these natively; no
+     * PhpSpreadsheet/PhpWord dependency needed for what's essentially a
+     * formatted data dump.
+     *
+     * pdf is different: there is no dependency-free way to produce a real
+     * PDF binary from PHP. This renders the same content as a print-ready
+     * HTML page and auto-opens the browser's print dialog so the admin can
+     * "Save as PDF" — it is NOT a server-generated .pdf file. If a true
+     * server-side PDF is needed later, add a library such as dompdf/dompdf
+     * via Composer and swap this branch for it.
+     */
+    public function exportCompletedRequests(): void {
+        if ((int)($_SESSION['role_id'] ?? 0) !== 1) {
+            $_SESSION['error'] = 'Access denied.';
+            header('Location: ' . url('dashboard')); exit;
+        }
+
+        $format = strtolower($_GET['format'] ?? 'csv');
+        if (!in_array($format, ['csv', 'xlsx', 'docx', 'pdf'], true)) {
+            $format = 'csv';
+        }
+
+        $stmt = db()->prepare(
+            'SELECT f.id, f.form_type, f.data, f.created_at, f.updated_at,
+                    e.employee_code, e.full_name, e.department, e.company
+             FROM forms f
+             JOIN employees e ON e.id = f.submitted_by
+             WHERE f.status = "completed"
+             ORDER BY f.updated_at DESC'
+        );
+        $stmt->execute();
+        $forms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (empty($forms)) {
+            $_SESSION['error'] = 'No completed requests to export yet.';
+            header('Location: ' . url('requests'));
+            exit;
+        }
+
+        // Approval trail for every exported form, fetched in one query and
+        // grouped by form_id, so each export includes who acted at every
+        // stage — not just the submission itself.
+        $formIds      = array_column($forms, 'id');
+        $placeholders = implode(',', array_fill(0, count($formIds), '?'));
+        $apprStmt     = db()->prepare(
+            "SELECT a.form_id, a.sequence, a.status, a.remarks, a.approved_at,
+                    ea.full_name AS approver_name
+             FROM approvals a
+             JOIN employees ea ON ea.id = a.approver_id
+             WHERE a.form_id IN ({$placeholders})
+             ORDER BY a.form_id, a.sequence"
+        );
+        $apprStmt->execute($formIds);
+        $approvalsByForm = [];
+        foreach ($apprStmt->fetchAll(PDO::FETCH_ASSOC) as $a) {
+            $approvalsByForm[(int) $a['form_id']][] = $a;
+        }
+
+        $formLabel = \App\Helpers\FormLabels::all();
+
+        // Bulk export, not tied to one record — entity_id 0 is the
+        // convention this app uses for actions with no single target.
+        $this->audit('requests_exported', 'form', 0, null, [
+            'exported_by' => $_SESSION['user_id'],
+            'format'      => $format,
+            'count'       => count($forms),
+        ]);
+
+        if ($format === 'xlsx') {
+            $this->streamExcelExport($forms, $approvalsByForm, $formLabel);
+        } elseif ($format === 'docx') {
+            $this->streamWordExport($forms, $approvalsByForm, $formLabel);
+        } elseif ($format === 'pdf') {
+            $this->streamPrintableExport($forms, $approvalsByForm, $formLabel);
+        } else {
+            $this->streamCsvExport($forms, $approvalsByForm, $formLabel);
+        }
+        exit;
+    }
+
     // ================================================================
     // PRIVATE
     // ================================================================
@@ -1205,6 +1293,218 @@ class FormController {
         $content = ob_get_clean();
         require __DIR__ . '/../../views/layouts/base.php';
         exit;
+    }
+
+    /**
+     * Turns a form's submitted `data` JSON into a flat list of readable
+     * "Label: value" lines, e.g. ['Leave Type: Sick Leave', 'Start Date: ...'].
+     * Recurses into nested arrays (like line-item tables) so every field
+     * a form type collects shows up, without needing a per-form-type mapping.
+     */
+    private function flattenFormData($data, string $prefix = ''): array {
+        $lines = [];
+        if (!is_array($data)) return $lines;
+
+        foreach ($data as $key => $value) {
+            $label = is_string($key)
+                ? ucwords(str_replace('_', ' ', $key))
+                : 'Item ' . ((int) $key + 1);
+            $label = $prefix !== '' ? "{$prefix} — {$label}" : $label;
+
+            if (is_array($value)) {
+                $lines = array_merge($lines, $this->flattenFormData($value, $label));
+            } else {
+                $value = is_bool($value) ? ($value ? 'Yes' : 'No') : (string) $value;
+                $lines[] = "{$label}: {$value}";
+            }
+        }
+        return $lines;
+    }
+
+    /** Human-readable "Name — Status (date)" line for one approval step. */
+    private function formatApprovalLine(array $a): string {
+        $line = $a['approver_name'] . ' — ' . ucfirst($a['status']);
+        if ($a['approved_at']) $line .= ' on ' . date('M j, Y g:i A', strtotime($a['approved_at']));
+        if (!empty($a['remarks'])) $line .= ' ("' . $a['remarks'] . '")';
+        return $line;
+    }
+
+    private function streamCsvExport(array $forms, array $approvalsByForm, array $formLabel): void {
+        $filename = 'completed-requests-' . date('Y-m-d_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $out = fopen('php://output', 'w');
+        // UTF-8 BOM so Excel opens accented/special characters correctly.
+        fwrite($out, "\xEF\xBB\xBF");
+        fputcsv($out, [
+            'Request ID', 'Form Type', 'Employee Code', 'Employee Name',
+            'Department', 'Company', 'Date Filed', 'Date Completed',
+            'Form Details', 'Approval Trail',
+        ]);
+
+        foreach ($forms as $row) {
+            $data    = json_decode($row['data'] ?? '', true) ?: [];
+            $details = implode(' | ', $this->flattenFormData($data));
+            $trail   = [];
+            foreach ($approvalsByForm[(int) $row['id']] ?? [] as $a) {
+                $trail[] = $this->formatApprovalLine($a);
+            }
+            fputcsv($out, [
+                $row['id'],
+                $formLabel[$row['form_type']] ?? $row['form_type'],
+                $row['employee_code'],
+                $row['full_name'],
+                $row['department'] ?? '',
+                $row['company'] ?? '',
+                date('Y-m-d H:i', strtotime($row['created_at'])),
+                date('Y-m-d H:i', strtotime($row['updated_at'])),
+                $details,
+                implode(' -> ', $trail),
+            ]);
+        }
+        fclose($out);
+    }
+
+    /**
+     * Excel does not require a real .xlsx (ZIP+XML) binary — it natively
+     * opens an HTML table served with the Excel MIME type / .xls extension.
+     * This avoids pulling in PhpSpreadsheet for what's a straightforward
+     * tabular export.
+     */
+    private function streamExcelExport(array $forms, array $approvalsByForm, array $formLabel): void {
+        $filename = 'completed-requests-' . date('Y-m-d_His') . '.xls';
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "\xEF\xBB\xBF";
+        echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8">';
+        echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+        echo '<x:Name>Completed Requests</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>';
+        echo '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+        echo '</head><body>';
+        echo '<table border="1" cellspacing="0" cellpadding="4">';
+        echo '<tr>';
+        foreach (['Request ID', 'Form Type', 'Employee Code', 'Employee Name', 'Department',
+                  'Company', 'Date Filed', 'Date Completed', 'Form Details', 'Approval Trail'] as $h) {
+            echo '<th>' . htmlspecialchars($h) . '</th>';
+        }
+        echo '</tr>';
+
+        foreach ($forms as $row) {
+            $data    = json_decode($row['data'] ?? '', true) ?: [];
+            $details = implode("\n", $this->flattenFormData($data));
+            $trail   = [];
+            foreach ($approvalsByForm[(int) $row['id']] ?? [] as $a) {
+                $trail[] = $this->formatApprovalLine($a);
+            }
+            echo '<tr>';
+            echo '<td>' . (int) $row['id'] . '</td>';
+            echo '<td>' . htmlspecialchars($formLabel[$row['form_type']] ?? $row['form_type']) . '</td>';
+            echo '<td>' . htmlspecialchars($row['employee_code']) . '</td>';
+            echo '<td>' . htmlspecialchars($row['full_name']) . '</td>';
+            echo '<td>' . htmlspecialchars($row['department'] ?? '') . '</td>';
+            echo '<td>' . htmlspecialchars($row['company'] ?? '') . '</td>';
+            echo '<td>' . date('Y-m-d H:i', strtotime($row['created_at'])) . '</td>';
+            echo '<td>' . date('Y-m-d H:i', strtotime($row['updated_at'])) . '</td>';
+            echo '<td style="mso-number-format:\'\@\';white-space:pre-wrap;">' . nl2br(htmlspecialchars($details)) . '</td>';
+            echo '<td>' . htmlspecialchars(implode(' -> ', $trail)) . '</td>';
+            echo '</tr>';
+        }
+        echo '</table></body></html>';
+    }
+
+    /**
+     * Word does not require a real .docx (ZIP+XML) binary either — it opens
+     * an HTML document served with the Word MIME type / .doc extension.
+     * Unlike the CSV/Excel table, this lays out one full section per form
+     * (all submitted fields + approval trail), since that reads far better
+     * as a document than as spreadsheet rows.
+     */
+    private function streamWordExport(array $forms, array $approvalsByForm, array $formLabel): void {
+        $filename = 'completed-requests-' . date('Y-m-d_His') . '.doc';
+        header('Content-Type: application/msword; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "\xEF\xBB\xBF";
+        echo $this->buildExportHtml($forms, $approvalsByForm, $formLabel);
+    }
+
+    /**
+     * Word/Excel can be tricked with an HTML file, but a real PDF can't —
+     * PHP has no built-in way to rasterize/paginate to PDF without a library
+     * (e.g. dompdf/dompdf via Composer). Rather than mislabel an HTML file
+     * as .pdf, this opens a print-ready page and auto-triggers the browser's
+     * print dialog so the admin can choose "Save as PDF" there.
+     */
+    private function streamPrintableExport(array $forms, array $approvalsByForm, array $formLabel): void {
+        header('Content-Type: text/html; charset=utf-8');
+        echo $this->buildExportHtml($forms, $approvalsByForm, $formLabel, true);
+    }
+
+    private function buildExportHtml(array $forms, array $approvalsByForm, array $formLabel, bool $autoPrint = false): string {
+        ob_start();
+        ?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Completed Requests Export</title>
+<style>
+    body { font-family: Calibri, Arial, sans-serif; color: #1a1a1a; max-width: 900px; margin: 2rem auto; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .meta { color: #666; font-size: 13px; margin-bottom: 1.5rem; }
+    .form-section { page-break-inside: avoid; border-top: 2px solid #1a1a1a; padding: 1rem 0; }
+    .form-section h2 { font-size: 16px; margin: 0 0 4px; }
+    .form-meta { font-size: 13px; color: #444; margin-bottom: 0.75rem; }
+    h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #555; margin: .75rem 0 .25rem; }
+    ul { margin: 0; padding-left: 1.25rem; font-size: 13px; }
+    li { margin-bottom: 2px; }
+    @media print { .form-section { break-inside: avoid; } }
+</style>
+</head>
+<body<?= $autoPrint ? ' onload="window.print()"' : '' ?>>
+    <h1>Completed Requests Export</h1>
+    <div class="meta">Generated <?= date('F j, Y g:i A') ?> — <?= count($forms) ?> request(s)</div>
+
+    <?php foreach ($forms as $row):
+        $data = json_decode($row['data'] ?? '', true) ?: [];
+    ?>
+    <div class="form-section">
+        <h2>#<?= (int) $row['id'] ?> — <?= htmlspecialchars($formLabel[$row['form_type']] ?? $row['form_type']) ?></h2>
+        <div class="form-meta">
+            <strong><?= htmlspecialchars($row['full_name']) ?></strong> (<?= htmlspecialchars($row['employee_code']) ?>)
+            &nbsp;·&nbsp; <?= htmlspecialchars($row['department'] ?? '—') ?>
+            &nbsp;·&nbsp; <?= htmlspecialchars($row['company'] ?? '—') ?><br>
+            Filed <?= date('M j, Y g:i A', strtotime($row['created_at'])) ?>
+            &nbsp;·&nbsp; Completed <?= date('M j, Y g:i A', strtotime($row['updated_at'])) ?>
+        </div>
+
+        <h3>Form Details</h3>
+        <ul>
+            <?php foreach ($this->flattenFormData($data) as $line): ?>
+                <li><?= htmlspecialchars($line) ?></li>
+            <?php endforeach; ?>
+        </ul>
+
+        <h3>Approval Trail</h3>
+        <ul>
+            <?php foreach ($approvalsByForm[(int) $row['id']] ?? [] as $a): ?>
+                <li><?= htmlspecialchars($this->formatApprovalLine($a)) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endforeach; ?>
+</body>
+</html>
+        <?php
+        return ob_get_clean();
     }
 
     private function audit(string $action, string $entity, int $entityId, ?array $old, ?array $new): void {
