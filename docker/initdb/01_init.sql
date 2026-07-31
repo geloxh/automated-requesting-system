@@ -30,7 +30,7 @@ INSERT INTO roles (name, description) VALUES
 ('AcquisitionChecker', 'Finance/Accounting Checker'),
 ('FinalApprover', 'Final sign-off authority'),
 ('AdminApprover', 'Combined authority: Immediate Supervisor, Department Head, and Final Approver approval stages'),
-('FinanceHead', 'Reviews and signs off on the Evaluation Approval stage for Advance Payment, Request for Payment, Reimbursement, and Liquidation forms'),
+('EvaluationApprover', 'Finance Head. Signs Advance Payment, Request for Payment, Reimbursement, and Liquidation at the Evaluation Approval stage.'),
 ('HRVerifier', 'Cross-checks employee attendance records and co-signs the Process Approval stage on Reimbursement and Liquidation forms');
 
 -- ============================================================
