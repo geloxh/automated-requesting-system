@@ -1696,7 +1696,7 @@ class FormController {
         }
         define('BASE_LOADED', true);
         extract($vars);
-        if (!isset($pageTitle)) $pageTitle = 'Processing System';
+        if (!isset($pageTitle)) $pageTitle = 'Automated Requesting System';
         ob_start();
         require $fullPath;
         $content = ob_get_clean();

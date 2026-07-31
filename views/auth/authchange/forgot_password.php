@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reset Password — Processing System</title>
+    <title>Reset Password — Automated Requesting System</title>
     <link href="<?= url('stylesheets/auth.css') ?>" rel="stylesheet">
 </head>
 <body>

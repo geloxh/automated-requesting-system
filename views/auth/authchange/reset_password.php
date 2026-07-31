@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create New Password — Processing System</title>
+    <title>Create New Password — Automated Requesting System</title>
     <link href="<?= url('stylesheets/auth.css') ?>" rel="stylesheet">
 </head>
 <body>

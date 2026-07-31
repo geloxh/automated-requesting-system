@@ -5,7 +5,6 @@
 -- are assigned). The HR Verifier co-signs the Process Approval stage
 -- alongside the Finance/Accounting Checker on Reimbursement and
 -- Liquidation forms — see FormController::HR_COSIGN_FORM_TYPES.
--- Run once via phpMyAdmin or: mysql -u root -p processing_system < migrations/hr_verifier.sql
 -- ============================================================
 
 INSERT INTO roles (name, description)

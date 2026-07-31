@@ -31,7 +31,7 @@ class NotificationService
               . "A {$formLabel} submitted by {$submitterName} requires your approval at the {$stageName} stage.\n\n"
               . "Review it here:\n{$link}\n\n"
               . "Please log in and take action at your earliest convenience.\n\n"
-              . "— " . ($_ENV['MAIL_FROM_NAME'] ?? 'Processing System');
+              . "— " . ($_ENV['MAIL_FROM_NAME'] ?? 'Automated Requesting System');
 
         self::send($toEmail, $toName, $subject, $body);
     }
@@ -81,7 +81,7 @@ class NotificationService
                 break;
         }
 
-        $body .= "\n— " . ($_ENV['MAIL_FROM_NAME'] ?? 'Processing System');
+        $body .= "\n— " . ($_ENV['MAIL_FROM_NAME'] ?? 'Automated Requesting System');
         self::send($toEmail, $toName, $subject, $body);
     }
 
@@ -100,7 +100,7 @@ class NotificationService
 
             $mail->setFrom(
                 $_ENV['MAIL_FROM_ADDRESS'],
-                $_ENV['MAIL_FROM_NAME'] ?? 'Processing System'
+                $_ENV['MAIL_FROM_NAME'] ?? 'Automated Requesting System'
             );
             $mail->addAddress($toEmail, $toName);
             $mail->Subject = $subject;

@@ -1,7 +1,7 @@
 /**
  * form-table.js
  * Handles dynamic row add/remove and optional column recalculation
- * for all form tables in the processing system.
+ * for all form tables in the automated requesting system.
  *
  * Usage: add data attributes to the table:
  *   data-table-id — the table's id

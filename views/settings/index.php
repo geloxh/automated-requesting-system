@@ -251,7 +251,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                 <div class="settings-card-body settings-card-body--info">
                     <div class="info-row">
                         <span class="info-row-label"><i class="ti ti-tag"></i> App name</span>
-                        <span class="info-row-value"><?= $s('app_name', 'AutomatedProcessingSystem') ?></span>
+                        <span class="info-row-value"><?= $s('app_name', 'AutomatedRequestingSystem') ?></span>
                     </div>
                     <div class="info-row">
                         <span class="info-row-label"><i class="ti ti-link"></i> App URL</span>
@@ -535,7 +535,7 @@ $selected = fn(string $key, string $match) => ($settings[$key] ?? '') === $match
                             <div class="settings-row-label"><label for="mail_from_name">From name</label></div>
                             <div class="settings-row-control">
                                 <input type="text" id="mail_from_name" name="mail_from_name"
-                                       value="<?= $s('mail_from_name', 'Automated Processing System') ?>" class="form-control">
+                                       value="<?= $s('mail_from_name', 'Automated Requesting System') ?>" class="form-control">
                             </div>
                         </div>
 

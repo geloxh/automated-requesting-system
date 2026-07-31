@@ -106,7 +106,7 @@
                     $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'] ?? 'tls';
                     $mail->Port = $_ENV['MAIL_PORT'] ?? 587;
 
-                    $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME'] ?? 'Processing System');
+                    $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME'] ?? 'Automated Requesting System');
                     $mail->addAddress($email);
                     $mail->Subject = 'Password Reset Request';
                     $mail->Body = "Click the link below to reset your password (expires in 1 hour):\n\n{$resetLink}";

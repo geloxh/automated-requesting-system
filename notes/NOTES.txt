@@ -32,7 +32,7 @@ Typical values:
 "C:\xampp\php\php.exe" -r "echo password_hash('yourpassword', PASSWORD_BCRYPT, ['cost' => 12]);"
 
 .env
-APP_NAME=ProcessingSystem
+APP_NAME=AutomatedRequestingSystem
 APP_ENV=local
 APP_URL=http://localhost/automated-requesting-system/public
 
