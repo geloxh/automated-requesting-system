@@ -21,6 +21,14 @@ services:
       # app/helpers/ which would overwrite the correctly-cased image filesystem.
       - uploads_data:/var/www/automated-requesting-system/public/uploads
       - storage_data:/var/www/automated-requesting-system/storage
+      # ── Real TLS cert (see TAILSCALE.md) ──
+      # Overlays the self-signed cert/key baked into the image at these same
+      # paths with a real, trusted one — no Dockerfile change or rebuild
+      # needed. Uncomment once docker/certs/ars-selfsigned.crt and .key exist
+      # (generated via `tailscale cert`), then:
+      #   docker compose up -d --force-recreate app
+      # - ./docker/certs/ars-selfsigned.crt:/etc/ssl/certs/ars-selfsigned.crt:ro
+      # - ./docker/certs/ars-selfsigned.key:/etc/ssl/private/ars-selfsigned.key:ro
     networks:
       - ars_net
 

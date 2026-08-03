@@ -1,132 +1,107 @@
-## Running the Automated Requesting System in Docker
+## Accessing ARS Over Mobile Data (Tailscale)
 
-### Prerequisites
+By default, ARS is only reachable at a private LAN address (e.g. `https://192.168.100.108`) —
+see [DOCKER.md](./DOCKER.md#giving-staff-access-network-setup). That address only exists inside
+the office network, so a phone on mobile data has no route to it at all. This isn't a Docker
+setting — it's fixed by putting the phone and the Docker host on the same private network,
+which is exactly what [Tailscale](https://tailscale.com) does (a mesh VPN, free for small teams).
 
-Install **Docker Desktop** on the machine that will host the system:
-- Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
-- Make sure it's **running** before proceeding (whale icon in the taskbar/menu bar)
+No app code changes are needed for this — `url()` in `config/app.php` only generates
+root-relative links, so the app works identically no matter which address (LAN IP, Tailscale
+IP, or MagicDNS name) it's reached through.
 
 ---
 
-### Step 1 — Get the project files
+### Step 1 — Install Tailscale on the Docker host
 
-Unzip the project and open a terminal inside the project folder:
+1. Sign up free at [tailscale.com](https://tailscale.com) (Google/Microsoft/GitHub login all work).
+2. Download and install the **Windows client** on the machine running Docker, and sign in.
+3. That's it for the host side — a sidecar container isn't needed. `docker-compose.yml` already
+   publishes ports to all interfaces (`"80:80"`, `"443:443"`), so once the *Windows host* joins
+   the tailnet, everything it exposes is reachable through it too.
 
-```bash
-cd C:\automated-requesting-system
+You'll see a `100.x.y.z` Tailscale IP assigned to this machine — visible in the system tray icon,
+or the [admin console](https://login.tailscale.com/admin/machines).
+
+---
+
+### Step 2 — Turn on MagicDNS (recommended)
+
+Admin console → **DNS** → enable **MagicDNS**. This gives the host a stable name like
+`ars-server.your-tailnet.ts.net` instead of a numeric IP you'd otherwise have to remember and
+re-share every time it changes.
+
+---
+
+### Step 3 — Install Tailscale on staff phones
+
+1. App Store / Google Play → **Tailscale** → sign in with the same account/organization.
+2. If **device approval** is turned on (Settings → Device management — recommended for a
+   business tailnet, so a random device signed into the same email can't silently join), approve
+   each phone once in the admin console.
+
+---
+
+### Step 4 — Access the app over mobile data
+
+With the Tailscale toggle **on** in the phone app, open a browser and go to:
+
+```
+https://100.x.y.z
 ```
 
----
-
-### Step 2 — First-time build & start
-
-```bash
-docker compose up --build
-```
-
-This single command:
-- Builds the PHP 8.2 + Apache image
-- Installs all Composer dependencies
-- Starts MariaDB and waits for it to be healthy
-- Seeds the entire database (tables, roles, default admin account)
-
-First run takes **2–3 minutes**. You'll know it's ready when you see:
+or, once MagicDNS is set up:
 
 ```
-ars_app  | AH00558: apache2: ... httpd started
+https://ars-server.your-tailnet.ts.net
 ```
 
----
-
-### Step 3 — Access the system
-
-| What | URL |
-|------|-----|
-| **App** | `https://localhost/automated-requesting-system/public` |
-| **phpMyAdmin** (DB admin) | `http://localhost:8080` |
-
-> Your browser will show a **certificate warning** — click **Advanced → Proceed to localhost**. This is expected because the SSL certificate is self-signed for local use.
+Same login page, same app — reachable from anywhere with a data connection, and never exposed
+to the public internet.
 
 ---
 
-### Default login credentials
+### About the certificate warning
 
-The database seeds one admin account out of the box:
+The Docker image bakes a **self-signed certificate** at build time (`docker/Dockerfile`),
+scoped for the LAN IP. Browsers will show a "Not Secure" warning when hitting the Tailscale
+address too — this is cosmetic (Tailscale's own WireGuard tunnel is already end-to-end
+encrypted independently of this), but it looks unprofessional for staff logging in.
 
-| Field | Value |
-|-------|-------|
-| Email | `sample@3ehitech.com` |
-| Employee Code | `EMP-0001` |
-| Role | **SysAdmin** |
+**Option A — do nothing.** Click through the one-time browser warning. Zero extra setup, and
+the connection is still genuinely private via Tailscale.
 
-Log in as SysAdmin first to create accounts for your staff.
+**Option B — get a real trusted certificate.** Tailscale can auto-issue a free Let's Encrypt
+cert for your MagicDNS name. `docker-compose.yml` already has the mount wired up (commented
+out) for exactly this — see `docker/certs/README.md` for the full walkthrough. Short version:
 
----
+1. Admin console → **HTTPS Certificates** → enable.
+2. On the Docker host, from inside `docker/certs/`:
+   `tailscale cert --cert-file=ars-selfsigned.crt --key-file=ars-selfsigned.key ars-server.your-tailnet.ts.net`
+3. Uncomment the two cert lines under the `app` service's `volumes:` in `docker-compose.yml`.
+4. `docker compose up -d --force-recreate app` — no image rebuild needed.
 
-### Staff roles available
-
-| Role | What they can do |
-|------|-----------------|
-| **SysAdmin** | Full system access |
-| **Staff** | Submit forms only |
-| **Approver** | Approve / reject forms |
-| **DepartmentHead** | Department-level approvals |
-| **Checker** | Verify / check submissions |
-| **FinalApprover** | Final sign-off authority |
-
----
-
-### Giving staff access (network setup)
-
-By default the system is only reachable at `localhost` (the machine running Docker). To let other staff on the same network access it:
-
-1. Find the **host machine's local IP address** (e.g. `192.168.1.50`)
-2. Staff open: `https://192.168.1.50/automated-requesting-system/public`
-3. They'll get the same certificate warning — click **Advanced → Proceed**
-
-> If you want the URL to use the IP instead of localhost, update `APP_URL` in `.env.docker` before running:
-> ```
-> APP_URL=https://192.168.1.50
-> ```
-> Then rebuild: `docker compose up --build`
-
-> **Need staff to access it off the office network too (mobile data, home, etc.)?**
-> See [TAILSCALE.md](./TAILSCALE.md) — a private-network setup that doesn't require opening
-> any ports on your router or exposing the app to the public internet.
+Tailscale certs are Let's Encrypt-backed and last ~90 days; re-running step 2 and
+`docker compose restart app` before expiry renews it (see `docker/certs/README.md` for a
+suggested scheduled-task approach).
 
 ---
 
-### Day-to-day commands
+### Optional hardening
 
-```bash
-# Normal start (after first build)
-docker compose up
-
-# Stop (keeps all data)
-docker compose down
-
-# View live logs
-docker compose logs -f app
-
-# Full reset — wipes DB and starts fresh
-docker compose down -v
-docker compose up --build
-
-# Shell into the app container
-docker exec -it ars_app bash
-
-# Access the database directly
-docker exec -it ars_db mariadb -u root -proot arsdb
-```
+- **ACLs** — restrict which tailnet devices/roles can actually reach the Docker host's ports,
+  rather than every device on the tailnet having access by default.
+- **Device approval** — keep this on so new devices need explicit sign-off before joining.
 
 ---
 
-### What runs inside Docker
+### Quick reference
 
-| Container | Purpose | Port |
-|-----------|---------|------|
-| `ars_app` | PHP 8.2 + Apache (the app) | 80, 443 |
-| `ars_db` | MariaDB 11 (database) | 3307 |
-| `ars_phpmyadmin` | phpMyAdmin (DB GUI) | 8080 |
-
-Data persists across restarts in Docker volumes (`db_data` for the database, `uploads_data` for file uploads). Only `docker compose down -v` wipes them.
+| Item | Value |
+|------|-------|
+| Docker host ports published | `80`, `443` (already correct — see `docker-compose.yml`) |
+| App code changes required | None |
+| `.env.docker` changes required | None |
+| Where to find your Tailscale IP | System tray icon, or [admin console → Machines](https://login.tailscale.com/admin/machines) |
+| Where to enable MagicDNS | Admin console → DNS |
+| Where to enable trusted HTTPS certs | Admin console → HTTPS Certificates |

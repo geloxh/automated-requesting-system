@@ -19,7 +19,7 @@
         "resizable": true,
         "center": true,
 
-        "url": "https://ars-server.your-tailnet.ts.net"
+        "url": "http://localhost/automated-requesting-system/public/"
       }
     ],
     "security": {

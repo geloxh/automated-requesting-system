@@ -12,3 +12,11 @@ INSTRUCTIONS.md
 
 backup_2026-07-30
 restore.ps1
+
+desktop-app/node_modules
+mobile-app/node_modules
+
+# Real TLS cert/key mounted over the self-signed one (see TAILSCALE.md) —
+# never commit private keys.
+docker/certs/*.crt
+docker/certs/*.key

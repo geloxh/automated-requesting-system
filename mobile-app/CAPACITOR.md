@@ -24,7 +24,9 @@ since you're already using Tailscale (see `../TAILSCALE.md`):
 
 1. Admin console → **HTTPS Certificates** → enable.
 2. On the Docker host: `tailscale cert ars-server.your-tailnet.ts.net`
-3. Mount that cert into the container in place of the self-signed one.
+3. Mount that cert into the container in place of the self-signed one — this is already
+   wired up (commented out) in `docker-compose.yml`; see `../docker/certs/README.md` for
+   the exact steps.
 
 Once that's done, point `capacitor.config.ts` at `https://ars-server.your-tailnet.ts.net`
 and the app will load exactly like a normal website — no cert errors, no native code changes.
