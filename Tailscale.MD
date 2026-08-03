@@ -55,7 +55,7 @@ The database seeds one admin account out of the box:
 
 | Field | Value |
 |-------|-------|
-| Email | `it@3ehitech.com` |
+| Email | `sample@3ehitech.com` |
 | Employee Code | `EMP-0001` |
 | Role | **SysAdmin** |
 
