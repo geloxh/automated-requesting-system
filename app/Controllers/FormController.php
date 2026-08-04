@@ -783,13 +783,13 @@ class FormController {
                 // Checker(Immediate Head) - auto-approve sequence 2 and advance status.
                 if ((int)$_SESSION['role_id'] === self::HR_VERIFIER_ROLE && in_array($type, self::REIMB_LIQUID_TYPES, true)) {
                     $pdo->prepare(
-                        "UPDATE approvals SET status = 'approved', approver_id = ? approved_at = NOW(),
+                        "UPDATE approvals SET status = 'approved', approver_id = ?, approved_at = NOW(),
                         remarks = 'Auto-approved: submitted by HR'
                         WHERE form_id = ? AND sequence = 2"
                     )->execute([(int)$_SESSION['user_id'], $formId]);
 
                     $pdo->prepare(
-                        "UPDATE forms SET status = 'immediatehead_approved' updated_at = NOW() WHERE id = ?"
+                        "UPDATE forms SET status = 'immediatehead_approved', updated_at = NOW() WHERE id = ?"
                     )->execute([$formId]);
                 }
             }
@@ -816,6 +816,7 @@ class FormController {
     private function seedApprovalRows(\PDO $pdo, int $formId, string $type, array $data, int $submitterId): void {
         $pipeline = $this->getPipeline($type);
         $isHrFirstCoSign = in_array($type, self::REIMB_LIQUID_TYPES, true);
+        $isHrSubmitter = $isHrFirstCoSign && (int)($_SESSION['role_id'] ?? 0) === self::HR_VERIFIER_ROLE;
 
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
@@ -824,6 +825,13 @@ class FormController {
 
         $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
         foreach ($stagesNeedingApprover as $step) {
+            // Sequence 2 (Checker): HR submitter acts as their own checker
+            // send their own ID as placeholder; store() will immediately approve it.
+            if ($isHrSubmitter && $step['sequence'] === 2) {
+                $insert->execute([$formId, $submitterId, 2]);
+                continue;
+            }
+            
             if ($isHrFirstCoSign && $step['sequence'] === 3) {
                 $hrIds = $this->resolveApproversByRole($pdo, 9, $data, $submitterId, $type);
                 if (empty($hrIds)) {
