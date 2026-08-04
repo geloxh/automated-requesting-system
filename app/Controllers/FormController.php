@@ -778,6 +778,20 @@ class FormController {
                     "UPDATE approvals SET status = 'approved', approved_at = NOW(), remarks = 'Submitted'
                     WHERE form_id = ? AND sequence = 1"
                 )->execute([$formId]);
+
+                // HR Verifier submitting a reimbursement/liquidation forms acts as the
+                // Checker(Immediate Head) - auto-approve sequence 2 and advance status.
+                if ((int)$_SESSION['role_id'] === self::HR_VERIFIER_ROLE && in_array($type, self::REIMB_LIQUID_TYPES, true)) {
+                    $pdo->prepare(
+                        "UPDATE approvals SET status = 'approved', approver_id = ? approved_at = NOW(),
+                        remarks = 'Auto-approved: submitted by HR'
+                        WHERE form_id = ? AND sequence = 2"
+                    )->execute([(int)$_SESSION['user_id'], $formId]);
+
+                    $pdo->prepare(
+                        "UPDATE forms SET status = 'immediatehead_approved' updated_at = NOW() WHERE id = ?"
+                    )->execute([$formId]);
+                }
             }
 
             $this->audit('form_created', 'form', $formId, null, ['type' => $type, 'status' => $initialStatus]);
