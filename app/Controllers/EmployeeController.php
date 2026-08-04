@@ -38,12 +38,12 @@
                 return;
             }
 
-            $supervisors     = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
             $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $financeHeads    = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $roles           = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
-            $departments     = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
-            $companies       = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
+            $financeHeads = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $roles = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
+            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
+            $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
@@ -120,12 +120,12 @@
                         (int) $data['role_id'],
                         $data['department'] ?: null,
                         $data['company'] ?: null,
-                        $data['supervisor_id']       ? (int) $data['supervisor_id']       : null,
-                        $data['supervisor_id_2']     ? (int) $data['supervisor_id_2']     : null,
-                        $data['master_approver_id']  ? (int) $data['master_approver_id']  : null,
-                        $data['finance_head_id']     ? (int) $data['finance_head_id']     : null,
-                        $data['job_title']  ?: null,
-                        $data['phone']      ?: null,
+                        $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
+                        $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
+                        $data['master_approver_id'] ? (int) $data['master_approver_id']  : null,
+                        $data['finance_head_id'] ? (int) $data['finance_head_id'] : null,
+                        $data['job_title'] ?: null,
+                        $data['phone'] ?: null,
                         $data['date_hired'] ?: null,
                         $data['employment_type'] ?: 'full_time',
                         (int) $existing['id'],
@@ -143,7 +143,7 @@
 
             // new employee
             try {
-                $pdo     = db();
+                $pdo = db();
                 $empCode = \App\Helpers\generateEmployeeCode($pdo);
                 $pdo->prepare(
                     'INSERT INTO employees
@@ -160,13 +160,13 @@
                     password_hash($data['password'], PASSWORD_BCRYPT),
                     (int) $data['role_id'],
                     $data['department'] ?: null,
-                    $data['company']    ?: null,
-                    $data['supervisor_id']      ? (int) $data['supervisor_id']      : null,
-                    $data['supervisor_id_2']    ? (int) $data['supervisor_id_2']    : null,
+                    $data['company'] ?: null,
+                    $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
+                    $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
-                    $data['finance_head_id']    ? (int) $data['finance_head_id']    : null,
-                    $data['job_title']  ?: null,
-                    $data['phone']      ?: null,
+                    $data['finance_head_id'] ? (int) $data['finance_head_id'] : null,
+                    $data['job_title'] ?: null,
+                    $data['phone'] ?: null,
                     $data['date_hired'] ?: null,
                     $data['employment_type'] ?: 'full_time',
                 ]);
@@ -189,24 +189,24 @@
 
             $stmt = db()->prepare('SELECT * FROM employees WHERE id = ?');
             $stmt->execute([$id]);
-            $employee    = $stmt->fetch(PDO::FETCH_ASSOC);
+            $employee = $stmt->fetch(PDO::FETCH_ASSOC);
             $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
-            $companies   = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
+            $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
 
             if (!$employee) {
                 $_SESSION['error'] = 'Employee not found.';
                 header('Location: ' . url('employees')); exit;
             }
 
-            $supervisors     = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
             $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $financeHeads    = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $roles           = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
+            $financeHeads = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $roles = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/employees/edit.php';
-            $content   = ob_get_clean();
+            $content = ob_get_clean();
             $pageTitle = 'Edit Employee: ' . htmlspecialchars($employee['full_name']);
             require __DIR__ . '/../../views/layouts/base.php';
         }
@@ -247,14 +247,14 @@
                     $data['email'],
                     (int) $data['role_id'],
                     $data['department'] ?: null,
-                    $data['company']    ?: null,
-                    $data['supervisor_id']      ? (int) $data['supervisor_id']      : null,
-                    $data['supervisor_id_2']    ? (int) $data['supervisor_id_2']    : null,
+                    $data['company'] ?: null,
+                    $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
+                    $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
-                    $data['finance_head_id']    ? (int) $data['finance_head_id']    : null,
+                    $data['finance_head_id'] ? (int) $data['finance_head_id'] : null,
                     isset($_POST['is_active']) ? 1 : 0,
-                    $data['job_title']  ?: null,
-                    $data['phone']      ?: null,
+                    $data['job_title'] ?: null,
+                    $data['phone'] ?: null,
                     $data['date_hired'] ?: null,
                     $data['employment_type'] ?: 'full_time',
                 ];
@@ -273,11 +273,11 @@
                     if (strlen($_POST['password']) < 8) {
                         throw new Exception("Password too short.");
                     }
-                    $sql     .= ", password_hash = ?";
+                    $sql .= ", password_hash = ?";
                     $params[] = password_hash($_POST['password'], PASSWORD_BCRYPT);
                 }
 
-                $sql     .= " WHERE id = ?";
+                $sql .= " WHERE id = ?";
                 $params[] = $id;
 
                 $pdo->prepare($sql)->execute($params);
@@ -309,7 +309,7 @@
                 exit;
             }
 
-            $pdo  = db();
+            $pdo = db();
             $stmt = $pdo->prepare('SELECT id, role_id FROM employees WHERE id = ?');
             $stmt->execute([$id]);
             $employee = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -378,7 +378,7 @@
             }
 
             $allowed = ['employed', 'resigned', 'floating'];
-            $status  = trim($_POST['employment_status'] ?? '');
+            $status = trim($_POST['employment_status'] ?? '');
 
             if (!in_array($status, $allowed, true)) {
                 $_SESSION['error'] = 'Invalid employment status.';
@@ -462,7 +462,7 @@
                             5 => 'completed',
                         ];
 
-                    $seq       = (int) ($approval['sequence'] ?? 0);
+                    $seq = (int) ($approval['sequence'] ?? 0);
                     $newStatus = $seqToStatus[$seq] ?? 'submitted';
                 }
 
@@ -505,13 +505,13 @@
                 WHERE e.id = ?
             ');
             $employee->execute([$_SESSION['user_id']]);
-            $employee    = $employee->fetch();
+            $employee = $employee->fetch();
             $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
             require __DIR__ . '/../../views/profile/index.php';
-            $content   = ob_get_clean();
+            $content = ob_get_clean();
             $pageTitle = 'Profile';
             require __DIR__ . '/../../views/layouts/base.php';
         }
@@ -557,9 +557,9 @@
             }
 
             $data = [
-                'full_name'  => trim($_POST['full_name'] ?? ''),
+                'full_name' => trim($_POST['full_name'] ?? ''),
                 'department' => trim($_POST['department'] ?? ''),
-                'username'   => trim($_POST['username'] ?? '') ?: null,
+                'username' => trim($_POST['username'] ?? '') ?: null,
             ];
 
             if ($data['full_name'] === '') {
@@ -582,7 +582,7 @@
                 ->execute([$data['full_name'], $data['department'], $data['username'], $_SESSION['user_id']]);
 
             $_SESSION['user_name'] = $data['full_name'];
-            $_SESSION['success']   = 'Profile updated.';
+            $_SESSION['success'] = 'Profile updated.';
             header('Location: ' . url('profile'));
             exit;
         }
@@ -596,10 +596,10 @@
                 exit;
             }
 
-            $file     = $_FILES['avatar'];
-            $maxSize  = 2 * 1024 * 1024;
-            $allowed  = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
-            $finfo    = new finfo(FILEINFO_MIME_TYPE);
+            $file = $_FILES['avatar'];
+            $maxSize = 2 * 1024 * 1024;
+            $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if ($file['size'] > $maxSize) {
@@ -623,7 +623,7 @@
             $ext = $extMap[$mimeType];
 
             $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-            $destDir  = __DIR__ . '/../../public/uploads/avatars/';
+            $destDir = __DIR__ . '/../../public/uploads/avatars/';
             $destPath = $destDir . $filename;
 
             if (!is_dir($destDir)) {
