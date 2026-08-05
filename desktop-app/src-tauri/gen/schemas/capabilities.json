@@ -1,1 +1,0 @@
-{"default":{"identifier":"default","description":"Baseline capabilities for the main window. No filesystem, shell, or other privileged APIs are granted — this app is a plain webview pointed at a remote URL with no native Rust<->JS bridge in use.","local":true,"windows":["main"],"permissions":["core:default"]}}

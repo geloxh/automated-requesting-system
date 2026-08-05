@@ -98,6 +98,16 @@
                 </select>
                 <small class="text-muted">Optional. Signs Advance Payment, Request for Payment, Reimbursement, and Liquidation at the Evaluation stage.</small>
             </div>
+            <div class="form-group">
+                <label>HR Verifier <small class="text-muted">(Reimbursement / Liquidation)</small></label>
+                <select name="hr_verifier_id">
+                    <option value="">-- Auto-assign (workload balanced) --</option>
+                    <?php foreach ($hrVerifiers as $hv): ?>
+                        <option value="<?= $hv['id'] ?>"><?= htmlspecialchars($hv['full_name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Optional. Routes Reimbursement and Liquidation process approval stage.</small>
+            </div>
         </div>
 
         <div class="form-section-divider">
