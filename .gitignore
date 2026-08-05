@@ -14,6 +14,7 @@ backup_2026-07-30
 restore.ps1
 
 desktop-app/node_modules
+desktop-app/src-tauri/target
 mobile-app/node_modules
 mobile-app/.idea
 
