@@ -86,7 +86,24 @@
             ORDER BY f.created_at DESC'
         );
         $stmt->execute([$userId, $userId]);
-    } elseif (in_array($roleId, [ 2, 4, 5 ], true)) {
+    } elseif ($roleId === 5) {
+        // AcquisitionChecker/Accounting shared queue: see forms assigned to
+        // them PLUS any pending Process (Accounting Checking) row assigned
+        // to any other Accounting account.
+        $stmt = db()->prepare(
+            'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
+            FROM forms f JOIN employees e ON e.id = f.submitted_by
+            JOIN approvals a ON a.form_id = f.id
+            WHERE (
+                a.approver_id = ?
+                OR f.submitted_by = ?
+                OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 5)
+            )
+            AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY f.created_at DESC'
+        );
+        $stmt->execute([$userId, $userId]);
+    } elseif (in_array($roleId, [ 2, 4 ], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by

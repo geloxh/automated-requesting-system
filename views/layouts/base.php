@@ -120,6 +120,30 @@
                          )'
                     );
                     $ars->execute([$userId]);
+                } elseif ($roleId === 5) {
+                    // AcquisitionChecker/Accounting shared queue: count rows
+                    // assigned to them PLUS any pending row assigned to any
+                    // other Accounting account.
+                    $ars = db()->prepare(
+                        'SELECT COUNT(*) FROM approvals a
+                         JOIN forms f ON f.id = a.form_id
+                         WHERE (
+                             a.approver_id = ?
+                             OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 5)
+                         )
+                         AND a.status = "pending"
+                         AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )
+                         AND NOT EXISTS (
+                             SELECT 1 FROM approvals a3
+                             JOIN employees e3 ON e3.id = a3.approver_id
+                             WHERE a3.form_id = a.form_id
+                               AND a3.status = "pending"
+                               AND a3.sequence < a.sequence
+                               AND a3.approver_id <> a.approver_id
+                               AND e3.role_id <> 8
+                         )'
+                    );
+                    $ars->execute([$userId]);
                 } else {
                     $ars = db()->prepare(
                         'SELECT COUNT(*) FROM approvals a
