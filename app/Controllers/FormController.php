@@ -33,6 +33,7 @@ class FormController {
 
     private const FINANCE_HEAD_ROLE = 8;
     private const HR_VERIFIER_ROLE = 9;
+    private const ADMIN_APPROVER_ROLE = 7;
     private const REIMB_LIQUID_TYPES = ['reimbursement', 'liquidation'];
 
     private function adminApproverStandsInFor(string $formType, int $stageRoleId): bool {
@@ -798,6 +799,20 @@ class FormController {
                         "UPDATE forms SET status = 'immediatehead_approved', updated_at = NOW() WHERE id = ?"
                     )->execute([$formId]);
                 }
+
+                // Admin Approver submitting any form type skips the Checker (Immediate
+                // Head) step entirely - auto-approve sequence 2 and advance status.
+                if ((int)$_SESSION['role_id'] === self::ADMIN_APPROVER_ROLE) {
+                    $pdo->prepare(
+                        "UPDATE approvals SET status = 'approved', approver_id = ?, approved_at = NOW(),
+                        remarks = 'Auto-approved: submitted by Admin Approver'
+                        WHERE form_id = ? AND sequence = 2"
+                    )->execute([(int)$_SESSION['user_id'], $formId]);
+
+                    $pdo->prepare(
+                        "UPDATE forms SET status = 'immediatehead_approved', updated_at = NOW() WHERE id = ?"
+                    )->execute([$formId]);
+                }
             }
 
             $this->audit('form_created', 'form', $formId, null, ['type' => $type, 'status' => $initialStatus]);
@@ -823,6 +838,7 @@ class FormController {
         $pipeline = $this->getPipeline($type);
         $isHrFirstCoSign = in_array($type, self::REIMB_LIQUID_TYPES, true);
         $isHrSubmitter = $isHrFirstCoSign && (int)($_SESSION['role_id'] ?? 0) === self::HR_VERIFIER_ROLE;
+        $isAdminApproverSubmitter = (int)($_SESSION['role_id'] ?? 0) === self::ADMIN_APPROVER_ROLE;
 
         $insert = $pdo->prepare(
             "INSERT INTO approvals (form_id, approver_id, sequence, status) VALUES (?, ?, ?, 'pending')"
@@ -831,9 +847,10 @@ class FormController {
 
         $stagesNeedingApprover = array_filter($pipeline, fn($step) => $step['sequence'] >= 2);
         foreach ($stagesNeedingApprover as $step) {
-            // Sequence 2 (Checker): HR submitter acts as their own checker
-            // send their own ID as placeholder; store() will immediately approve it.
-            if ($isHrSubmitter && $step['sequence'] === 2) {
+            // Sequence 2 (Checker): HR submitter, or an Admin Approver submitting
+            // any form type, acts as their own checker - send their own ID as a
+            // placeholder; store() will immediately auto-approve it.
+            if (($isHrSubmitter || $isAdminApproverSubmitter) && $step['sequence'] === 2) {
                 $insert->execute([$formId, $submitterId, 2]);
                 continue;
             }

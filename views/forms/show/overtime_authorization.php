@@ -1,4 +1,4 @@
-<?php // $data and $ro() are set by show.php ?>
+<?php ?>
 <div class="form-card">
     <div class="form-section-title">Applicant Details</div>
     <div class="form-grid g-3">
@@ -15,15 +15,15 @@
             <thead><tr><th>Date</th><th>Reason/s</th><th>Start</th><th>To</th><th>Total Hours</th></tr></thead>
             <tbody>
             <?php
-                $otDates  = $data['ot_date']       ?? [];
-                $reasons  = $data['reason']        ?? [];
-                $covered  = $data['hours_covered'] ?? [];
-                $totals   = $data['hours_total']   ?? [];
+                $otDates = $data['ot_date'] ?? [];
+                $reasons = $data['reason'] ?? [];
+                $covered = $data['hours_covered'] ?? [];
+                $totals = $data['hours_total'] ?? [];
                 // hours_covered is stored as a flat array: [start1, end1, start2, end2, ...]
                 $count = max(count($otDates), 1);
                 for ($i = 0; $i < $count; $i++):
-                    $start = $covered[$i * 2]       ?? '';
-                    $end   = $covered[$i * 2 + 1]   ?? '';
+                    $start = $covered[$i * 2] ?? '';
+                    $end = $covered[$i * 2 + 1] ?? '';
             ?>
                 <tr>
                     <td><input type="text" value="<?= htmlspecialchars($otDates[$i] ?? '') ?>" readonly></td>

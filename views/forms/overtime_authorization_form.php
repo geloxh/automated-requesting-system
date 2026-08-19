@@ -10,6 +10,13 @@
         : url('forms/overtime');
     $fieldVal = fn(string $k, string $def = '') =>
         htmlspecialchars($data[$k] ?? $def);
+    // hours_covered is stored as a flat interleaved array: [start1, end1, start2, end2, ...]
+    $otRowCount = max(1, count((array)($data['ot_date'] ?? [])));
+    $otDateVal = fn(int $i) => htmlspecialchars($data['ot_date'][$i] ?? '');
+    $otReasonVal = fn(int $i) => htmlspecialchars($data['reason'][$i] ?? '');
+    $otStartVal = fn(int $i) => htmlspecialchars($data['hours_covered'][$i * 2] ?? '');
+    $otEndVal = fn(int $i) => htmlspecialchars($data['hours_covered'][$i * 2 + 1] ?? '');
+    $otTotalVal = fn(int $i) => htmlspecialchars($data['hours_total'][$i] ?? '');
 ?>
 <form method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
     <div class="page-heading">Overtime Authorization Request</div>
@@ -39,20 +46,22 @@
         <div class="form-section-title">OT Request Details</div>
         <div class="table-scroll">
             <table class="form-table" id="items-table"
-                data-recalc="items"
+                data-recalc="ot"
                 data-add-btn-id="add-row"
-                data-total-id="total_amount"
+                data-total-id="total_hours"
             >
                 <thead><tr><th>Date</th><th>Reason/s</th><th>Start</th><th>To</th><th>Total Hours</th><th></th></tr></thead>
                 <tbody>
+                    <?php for ($i = 0; $i < $otRowCount; $i++): ?>
                     <tr>
-                        <td><input type="date" name="ot_date[]" required value="<?= $fieldVal('ot_date[]') ?>"></td>
-                        <td><input type="text" name="reason[]" value="<?= $fieldVal('reason[]') ?>"></td>
-                        <td><input type="time" name="hours_covered[]" value="<?= $fieldVal('hours_covered[]') ?>"></td>
-                        <td><input type="time" name="hours_covered[]" value="<?= $fieldVal('hours_covered[]') ?>"></td>
-                        <td><input type="number" name="hours_total[]" step="0.1" class="ot-hours" value="<?= $fieldVal('hours_total[]') ?>"></td>
+                        <td><input type="date" name="ot_date[]" required value="<?= $otDateVal($i) ?>"></td>
+                        <td><input type="text" name="reason[]" value="<?= $otReasonVal($i) ?>"></td>
+                        <td><input type="time" name="hours_covered[]" value="<?= $otStartVal($i) ?>"></td>
+                        <td><input type="time" name="hours_covered[]" value="<?= $otEndVal($i) ?>"></td>
+                        <td><input type="number" name="hours_total[]" step="0.1" class="ot-hours" value="<?= $otTotalVal($i) ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>
+                    <?php endfor; ?>
                 </tbody>
             </table>
         </div>
@@ -82,9 +91,9 @@
             <div class="attach-saved-label">Attached files</div>
             <div class="attach-list" id="attachSavedList">
                 <?php foreach ((array)$data['attachments'] as $i => $f):
-                    $ext  = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                    $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
                     $name = htmlspecialchars(basename($f));
-                    $url  = htmlspecialchars(url($f));
+                    $url = htmlspecialchars(url($f));
                     $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                 ?>
                 <div class="attach-item" id="saved-<?= $i ?>">

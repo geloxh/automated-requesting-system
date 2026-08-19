@@ -154,9 +154,9 @@
                         <div class="show-dl-value">
                             <div class="attach-list">
                                 <?php foreach ((array)$data['attachments'] as $f):
-                                    $ext   = strtolower(pathinfo($f, PATHINFO_EXTENSION));
-                                    $name  = htmlspecialchars(basename($f));
-                                    $url   = htmlspecialchars(url($f));
+                                    $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                                    $name = htmlspecialchars(basename($f));
+                                    $url = htmlspecialchars(url($f));
                                     $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                                 ?>
                                 <div class="attach-item">

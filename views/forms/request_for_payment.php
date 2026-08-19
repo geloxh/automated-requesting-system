@@ -10,6 +10,13 @@
         : url('forms/request-for-payment/create');
     $fieldVal = fn(string $k, string $def = '') =>
         htmlspecialchars($data[$k] ?? $def);
+    $rowVal = fn(string $k, int $i, string $def = '') =>
+        htmlspecialchars($data[$k][$i] ?? $def);
+    $itemRowKeys = ['item', 'description', 'unit_price', 'quantity', 'amount'];
+    $itemRowCount = 1;
+    foreach ($itemRowKeys as $rk) {
+        $itemRowCount = max($itemRowCount, count((array)($data[$rk] ?? [])));
+    }
 ?>
 <form method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
     <div class="page-heading">Request for Payment</div>
@@ -34,8 +41,9 @@
             <div class="form-group"><label>Pages</label><input type="text" name="page_no" placeholder="No. of attachments" value="<?= $fieldVal('page_no') ?>"></div>
             <div class="form-group"><label>Date</label><input type="date" name="date" required value="<?= $fieldVal('date') ?>"></div>
         </div>
-        <div class="form-group mt-1">
-            <label>Project Name</label><input type="text" name="project_name" value="<?= $fieldVal('project_name') ?>">
+        <div class="form-grid g-2 mt-1">
+            <div class="form-group"><label>Project Name</label><input type="text" name="project_name" value="<?= $fieldVal('project_name') ?>"></div>
+            <div class="form-group"><label>Project No.</label><input type="text" name="project_code" value="<?= $fieldVal('project_code') ?>"></div>
         </div>
     </div>
 
@@ -72,14 +80,16 @@
             >
                 <thead><tr><th>Item</th><th>Description</th><th>Unit Price</th><th>Quantity</th><th>Amount</th><th></th></tr></thead>
                 <tbody>
+                    <?php for ($i = 0; $i < $itemRowCount; $i++): ?>
                     <tr>
-                        <td><input type="text" name="item[]" value="<?= $fieldVal('item[]') ?>"></td>
-                        <td><input type="text" name="description[]" value="<?= $fieldVal('description[]') ?>"></td>
-                        <td><input type="number" step="0.01" name="unit_price[]" class="unit-price" value="<?= $fieldVal('unit_price[]') ?>"></td>
-                        <td><input type="number" name="quantity[]" class="qty" value="<?= $fieldVal('quantity[]') ?>"></td>
-                        <td><input type="number" step="0.01" name="amount[]" class="row-amount" readonly value="<?= $fieldVal('amount[]') ?>"></td>
+                        <td><input type="text" name="item[]" value="<?= $rowVal('item', $i) ?>"></td>
+                        <td><input type="text" name="description[]" value="<?= $rowVal('description', $i) ?>"></td>
+                        <td><input type="number" step="0.01" name="unit_price[]" class="unit-price" value="<?= $rowVal('unit_price', $i) ?>"></td>
+                        <td><input type="number" name="quantity[]" class="qty" value="<?= $rowVal('quantity', $i) ?>"></td>
+                        <td><input type="number" step="0.01" name="amount[]" class="row-amount" readonly value="<?= $rowVal('amount', $i) ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>
+                    <?php endfor; ?>
                 </tbody>
             </table>
         </div>
@@ -107,9 +117,9 @@
             <div class="attach-saved-label">Attached files</div>
             <div class="attach-list" id="attachSavedList">
                 <?php foreach ((array)$data['attachments'] as $i => $f):
-                    $ext   = strtolower(pathinfo($f, PATHINFO_EXTENSION));
-                    $name  = htmlspecialchars(basename($f));
-                    $furl  = htmlspecialchars(url($f));
+                    $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                    $name = htmlspecialchars(basename($f));
+                    $furl = htmlspecialchars(url($f));
                     $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                 ?>
                 <div class="attach-item" id="saved-<?= $i ?>">

@@ -105,9 +105,9 @@
             <div class="attach-saved-label">Attached files</div>
             <div class="attach-list" id="attachSavedList">
                 <?php foreach ((array)$data['attachments'] as $i => $f):
-                    $ext  = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+                    $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
                     $name = htmlspecialchars(basename($f));
-                    $url  = htmlspecialchars(url($f));
+                    $url = htmlspecialchars(url($f));
                     $isImg = in_array($ext, ['jpg','jpeg','png','gif','webp']);
                 ?>
                 <div class="attach-item" id="saved-<?= $i ?>">

@@ -60,6 +60,10 @@ function initTable(config) {
 
     document.addEventListener('input', runRecalc);
 
+    // Run once on load so totals/balance reflect any pre-filled values
+    // (e.g. editing a saved draft), not just values typed after load.
+    runRecalc();
+
     document.addEventListener('click', e => {
         if (!e.target.classList.contains('remove-row')) return;
         const tbody = document.querySelector(`#${tableId} tbody`);
@@ -76,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
              recalc: table.dataset.recalc,
              totalId: table.dataset.totalId,
              balanceId: table.dataset.balanceId ?? null,
-             advanceID: table.dataset.advanceId ?? null,
+             advanceId: table.dataset.advanceId ?? null,
         });
     });
 });

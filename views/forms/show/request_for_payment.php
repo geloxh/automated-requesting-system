@@ -7,7 +7,10 @@
         <div class="form-group"><label>Pages</label><input type="text" value="<?= $ro('page_no') ?>" readonly></div>
         <div class="form-group"><label>Date</label><input type="text" value="<?= $ro('date') ?>" readonly></div>
     </div>
-    <div class="form-group mt-1"><label>Project Name</label><input type="text" value="<?= $ro('project_name') ?>" readonly></div>
+    <div class="form-grid g-2 mt-1">
+        <div class="form-group"><label>Project Name</label><input type="text" value="<?= $ro('project_name') ?>" readonly></div>
+        <div class="form-group"><label>Project No.</label><input type="text" value="<?= $ro('project_code') ?>" readonly></div>
+    </div>
 </div>
 
 <div class="form-card">
@@ -30,19 +33,19 @@
             <thead><tr><th>Item</th><th>Description</th><th>Unit Price</th><th>Quantity</th><th>Amount</th></tr></thead>
             <tbody>
             <?php
-                $items   = $data['item']        ?? [];
-                $descs   = $data['description'] ?? [];
-                $prices  = $data['unit_price']  ?? [];
-                $qtys    = $data['quantity']    ?? [];
-                $amounts = $data['amount']      ?? [];
+                $items = $data['item'] ?? [];
+                $descs = $data['description'] ?? [];
+                $prices = $data['unit_price'] ?? [];
+                $qtys = $data['quantity'] ?? [];
+                $amounts = $data['amount'] ?? [];
                 $count = max(count($items), 1);
                 for ($i = 0; $i < $count; $i++):
             ?>
                 <tr>
-                    <td><input type="text"   value="<?= htmlspecialchars($items[$i]   ?? '') ?>" readonly></td>
-                    <td><input type="text"   value="<?= htmlspecialchars($descs[$i]   ?? '') ?>" readonly></td>
-                    <td><input type="number" value="<?= htmlspecialchars($prices[$i]  ?? '') ?>" readonly></td>
-                    <td><input type="number" value="<?= htmlspecialchars($qtys[$i]    ?? '') ?>" readonly></td>
+                    <td><input type="text" value="<?= htmlspecialchars($items[$i] ?? '') ?>" readonly></td>
+                    <td><input type="text" value="<?= htmlspecialchars($descs[$i] ?? '') ?>" readonly></td>
+                    <td><input type="number" value="<?= htmlspecialchars($prices[$i] ?? '') ?>" readonly></td>
+                    <td><input type="number" value="<?= htmlspecialchars($qtys[$i] ?? '') ?>" readonly></td>
                     <td><input type="number" value="<?= htmlspecialchars($amounts[$i] ?? '') ?>" readonly></td>
                 </tr>
             <?php endfor; ?>
