@@ -95,7 +95,7 @@
         <label class="attach-drop" id="attachDrop">
             <i class="ti ti-cloud-upload"></i>
             <span class="attach-drop-main">Choose files here</span>
-            <span class="attach-drop-sub">PDF, JPG, PNG — max 5 MB each · multiple allowed</span>
+            <span class="attach-drop-sub">PDF, JPG, PNG — max 20 MB each · multiple allowed</span>
             <input type="file" name="attachments[]" id="attachInput"
                 multiple accept=".pdf,.jpg,.jpeg,.png" class="hidden-input">
         </label>

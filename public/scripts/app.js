@@ -631,7 +631,7 @@ document.addEventListener('change', function (e) {
 
     function addFiles(files) {
         Array.from(files).forEach(function (f) {
-            if (f.size > 5 * 1024 * 1024) { alert(f.name + ' exceeds 5 MB.'); return; }
+            if (f.size > 20 * 1024 * 1024) { alert(f.name + ' exceeds 20 MB.'); return; }
             pickedFiles.push(f);
         });
         syncInput();

@@ -83,7 +83,7 @@ function initSignatureCapture() {
     if (!form || !tabDraw || !tabUpload) return;
 
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-    const MAX_BYTES = 5 * 1024 * 1024;
+    const MAX_BYTES = 20 * 1024 * 1024;
 
     // ── Tabs ──
     let activeMethod = 'draw';
@@ -220,7 +220,7 @@ function initSignatureCapture() {
             return;
         }
         if (file.size > MAX_BYTES) {
-            showFileError('File must be under 5 MB.');
+            showFileError('File must be under 20 MB.');
             clearFile();
             return;
         }

@@ -26,6 +26,16 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -subj "/C=PH/ST=NCR/L=Manila/O=AutomatedRequestingSystem/CN=192.168.100.108" \
     -addext "subjectAltName=IP:192.168.100.108,DNS:localhost"
 
+# ── PHP upload limits ── //
+# Forms allow supporting-document attachments up to 20MB each, multiple per
+# submission. PHP's stock defaults (upload_max_filesize=2M, post_max_size=8M)
+# would silently reject/truncate these before the app's own validation even
+# runs, regardless of what the app-level checks allow.
+RUN { \
+        echo 'upload_max_filesize = 20M'; \
+        echo 'post_max_size = 100M'; \
+    } > /usr/local/etc/php/conf.d/ars-uploads.ini
+
 # ── Composer ── //
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

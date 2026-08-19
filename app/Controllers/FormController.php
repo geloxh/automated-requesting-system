@@ -585,7 +585,7 @@ class FormController {
         if (!empty($_FILES['approval_file']['tmp_name'])) {
             $file = $_FILES['approval_file'];
             $allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-            $maxBytes = 5 * 1024 * 1024;
+            $maxBytes = 20 * 1024 * 1024;
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
@@ -595,7 +595,7 @@ class FormController {
                 exit;
             }
             if ($file['size'] > $maxBytes) {
-                $_SESSION['error'] = 'File must be under 5 MB.';
+                $_SESSION['error'] = 'File must be under 20 MB.';
                 header("Location: " . url("forms/view/{$id}"));
                 exit;
             }
@@ -717,7 +717,7 @@ class FormController {
         $uploadedPaths = [];
         if (!empty($_FILES['attachments']['name'][0])) {
             $allowed = ['image/jpeg', 'image/png', 'application/pdf'];
-            $maxBytes = 5 * 1024 * 1024;
+            $maxBytes = 20 * 1024 * 1024;
             $destDir = __DIR__ . '/../../public/uploads/forms/';
             if (!is_dir($destDir)) mkdir($destDir, 0755, true);
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -726,7 +726,7 @@ class FormController {
                 if ($_FILES['attachments']['error'][$i] !== UPLOAD_ERR_OK) continue;
                 $mime = $finfo->file($tmp);
                 if (!in_array($mime, $allowed, true) || $_FILES['attachments']['size'][$i] > $maxBytes) {
-                    $_SESSION['error'] = 'Invalid file or file exceeds 5 MB.';
+                    $_SESSION['error'] = 'Invalid file or file exceeds 20 MB.';
                     header("Location: " . url("forms/{$slug}/create"));
                     exit;
                 }
@@ -1651,7 +1651,7 @@ class FormController {
 
         if (!empty($_FILES['attachments']['name'][0])) {
             $allowed = ['image/jpeg', 'image/png', 'application/pdf'];
-            $maxBytes = 5 * 1024 * 1024;
+            $maxBytes = 20 * 1024 * 1024;
             $destDir = __DIR__ . '/../../public/uploads/forms/';
             if (!is_dir($destDir)) mkdir($destDir, 0755, true);
             $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -1660,7 +1660,7 @@ class FormController {
                 if ($_FILES['attachments']['error'][$i] !== UPLOAD_ERR_OK) continue;
                 $mime = $finfo->file($tmp);
                 if (!in_array($mime, $allowed, true) || $_FILES['attachments']['size'][$i] > $maxBytes) {
-                    $_SESSION['error'] = 'Invalid file or file exceeds 5 MB.';
+                    $_SESSION['error'] = 'Invalid file or file exceeds 20 MB.';
                     header('Location: ' . url('forms/' . $id . '/edit'));
                     exit;
                 }

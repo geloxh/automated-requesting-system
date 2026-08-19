@@ -130,12 +130,12 @@
 
 // ── Attachment drop zone ──
 (function () {
-    const drop   = document.getElementById('attachDrop');
-    const input  = document.getElementById('attachInput');
-    const list   = document.getElementById('attachNewList');
+    const drop = document.getElementById('attachDrop');
+    const input = document.getElementById('attachInput');
+    const list = document.getElementById('attachNewList');
     if (!drop || !input || !list) return;
 
-    const MAX = 5 * 1024 * 1024;
+    const MAX = 20 * 1024 * 1024;
     const ALLOWED = ['image/jpeg','image/png','application/pdf'];
 
     function renderFile(file, idx) {
@@ -178,7 +178,7 @@
     function handleFiles(files) {
         Array.from(files).forEach((f, i) => {
             if (!ALLOWED.includes(f.type) || f.size > MAX) {
-                alert(`"${f.name}" is invalid or exceeds 5 MB.`);
+                alert(`"${f.name}" is invalid or exceeds 20 MB.`);
                 return;
             }
             renderFile(f, Date.now() + i);
