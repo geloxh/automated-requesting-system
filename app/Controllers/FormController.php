@@ -560,7 +560,13 @@ class FormController {
         }
 
         // FIX 3b: roleSatisfiesStage now handles role 9 → role 5, so no extra hack needed
+        // FIX 4: A directly-assigned approver (e.g. an employee's supervisor_id points
+        // to someone whose own account role differs from the pipeline step's role_id,
+        // such as a Finance Head set as another employee's Immediate Head) is authorized
+        // by virtue of owning the pending approval row itself — role match isn't required.
+        $isDirectlyAssignedApprover = $approval && (int) $approval['approver_id'] === $userId;
         $actorAllowed = $isAdmin || $isAdminApproverStandIn || $isMasterApproverStandIn || $isFinalApproverStandIn || $isHrVerifierStandIn || $isFinanceHeadStandIn || $action === 'submit'
+            || $isDirectlyAssignedApprover
             || $this->roleSatisfiesStage($roleId, $step['role_id'], $form['form_type']);
         if (!$actorAllowed) {
             $_SESSION['error'] = 'You are not authorized to perform this action.';
