@@ -1266,12 +1266,23 @@ class FormController {
         if ($roleId === 5) {
             $accRow = db()->prepare(
                 "SELECT a.id FROM approvals a JOIN employees e ON e.id = a.approver_id
-                 WHERE a.form_id = ? AND e.role_id = 5 LIMIT 1"
+                WHERE a.form_id = ? AND e.role_id = 5 LIMIT 1"
             );
             $accRow->execute([$id]);
             if ($accRow->fetch()) return $form;
-        }
 
+            // Also grant access when this specific user has a pending sequence-3
+            // row (dynamic co-sign on Reimbursement/Liquidation, inserted by HR
+            // approval — the approver_id is role 5 but may not be found by the
+            // e.role_id = 5 join if the employee record isn't role 5 exactly).
+            $myPending = db()->prepare(
+                "SELECT id FROM approvals
+                WHERE form_id = ? AND approver_id = ? AND sequence = 3 AND status = 'pending'
+                LIMIT 1"
+            );
+            $myPending->execute([$id, $userId]);
+            if ($myPending->fetch()) return $form;
+        }
         return $this->renderError(403, 'Access Denied', 'You do not have permission to view this form.');
     }
 
@@ -1628,12 +1639,30 @@ class FormController {
     private function canEditAsProcessApprover(array $form): bool {
         if ((int) ($_SESSION['role_id'] ?? 0) !== 5) return false;
 
+        // Pipeline-defined stage (Finance forms: advance_payment, request_for_payment)
         $pipeline = $this->getPipeline($form['form_type']);
         foreach ($pipeline as $step) {
             if ((int) $step['role_id'] === 5 && $form['status'] === $step['from']) {
                 return true;
             }
         }
+
+        // Dynamic co-sign stage (Reimbursement / Liquidation): role 5 is seeded
+        // at sequence 3 alongside HR. The pipeline lists role_id 9 for that step,
+        // so the loop above never matches. Check the DB directly instead.
+        if (in_array($form['form_type'], self::REIMB_LIQUID_TYPES, true)
+            && $form['status'] === 'immediatehead_approved'
+        ) {
+            $userId = (int) ($_SESSION['user_id'] ?? 0);
+            $row = db()->prepare(
+                "SELECT id FROM approvals
+                WHERE form_id = ? AND approver_id = ? AND sequence = 3 AND status = 'pending'
+                LIMIT 1"
+            );
+            $row->execute([$form['id'], $userId]);
+            if ($row->fetch()) return true;
+        }
+
         return false;
     }
 
