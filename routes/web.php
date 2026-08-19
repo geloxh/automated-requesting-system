@@ -252,7 +252,7 @@
 
     // GET /approvals — pending approval inbox
     if ($uri === '/approvals') {
-        \App\Middleware\RoleMiddleware::requireAnyRole([1, 2, 3, 4, 5, 6, 7, 8]); // extend for roles 4,5,6 as needed
+        \App\Middleware\RoleMiddleware::requireAnyRole([1, 2, 3, 4, 5, 6, 7, 8, 9]); // extend for roles 4,5,6 as needed
         (new \App\Controllers\ApprovalController)->inbox();
         exit;
     }

@@ -176,6 +176,17 @@ class FormController {
         $nextAction = $statusToAction[$form['status']] ?? null;
 
         $canAct = $this->canActOnForm($form, $approvalSteps);
+
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
+        $isOwner = $roleId === 1 || (int) $form['submitted_by'] === $userId;
+        $editableStatuses = ['draft', 'submitted', 'rejected'];
+        // Same rule as edit()/update(): the owner while in an editable status,
+        // OR the AcquisitionChecker while the form sits at their Process
+        // (Accounting Checking) stage.
+        $canEdit = ($isOwner && in_array($form['status'], $editableStatuses, true))
+            || $this->canEditAsProcessApprover($form);
+
         $data = json_decode($form['data'], true) ?? [];
         $formLabel = \App\Helpers\FormLabels::all();
         $typeLabel = \App\Helpers\FormLabels::get($form['form_type']);
@@ -186,7 +197,7 @@ class FormController {
         ];
 
         $this->render('forms/show', compact(
-            'form', 'approvalSteps', 'canAct', 'data',
+            'form', 'approvalSteps', 'canAct', 'canEdit', 'data',
             'pageTitle', 'nextAction', 'breadcrumbs'
         ));
     }
@@ -1609,15 +1620,37 @@ class FormController {
         return $this->typeMap[$slug];
     }
 
+    // AcquisitionChecker/Accounting (role 5) may edit a form while it is
+    // sitting at their Process (Accounting Checking) stage — i.e. the form's
+    // current status matches the 'from' status of the pipeline step whose
+    // role_id is 5 for this form's type. Derived from the pipeline
+    // definition so it stays correct if the pipeline ever changes.
+    private function canEditAsProcessApprover(array $form): bool {
+        if ((int) ($_SESSION['role_id'] ?? 0) !== 5) return false;
+
+        $pipeline = $this->getPipeline($form['form_type']);
+        foreach ($pipeline as $step) {
+            if ((int) $step['role_id'] === 5 && $form['status'] === $step['from']) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function edit(int $id): void {
         $form = $this->findForm($id);
 
-        if ($_SESSION['role_id'] != 1 && $form['submitted_by'] != $_SESSION['user_id']) {
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
+        $isOwner = $roleId === 1 || (int) $form['submitted_by'] === $userId;
+        $isProcessApprover = $this->canEditAsProcessApprover($form);
+
+        if (!$isOwner && !$isProcessApprover) {
             $this->renderError(403, 'Access Denied', 'You can only edit your own submissions.');
         }
 
         $editableStatuses = ['draft', 'submitted', 'rejected'];
-        if (!in_array($form['status'], $editableStatuses, true)) {
+        if (!$isProcessApprover && !in_array($form['status'], $editableStatuses, true)) {
             $_SESSION['error'] = 'This form cannot be edited while it is in approval or completed.';
             header('Location: ' . url('forms/view/' . $id));
             exit;
@@ -1629,9 +1662,9 @@ class FormController {
         $formLabel = \App\Helpers\FormLabels::all();
         $typeLabel = \App\Helpers\FormLabels::get($type);
         $pageTitle = 'Edit ' . $typeLabel . ' #' . $id;
-        $departments = db()->query(
-            'SELECT DISTINCT department FROM employees WHERE department IS NOT NULL ORDER BY department'
-        )->fetchAll(PDO::FETCH_COLUMN);
+        $currentUser = $_SESSION['user_name'] ?? '';        
+        $currentDept = $_SESSION['department'] ?? '';        
+        $departments = db()->query('SELECT name FROM departments ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
 
         $breadcrumbs = [
             ['label' => $typeLabel, 'url' => url('forms/' . $slug)],
@@ -1644,7 +1677,8 @@ class FormController {
 
         $this->render("forms/{$viewName}", compact(
             'form', 'data', 'type', 'slug', 'formLabel', 'typeLabel',
-            'pageTitle', 'breadcrumbs', 'departments'
+            'pageTitle', 'breadcrumbs', 'departments',
+            'currentUser', 'currentDept'              
         ));
     }
 
@@ -1653,12 +1687,17 @@ class FormController {
 
         $form = $this->findForm($id);
 
-        if ($_SESSION['role_id'] != 1 && $form['submitted_by'] != $_SESSION['user_id']) {
+        $userId = (int) $_SESSION['user_id'];
+        $roleId = (int) $_SESSION['role_id'];
+        $isOwner = $roleId === 1 || (int) $form['submitted_by'] === $userId;
+        $isProcessApprover = $this->canEditAsProcessApprover($form);
+
+        if (!$isOwner && !$isProcessApprover) {
             $this->renderError(403, 'Access Denied', 'You can only edit your own submissions.');
         }
 
         $editableStatuses = ['draft', 'submitted', 'rejected'];
-        if (!in_array($form['status'], $editableStatuses, true)) {
+        if (!$isProcessApprover && !in_array($form['status'], $editableStatuses, true)) {
             $_SESSION['error'] = 'This form cannot be edited in its current status.';
             header('Location: ' . url('forms/view/' . $id));
             exit;

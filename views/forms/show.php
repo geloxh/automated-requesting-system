@@ -11,7 +11,8 @@
 
     $isOwner = ((int)$form['submitted_by'] === (int)$_SESSION['user_id']) || $roleId == 1;
     $editableStatuses = ['draft', 'submitted', 'rejected'];
-    $canEdit = $isOwner && in_array($form['status'], $editableStatuses, true);
+    // $canEdit is computed by the controller (owner-in-editable-status, OR
+    // AcquisitionChecker while the form is at their Process stage).
     $canDelete = $isOwner && in_array($form['status'], $editableStatuses, true);
 
     $submittedBy = $form['submitter_name'] ?? ($form['submitted_by_name'] ?? null);
