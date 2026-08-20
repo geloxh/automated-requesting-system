@@ -84,8 +84,8 @@
                     <tr>
                         <td><input type="text" name="item[]" value="<?= $rowVal('item', $i) ?>"></td>
                         <td><input type="text" name="description[]" value="<?= $rowVal('description', $i) ?>"></td>
-                        <td><input type="number" step="0.01" name="unit_price[]" class="unit-price" value="<?= $rowVal('unit_price', $i) ?>"></td>
-                        <td><input type="number" name="quantity[]" class="qty" value="<?= $rowVal('quantity', $i) ?>"></td>
+                        <td><input type="number" step="any" name="unit_price[]" class="unit-price" value="<?= $rowVal('unit_price', $i) ?>"></td>
+                        <td><input type="number" step="any" name="quantity[]" class="qty" value="<?= $rowVal('quantity', $i) ?>"></td>
                         <td><input type="number" step="0.01" name="amount[]" class="row-amount" readonly value="<?= $rowVal('amount', $i) ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>

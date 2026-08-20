@@ -50,7 +50,7 @@
         <div class="form-grid g-3">
             <div class="form-group"><label>Advance Date</label><input type="date" name="advance_date" value="<?= $fieldVal('advance_date') ?>"></div>
             <div class="form-group"><label>Advance Type</label><input type="text" name="advance_type" value="<?= $fieldVal('advance_type') ?>"></div>
-            <div class="form-group"><label>Advance Amount</label><input type="number" step="0.01" name="advance_amount" id="advance_amount" value="<?= $fieldVal('advance_amount') ?>"></div>
+            <div class="form-group"><label>Advance Amount</label><input type="number" step="any" name="advance_amount" id="advance_amount" value="<?= $fieldVal('advance_amount') ?>"></div>
         </div>
     </div>
 
@@ -68,13 +68,13 @@
                 <tbody>
                     <?php for ($i = 0; $i < $liqRowCount; $i++): ?>
                     <tr>
-                        <td><input type="number" name="item_no[]" value="<?= $rowVal('item_no', $i) ?>"></td>
+                        <td><input type="number" step="any" name="item_no[]" value="<?= $rowVal('item_no', $i) ?>"></td>
                         <td><input type="date" name="item_date[]" value="<?= $rowVal('item_date', $i) ?>"></td>
                         <td><input type="text" name="invoice_number[]" value="<?= $rowVal('invoice_number', $i) ?>"></td>
                         <td><input type="text" name="even[]" value="<?= $rowVal('even', $i) ?>"></td>
                         <td><input type="text" name="particulars[]" value="<?= $rowVal('particulars', $i) ?>"></td>
                         <td><input type="text" name="person_place[]" value="<?= $rowVal('person_place', $i) ?>"></td>
-                        <td><input type="number" step="0.01" name="amount[]" class="row-amount" value="<?= $rowVal('amount', $i) ?>"></td>
+                        <td><input type="number" step="any" name="amount[]" class="row-amount" value="<?= $rowVal('amount', $i) ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>
                     <?php endfor; ?>

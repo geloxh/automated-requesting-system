@@ -41,7 +41,7 @@
         <div class="form-grid g-3">
             <div class="form-group"><label>From</label><input type="date" name="from_date" value="<?= $fieldVal('from_date') ?>"></div>
             <div class="form-group"><label>To</label><input type="date" name="to_date" value="<?= $fieldVal('to_date') ?>"></div>
-            <div class="form-group"><label>Number of Leave Days</label><input type="number" name="num_of_leave" value="<?= $fieldVal('num_of_leave') ?>"></div>
+            <div class="form-group"><label>Number of Leave Days</label><input type="number" step="any" name="num_of_leave" value="<?= $fieldVal('num_of_leave') ?>"></div>
         </div>
     </div>
 

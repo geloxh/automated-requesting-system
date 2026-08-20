@@ -58,7 +58,7 @@
                         <td><input type="text" name="reason[]" value="<?= $otReasonVal($i) ?>"></td>
                         <td><input type="time" name="hours_covered[]" value="<?= $otStartVal($i) ?>"></td>
                         <td><input type="time" name="hours_covered[]" value="<?= $otEndVal($i) ?>"></td>
-                        <td><input type="number" name="hours_total[]" step="0.1" class="ot-hours" value="<?= $otTotalVal($i) ?>"></td>
+                        <td><input type="number" name="hours_total[]" step="any" class="ot-hours" value="<?= $otTotalVal($i) ?>"></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-row">✕</button></td>
                     </tr>
                     <?php endfor; ?>

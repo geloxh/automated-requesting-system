@@ -33,7 +33,7 @@
                     </datalist>
                 </div>
             </div>
-            <div class="form-group"><label>Total Mileage</label><input type="number" name="total_mileage" value="<?= $fieldVal('total_mileage') ?>"></div>
+            <div class="form-group"><label>Total Mileage</label><input type="number" step="any" name="total_mileage" value="<?= $fieldVal('total_mileage') ?>"></div>
             <div class="form-group"><label>Schedule Time</label><input type="text" name="schedule_time" placeholder="Departure and arrival time" value="<?= $fieldVal('schedule_time') ?>"></div>
             <div class="form-group">
                 <label>Type of Trip</label>
