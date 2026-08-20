@@ -110,14 +110,15 @@
         );
         $stmt->execute();
     } elseif ($roleId === 5) {
-        // AcquisitionChecker/Accounting shared queue: only forms where a
-        // role-5 approval row is the current active pending step.
+        // AcquisitionChecker is NOT a shared queue: each submitter has
+        // exactly one assigned AcquisitionChecker (employees.
+        // acquisition_checker_id, see resolveApproversByRole()). Only
+        // show forms where THIS user is the actual assigned approver.
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
-            JOIN employees ea ON ea.id = a.approver_id
-            WHERE ea.role_id = 5
+            WHERE a.approver_id = ?
             AND a.status = \'pending\'
             AND NOT EXISTS (
                 SELECT 1 FROM approvals a2
@@ -129,7 +130,7 @@
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute();
+        $stmt->execute([$userId]);
     } elseif (in_array($roleId, [2, 4], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at

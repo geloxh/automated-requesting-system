@@ -80,12 +80,21 @@ class FormController {
         return $stageRoleId === 2;
     }
 
+    // FinalApprover (role 6) can also be picked as someone's Supervisor
+    // (employees.supervisor_id), which seeds them into the ImmediateHead
+    // (role 2) pipeline stage. This lets roleSatisfiesStage() recognise that.
+    private function finalApproverStandsInFor(string $formType, int $stageRoleId): bool {
+        return $stageRoleId === 2;
+    }
+
     private function roleSatisfiesStage(int $actorRole, int $requiredRole, string $formType = ''): bool {
         if ($actorRole === $requiredRole) return true;
         if ($actorRole === 7 && in_array($requiredRole, self::ADMIN_APPROVER_COVERS, true)) return true;
         if ($actorRole === 4 && $this->masterApproverStandsInFor($formType, $requiredRole)) return true;
+        if ($actorRole === 6 && $this->finalApproverStandsInFor($formType, $requiredRole)) return true;
         return false;
     }
+
 
     // ─── PUBLIC ROUTES ────────────────────────────────────────────────────────
 
@@ -102,8 +111,9 @@ class FormController {
             );
             $stmt->execute([$type]);
         } elseif (in_array($roleId, [2, 4, 5, 6, 7, 8, 9])) {
-            $stmt = db()->prepare(
-                'SELECT DISTINCT f.id, f.status, f.created_at, e.full_name
+            $standInRoles = ($roleId === 7) ? (self::ADMIN_APPROVER_STANDIN_COVERAGE[$type] ?? []) : [];
+
+            $sql = 'SELECT DISTINCT f.id, f.status, f.created_at, e.full_name
                  FROM forms f JOIN employees e ON e.id = f.submitted_by
                  WHERE f.form_type = ?
                    AND (
@@ -111,11 +121,24 @@ class FormController {
                      OR EXISTS (
                          SELECT 1 FROM approvals a
                          WHERE a.form_id = f.id AND a.approver_id = ?
-                     )
-                   )
-                 ORDER BY f.created_at DESC LIMIT 50'
-            );
-            $stmt->execute([$type, $userId, $userId]);
+                     )';
+            $params = [$type, $userId, $userId];
+
+            if (!empty($standInRoles)) {
+                // AdminApprover never owns an approvals row for the roles it stands
+                // in for (2/4/6), so also match on the pending step's role_id.
+                $placeholders = implode(',', array_fill(0, count($standInRoles), '?'));
+                $sql .= " OR EXISTS (
+                         SELECT 1 FROM approvals a
+                         WHERE a.form_id = f.id AND a.status = 'pending' AND a.role_id IN ({$placeholders})
+                     )";
+                array_push($params, ...$standInRoles);
+            }
+
+            $sql .= ') ORDER BY f.created_at DESC LIMIT 50';
+
+            $stmt = db()->prepare($sql);
+            $stmt->execute($params);
         } else {
             $stmt = db()->prepare(
                 'SELECT f.id, f.status, f.created_at, e.full_name
@@ -182,7 +205,7 @@ class FormController {
         $canEdit          = ($isOwner && in_array($form['status'], $editableStatuses, true))
             || $this->canEditAsProcessApprover($form);
 
-        $data        = json_decode($form['data'], true) ?? [];
+        $data        = json_decode((string) $this->rawFormData($form), true) ?? [];
         $formLabel   = \App\Helpers\FormLabels::all();
         $typeLabel   = \App\Helpers\FormLabels::get($form['form_type']);
         $pageTitle   = $typeLabel . ' #' . $id;
@@ -264,7 +287,9 @@ class FormController {
             if ($activeStepRole === null || !$this->masterApproverStandsInFor($form['form_type'], $activeStepRole)) {
                 $isMasterApproverStandIn = false;
             }
-            if ($activeStepRole !== 6) $isFinalApproverStandIn = false;
+            if ($activeStepRole === null || !($activeStepRole === 6 || $this->finalApproverStandsInFor($form['form_type'], $activeStepRole))) {
+                $isFinalApproverStandIn = false;
+            }
             if ($activeStepRole !== 9) $isHrVerifierStandIn    = false;
             if ($activeStepRole !== 8) $isFinanceHeadStandIn   = false;
 
@@ -358,6 +383,48 @@ class FormController {
         header("Location: " . url("forms/view/{$id}")); exit;
     }
 
+    public function edit(int $id): void {
+        $form = $this->findForm($id);
+
+        $userId           = (int) $_SESSION['user_id'];
+        $roleId           = (int) $_SESSION['role_id'];
+        $isOwner          = $roleId === 1 || (int) $form['submitted_by'] === $userId;
+        $editableStatuses = ['draft', 'submitted', 'rejected'];
+
+        if (!($isOwner && in_array($form['status'], $editableStatuses, true))
+            && !$this->canEditAsProcessApprover($form)) {
+            $_SESSION['error'] = 'You cannot edit this form at its current stage.';
+            header("Location: " . url("forms/view/{$id}")); exit;
+        }
+
+        $type = $form['form_type'];
+        if (!isset($this->fields[$type])) {
+            $_SESSION['error'] = 'Unknown form type.';
+            header("Location: " . url("forms/view/{$id}")); exit;
+        }
+
+        $fields      = $this->fields[$type];
+        $data        = json_decode((string) $this->rawFormData($form), true) ?? [];
+        $formType    = $type;
+        $slug        = array_search($type, $this->typeMap) ?: str_replace('_', '-', $type);
+        $noSuffix    = ['list', 'show', 'request_for_payment'];
+        $viewName    = in_array($type, $noSuffix) ? $type : "{$type}_form";
+        $pageTitle   = \App\Helpers\FormLabels::get($type);
+        $departments = db()->query('SELECT name FROM departments ORDER BY name')->fetchAll(PDO::FETCH_COLUMN);
+        $currentUser = $_SESSION['user_name'] ?? '';
+        $currentDept = $_SESSION['department'] ?? '';
+        $breadcrumbs = [
+            ['label' => $pageTitle, 'url' => url('forms/' . $slug)],
+            ['label' => '#' . $id, 'url' => url("forms/view/{$id}")],
+            ['label' => 'Edit'],
+        ];
+
+        $this->render("forms/{$viewName}", compact(
+            'form', 'data', 'fields', 'formType', 'slug', 'pageTitle',
+            'departments', 'currentUser', 'currentDept', 'breadcrumbs'
+        ));
+    }
+
     public function update(int $id): void {
         \App\Helpers\Csrf::verify();
 
@@ -393,7 +460,7 @@ class FormController {
             }
 
             $this->audit('form_updated', 'form', $id,
-                ['data' => $form['data']],
+                ['data' => $this->rawFormData($form)],
                 ['data' => json_encode($data)]
             );
 
@@ -406,6 +473,48 @@ class FormController {
         }
 
         header("Location: " . url("forms/view/{$id}")); exit;
+    }
+
+    public function delete(int $id): void {
+        \App\Helpers\Csrf::verify();
+
+        $form = $this->findForm($id);
+
+        $userId           = (int) $_SESSION['user_id'];
+        $roleId           = (int) $_SESSION['role_id'];
+        $isOwner          = $roleId === 1 || (int) $form['submitted_by'] === $userId;
+        $editableStatuses = ['draft', 'submitted', 'rejected'];
+
+        // Matches $canDelete in views/forms/show.php: owner only, and only
+        // while the form hasn't moved into the approval pipeline.
+        if (!($isOwner && in_array($form['status'], $editableStatuses, true))) {
+            $_SESSION['error'] = 'You cannot delete this form at its current stage.';
+            header("Location: " . url("forms/view/{$id}")); exit;
+        }
+
+        $pdo = db();
+        $pdo->beginTransaction();
+
+        try {
+            $this->audit('form_deleted', 'form', $id,
+                ['form_type' => $form['form_type'], 'status' => $form['status'], 'data' => $this->rawFormData($form)],
+                []
+            );
+
+            // form_data and approvals cascade-delete via their FKs on forms.id.
+            // notifications.form_id has no FK, so clear those explicitly.
+            $pdo->prepare('DELETE FROM notifications WHERE form_id = ?')->execute([$id]);
+            $pdo->prepare('DELETE FROM forms WHERE id = ?')->execute([$id]);
+
+            $pdo->commit();
+            $_SESSION['success'] = 'Form deleted successfully.';
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            $_SESSION['error'] = 'Failed to delete form. Please try again.';
+            header("Location: " . url("forms/view/{$id}")); exit;
+        }
+
+        header("Location: " . url("my-submissions")); exit;
     }
 
     public function mySubmissions(): void {
@@ -464,10 +573,11 @@ class FormController {
         if (!in_array($format, ['csv', 'xlsx', 'docx', 'pdf'], true)) $format = 'csv';
 
         $stmt = db()->prepare(
-            'SELECT f.id, f.form_type, f.data, f.created_at, f.updated_at,
+            'SELECT f.id, f.form_type, COALESCE(fd.data, f.data) AS data, f.created_at, f.updated_at,
                     e.employee_code, e.full_name, e.department, e.company
              FROM forms f
              JOIN employees e ON e.id = f.submitted_by
+             LEFT JOIN form_data fd ON fd.form_id = f.id
              WHERE f.status = "completed"
              ORDER BY f.updated_at DESC'
         );
@@ -479,7 +589,7 @@ class FormController {
             header('Content-Disposition: attachment; filename="completed_requests_' . date('Ymd_His') . '.csv"');
             $out = fopen('php://output', 'w');
             if (!empty($forms)) {
-                $firstData = json_decode($forms[0]['data'], true) ?? [];
+                $firstData = json_decode((string) $forms[0]['data'], true) ?? [];
                 $headers   = array_merge(
                     ['ID', 'Form Type', 'Employee Code', 'Full Name', 'Department', 'Company', 'Submitted At', 'Completed At'],
                     array_keys($firstData)
@@ -487,7 +597,7 @@ class FormController {
                 fputcsv($out, $headers);
             }
             foreach ($forms as $row) {
-                $data = json_decode($row['data'], true) ?? [];
+                $data = json_decode((string) $row['data'], true) ?? [];
                 $line = [
                     $row['id'], $row['form_type'], $row['employee_code'],
                     $row['full_name'], $row['department'], $row['company'],
@@ -535,7 +645,7 @@ class FormController {
 
         $isAdminApproverStandIn  = ($roleId === 7 && $this->adminApproverStandsInFor($form['form_type'], $step['role_id']));
         $isMasterApproverStandIn = ($roleId === 4 && $this->masterApproverStandsInFor($form['form_type'], $step['role_id']));
-        $isFinalApproverStandIn  = ($roleId === 6 && $step['role_id'] === 6);
+        $isFinalApproverStandIn  = ($roleId === 6 && ($step['role_id'] === 6 || $this->finalApproverStandsInFor($form['form_type'], $step['role_id'])));
         $isHrVerifierStandIn     = ($roleId === 9 && $step['role_id'] === 9);
         $isFinanceHeadStandIn    = ($roleId === 8 && $step['role_id'] === 8);
 
@@ -640,6 +750,9 @@ class FormController {
         // Role 4 (MasterApprover) stand-in
         if ($roleId === 4 && $this->masterApproverStandsInFor($form['form_type'], $activeStepRole)) return true;
 
+        // Role 6 (FinalApprover) stand-in as a supervisor
+        if ($roleId === 6 && $this->finalApproverStandsInFor($form['form_type'], $activeStepRole)) return true;
+
         // Shared-queue roles: 6, 8, 9
         if (in_array($roleId, [6, 8, 9], true) && $roleId === $activeStepRole) return true;
 
@@ -652,14 +765,13 @@ class FormController {
 
         if ($roleId === 1) {
             $stmt = db()->prepare(
-                'SELECT f.*, fd.data FROM forms f
+                'SELECT f.*, fd.data AS form_data_json FROM forms f
                  LEFT JOIN form_data fd ON fd.form_id = f.id
                  WHERE f.id = ?'
             );
             $stmt->execute([$id]);
         } elseif (in_array($roleId, [2, 4, 6, 7, 8, 9], true)) {
-            $stmt = db()->prepare(
-                'SELECT f.*, fd.data FROM forms f
+            $sql    = 'SELECT f.*, fd.data AS form_data_json FROM forms f
                  LEFT JOIN form_data fd ON fd.form_id = f.id
                  WHERE f.id = ?
                    AND (
@@ -667,16 +779,32 @@ class FormController {
                      OR EXISTS (
                          SELECT 1 FROM approvals a
                          WHERE a.form_id = f.id
-                           AND (a.approver_id = ? OR a.role_id IN (6,8,9))
-                     )
-                   )
-                 LIMIT 1'
-            );
-            $stmt->execute([$id, $userId, $userId]);
+                           AND (
+                             (a.approver_id = ? OR a.role_id IN (6,8,9))';
+            $params = [$id, $userId, $userId];
+
+            if ($roleId === 7) {
+                // AdminApprover also stands in for roles 2/4 on specific form types
+                // (e.g. leave/overtime/vehicle requests) — it never owns those rows,
+                // so match on the pending step's role_id + form_type instead.
+                // NB: every branch here stays inside the "AND (...)" group above so
+                // it remains correlated to a.form_id = f.id.
+                foreach (self::ADMIN_APPROVER_STANDIN_COVERAGE as $formType => $roleIds) {
+                    $placeholders = implode(',', array_fill(0, count($roleIds), '?'));
+                    $sql   .= " OR (f.form_type = ? AND a.role_id IN ({$placeholders}) AND a.status = 'pending')";
+                    $params[] = $formType;
+                    array_push($params, ...$roleIds);
+                }
+            }
+
+            $sql .= '))) LIMIT 1';
+
+            $stmt = db()->prepare($sql);
+            $stmt->execute($params);
         } elseif ($roleId === 5) {
             // Role 5: only forms where they are the assigned approver_id
             $stmt = db()->prepare(
-                'SELECT f.*, fd.data FROM forms f
+                'SELECT f.*, fd.data AS form_data_json FROM forms f
                  LEFT JOIN form_data fd ON fd.form_id = f.id
                  WHERE f.id = ?
                    AND (
@@ -691,7 +819,7 @@ class FormController {
             $stmt->execute([$id, $userId, $userId]);
         } else {
             $stmt = db()->prepare(
-                'SELECT f.*, fd.data FROM forms f
+                'SELECT f.*, fd.data AS form_data_json FROM forms f
                  LEFT JOIN form_data fd ON fd.form_id = f.id
                  WHERE f.id = ? AND f.submitted_by = ? LIMIT 1'
             );
@@ -704,6 +832,12 @@ class FormController {
             header('Location: ' . url('dashboard')); exit;
         }
         return $form;
+    }
+
+    // Prefer the form_data table (current storage); fall back to the
+    // legacy forms.data column for any older rows that predate it.
+    private function rawFormData(array $form): ?string {
+        return $form['form_data_json'] ?? $form['data'] ?? null;
     }
 
     private function canEditAsProcessApprover(array $form): bool {
@@ -777,7 +911,7 @@ class FormController {
         // Role 2 (ImmediateHead): the submitter's assigned immediate head
         if ($roleId === 2) {
             $stmt = db()->prepare(
-                'SELECT immediate_head_id FROM employees WHERE id = ? LIMIT 1'
+                'SELECT supervisor_id FROM employees WHERE id = ? LIMIT 1'
             );
             $stmt->execute([$submittedBy]);
             $headId = $stmt->fetchColumn();
@@ -858,6 +992,7 @@ class FormController {
 
         } catch (\Throwable $e) {
             $pdo->rollBack();
+            error_log('[FormController::store] ' . $e->getMessage());
             $_SESSION['error'] = 'Failed to submit form. Please try again.';
             header("Location: " . url("forms/{$slug}")); exit;
         }
@@ -888,20 +1023,40 @@ class FormController {
 
             // Also notify the next pending approver if any
             $next = db()->prepare(
-                'SELECT approver_id FROM approvals
+                'SELECT approver_id, role_id FROM approvals
                  WHERE form_id = ? AND status = \'pending\'
                  ORDER BY sequence ASC LIMIT 1'
             );
             $next->execute([$formId]);
-            $nextApproverId = $next->fetchColumn();
+            $nextStep       = $next->fetch(PDO::FETCH_ASSOC);
+            $nextApproverId = $nextStep ? (int) $nextStep['approver_id'] : null;
 
-            if ($nextApproverId && (int) $nextApproverId !== (int) $row['submitted_by']) {
+            if ($nextApproverId && $nextApproverId !== (int) $row['submitted_by']) {
                 \App\Controllers\NotificationController::create(
-                    (int) $nextApproverId,
+                    $nextApproverId,
                     "{$label} #{$formId} is awaiting your approval.",
                     'info',
                     $formId
                 );
+            }
+
+            // AdminApprover (role 7) never owns an approvals row directly — it stands
+            // in for roles 2/4/6 on certain form types. Notify all active AdminApprover
+            // employees whenever the newly-pending step falls under their coverage,
+            // otherwise they never learn the form is waiting on them.
+            if ($nextStep && $this->adminApproverStandsInFor($row['form_type'], (int) $nextStep['role_id'])) {
+                $admins = db()->prepare('SELECT id FROM employees WHERE role_id = 7 AND is_active = 1');
+                $admins->execute();
+                foreach ($admins->fetchAll(PDO::FETCH_COLUMN) as $adminId) {
+                    $adminId = (int) $adminId;
+                    if ($adminId === $nextApproverId || $adminId === (int) $row['submitted_by']) continue;
+                    \App\Controllers\NotificationController::create(
+                        $adminId,
+                        "{$label} #{$formId} is awaiting your approval.",
+                        'info',
+                        $formId
+                    );
+                }
             }
         } catch (\Throwable $e) {
             error_log('[FormController] sendStatusNotification failed: ' . $e->getMessage());

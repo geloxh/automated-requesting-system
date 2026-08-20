@@ -38,7 +38,7 @@
                 return;
             }
 
-            $supervisors        = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7, 8) AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $supervisors        = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 6, 7, 8) AND is_active = 1 ORDER BY full_name')->fetchAll();
             $masterApprovers    = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
             $financeHeads       = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
             $acquisitionCheckers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 5 AND is_active = 1 ORDER BY full_name')->fetchAll();
@@ -207,7 +207,7 @@
                 header('Location: ' . url('employees')); exit;
             }
 
-            $supervisors         = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7, 8) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $supervisors         = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 6, 7, 8) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
             $masterApprovers     = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
             $financeHeads        = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
             $acquisitionCheckers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 5 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();

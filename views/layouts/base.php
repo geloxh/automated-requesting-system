@@ -121,16 +121,14 @@
                     );
                     $ars->execute([$userId]);
                 } elseif ($roleId === 5) {
-                    // AcquisitionChecker/Accounting shared queue: count rows
-                    // assigned to them PLUS any pending row assigned to any
-                    // other Accounting account.
+                    // AcquisitionChecker is NOT a shared queue: each submitter
+                    // has exactly one assigned AcquisitionChecker (employees.
+                    // acquisition_checker_id, see resolveApproversByRole()).
+                    // Only count rows actually assigned to this user.
                     $ars = db()->prepare(
                         'SELECT COUNT(*) FROM approvals a
                          JOIN forms f ON f.id = a.form_id
-                         WHERE (
-                             a.approver_id = ?
-                             OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 5)
-                         )
+                         WHERE a.approver_id = ?
                          AND a.status = "pending"
                          AND f.status NOT IN ( "draft", "cancelled", "completed", "rejected" )
                          AND NOT EXISTS (
