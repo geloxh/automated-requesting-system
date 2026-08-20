@@ -54,6 +54,7 @@ CREATE TABLE employees (
     master_approver_id INT NULL,
     hr_verifier_id INT NULL,
     finance_head_id INT NULL,
+    acquisition_checker_id INT NULL,
     department VARCHAR(100) NULL,
     company VARCHAR(150) NULL,
     is_active TINYINT(1) DEFAULT 1,
@@ -65,7 +66,8 @@ CREATE TABLE employees (
     CONSTRAINT fk_employees_supervisor_2 FOREIGN KEY (supervisor_id_2) REFERENCES employees(id) ON DELETE SET NULL,
     CONSTRAINT fk_employees_master_approver FOREIGN KEY (master_approver_id) REFERENCES employees(id) ON DELETE SET NULL,
     CONSTRAINT fk_employees_hr_verifier FOREIGN KEY (hr_verifier_id) REFERENCES employees(id) ON DELETE SET NULL,
-    CONSTRAINT fk_employees_finance_head FOREIGN KEY (finance_head_id) REFERENCES employees(id) ON DELETE SET NULL
+    CONSTRAINT fk_employees_finance_head FOREIGN KEY (finance_head_id) REFERENCES employees(id) ON DELETE SET NULL,
+    CONSTRAINT fk_employees_acquisition_checker FOREIGN KEY (acquisition_checker_id) REFERENCES employees(id) ON DELETE SET NULL
 );
 
 CREATE INDEX idx_employees_username ON employees(username);
@@ -76,6 +78,7 @@ CREATE INDEX idx_employee_supervisor_2 ON employees(supervisor_id_2);
 CREATE INDEX idx_employees_master_approver ON employees(master_approver_id);
 CREATE INDEX idx_employees_hr_verifier ON employees(hr_verifier_id);
 CREATE INDEX idx_employees_finance_head ON employees(finance_head_id);
+CREATE INDEX idx_employees_acquisition_checker ON employees(acquisition_checker_id);
 
 INSERT INTO employees (employee_code, full_name, email, password_hash, role_id, department) VALUES
 ('EMP-0001', 'System Admin', 'it@3ehitech.com', '$2y$12$WfPj1bsf3zy3.5aiRCMdweUQIdJXPDja8eJlWHoM57W94V6jSR6aa', 1, 'IT');

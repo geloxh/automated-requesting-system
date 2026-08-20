@@ -38,13 +38,14 @@
                 return;
             }
 
-            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7, 8) AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $hrVerifiers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 9 AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $financeHeads = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $roles = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
-            $departments = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
-            $companies = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
+            $supervisors        = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7, 8) AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $masterApprovers    = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $financeHeads       = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $acquisitionCheckers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 5 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $hrVerifiers        = db()->query('SELECT id, full_name FROM employees WHERE role_id = 9 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $roles              = db()->query('SELECT id, name FROM roles ORDER BY id ASC')->fetchAll();
+            $departments        = db()->query('SELECT id, name FROM departments ORDER BY name')->fetchAll();
+            $companies          = db()->query('SELECT id, name FROM companies ORDER BY name')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
@@ -60,11 +61,12 @@
             $data = [];
             foreach (['full_name', 'username', 'email', 'password', 'role_id', 'department', 'company',
                       'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'finance_head_id',
+                      'acquisition_checker_id', 'hr_verifier_id',
                       'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
                 $val = trim($_POST[$f] ?? '');
                 if ($val === '' && !in_array($f, ['department', 'supervisor_id', 'supervisor_id_2',
-                    'master_approver_id', 'finance_head_id', 'username', 'job_title',
-                    'phone', 'date_hired', 'employment_type', 'company'])) {
+                    'master_approver_id', 'finance_head_id', 'acquisition_checker_id', 'hr_verifier_id',
+                    'username', 'job_title', 'phone', 'date_hired', 'employment_type', 'company'])) {
                     $_SESSION['error'] = "Field '{$f}' is required.";
                     header('Location: ' . url('employees/create'));
                     exit;
@@ -109,7 +111,8 @@
                             employee_code = ?, full_name = ?, username = ?, email = ?,
                             password_hash = ?, role_id = ?, department = ?, company = ?,
                             supervisor_id = ?, supervisor_id_2 = ?, master_approver_id = ?,
-                            finance_head_id = ?, job_title = ?, phone = ?, date_hired = ?,
+                            finance_head_id = ?, acquisition_checker_id = ?, hr_verifier_id = ?,
+                            job_title = ?, phone = ?, date_hired = ?,
                             employment_type = ?, employment_status = \'employed\', is_active = 1
                         WHERE id = ?'
                     )->execute([
@@ -123,8 +126,10 @@
                         $data['company'] ?: null,
                         $data['supervisor_id'] ? (int) $data['supervisor_id'] : null,
                         $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
-                        $data['master_approver_id'] ? (int) $data['master_approver_id']  : null,
+                        $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
                         $data['finance_head_id'] ? (int) $data['finance_head_id'] : null,
+                        $data['acquisition_checker_id'] ? (int) $data['acquisition_checker_id'] : null,
+                        $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
                         $data['job_title'] ?: null,
                         $data['phone'] ?: null,
                         $data['date_hired'] ?: null,
@@ -150,9 +155,10 @@
                     'INSERT INTO employees
                         (employee_code, full_name, username, email, password_hash, role_id,
                         department, company, supervisor_id, supervisor_id_2, master_approver_id,
-                        finance_head_id, job_title, phone, date_hired,
+                        finance_head_id, acquisition_checker_id, hr_verifier_id,
+                        job_title, phone, date_hired,
                         employment_type, employment_status, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'employed\', 1)'
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'employed\', 1)'
                 )->execute([
                     $empCode,
                     $data['full_name'],
@@ -166,6 +172,8 @@
                     $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
                     $data['finance_head_id'] ? (int) $data['finance_head_id'] : null,
+                    $data['acquisition_checker_id'] ? (int) $data['acquisition_checker_id'] : null,
+                    $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
                     $data['job_title'] ?: null,
                     $data['phone'] ?: null,
                     $data['date_hired'] ?: null,
@@ -199,11 +207,12 @@
                 header('Location: ' . url('employees')); exit;
             }
 
-            $supervisors = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7, 8) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $masterApprovers = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $financeHeads = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
-            $hrVerifiers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 9 AND is_active = 1 ORDER BY full_name')->fetchAll();
-            $roles = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
+            $supervisors         = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (2, 4, 7, 8) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $masterApprovers     = db()->query('SELECT id, full_name FROM employees WHERE role_id IN (4, 7) AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $financeHeads        = db()->query('SELECT id, full_name FROM employees WHERE role_id = 8 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $acquisitionCheckers = db()->query('SELECT id, full_name FROM employees WHERE role_id = 5 AND is_active = 1 AND id != ' . (int)$id . ' ORDER BY full_name')->fetchAll();
+            $hrVerifiers         = db()->query('SELECT id, full_name FROM employees WHERE role_id = 9 AND is_active = 1 ORDER BY full_name')->fetchAll();
+            $roles               = db()->query('SELECT * FROM roles ORDER BY id ASC')->fetchAll();
 
             define('BASE_LOADED', true);
             ob_start();
@@ -220,6 +229,7 @@
             $data = [];
             foreach (['full_name', 'username', 'email', 'role_id', 'department', 'company',
                       'supervisor_id', 'supervisor_id_2', 'master_approver_id', 'finance_head_id',
+                      'acquisition_checker_id', 'hr_verifier_id',
                       'is_active', 'job_title', 'phone', 'date_hired', 'employment_type'] as $f) {
                 $data[$f] = trim($_POST[$f] ?? '');
             }
@@ -241,7 +251,8 @@
                 $sql = "UPDATE employees SET
                         full_name = ?, username = ?, email = ?, role_id = ?,
                         department = ?, company = ?, supervisor_id = ?, supervisor_id_2 = ?,
-                        master_approver_id = ?, finance_head_id = ?, is_active = ?,
+                        master_approver_id = ?, finance_head_id = ?, acquisition_checker_id = ?,
+                        hr_verifier_id = ?, is_active = ?,
                         job_title = ?, phone = ?, date_hired = ?, employment_type = ?";
                 $params = [
                     $data['full_name'],
@@ -254,6 +265,8 @@
                     $data['supervisor_id_2'] ? (int) $data['supervisor_id_2'] : null,
                     $data['master_approver_id'] ? (int) $data['master_approver_id'] : null,
                     $data['finance_head_id'] ? (int) $data['finance_head_id'] : null,
+                    $data['acquisition_checker_id'] ? (int) $data['acquisition_checker_id'] : null,
+                    $data['hr_verifier_id'] ? (int) $data['hr_verifier_id'] : null,
                     isset($_POST['is_active']) ? 1 : 0,
                     $data['job_title'] ?: null,
                     $data['phone'] ?: null,
@@ -293,8 +306,6 @@
             header('Location: ' . url('employees'));
             exit;
         }
-
-        // --- all methods below are unchanged from original ---
 
         public function delete(int $id): void {
             \App\Helpers\Csrf::verify();
@@ -559,9 +570,9 @@
             }
 
             $data = [
-                'full_name' => trim($_POST['full_name'] ?? ''),
+                'full_name'  => trim($_POST['full_name'] ?? ''),
                 'department' => trim($_POST['department'] ?? ''),
-                'username' => trim($_POST['username'] ?? '') ?: null,
+                'username'   => trim($_POST['username'] ?? '') ?: null,
             ];
 
             if ($data['full_name'] === '') {
@@ -598,10 +609,10 @@
                 exit;
             }
 
-            $file = $_FILES['avatar'];
+            $file    = $_FILES['avatar'];
             $maxSize = 2 * 1024 * 1024;
             $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $finfo   = new finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($file['tmp_name']);
 
             if ($file['size'] > $maxSize) {
@@ -625,7 +636,7 @@
             $ext = $extMap[$mimeType];
 
             $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-            $destDir = __DIR__ . '/../../public/uploads/avatars/';
+            $destDir  = __DIR__ . '/../../public/uploads/avatars/';
             $destPath = $destDir . $filename;
 
             if (!is_dir($destDir)) {

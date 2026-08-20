@@ -110,6 +110,18 @@
                 <small class="text-muted">Optional. Signs Advance Payment, Request for Payment, Reimbursement, and Liquidation at the Evaluation stage.</small>
             </div>
             <div class="form-group">
+                <label>Acquisition Checker <small class="text-muted">(Finance / Reimbursement / Liquidation)</small></label>
+                <select name="acquisition_checker_id">
+                    <option value="">-- Auto-assign (workload balanced) --</option>
+                    <?php foreach ($acquisitionCheckers as $ac): ?>
+                        <option value="<?= $ac['id'] ?>" <?= (int)$employee['acquisition_checker_id'] === (int)$ac['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($ac['full_name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="text-muted">Optional. Routes Advance Payment, Request for Payment, Reimbursement, and Liquidation at the Process (Accounting Checking) stage.</small>
+            </div>
+            <div class="form-group">
                 <label>HR Verifier <small class="text-muted">(Reimbursement / Liquidation)</small></label>
                 <select name="hr_verifier_id">
                     <option value="">-- Auto-assign (workload balanced) --</option>
