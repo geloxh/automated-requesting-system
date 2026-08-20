@@ -1682,18 +1682,19 @@ class FormController {
         }
 
         // Dynamic co-sign stage (Reimbursement / Liquidation): role 5 is seeded
-        // at sequence 3 alongside HR. The pipeline lists role_id 9 for that step,
-        // so the loop above never matches. Check the DB directly instead.
+        // at sequence 3 alongside HR. Shared queue — any role 5 account may edit,
+        // not just the one auto-assigned, consistent with canActOnForm() and inbox.
         if (in_array($form['form_type'], self::REIMB_LIQUID_TYPES, true)
             && $form['status'] === 'immediatehead_approved'
         ) {
-            $userId = (int) ($_SESSION['user_id'] ?? 0);
             $row = db()->prepare(
-                "SELECT id FROM approvals
-                WHERE form_id = ? AND approver_id = ? AND sequence = 3 AND status = 'pending'
+                "SELECT a.id FROM approvals a
+                JOIN employees e ON e.id = a.approver_id
+                WHERE a.form_id = ? AND a.sequence = 3 AND a.status = 'pending'
+                AND e.role_id = 5
                 LIMIT 1"
             );
-            $row->execute([$form['id'], $userId]);
+            $row->execute([$form['id']]);
             if ($row->fetch()) return true;
         }
 

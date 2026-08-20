@@ -6,6 +6,17 @@
     $roleId = (int) $_SESSION['role_id'];
     $userId = (int) $_SESSION['user_id'];
 
+    // Active-sequence guard: only forms where the role's approval row
+    // is the current pending step (no earlier sequence still pending).
+    $activeSeqGuard = "AND a.status = 'pending'
+            AND NOT EXISTS (
+                SELECT 1 FROM approvals a2
+                WHERE a2.form_id = a.form_id
+                  AND a2.status = 'pending'
+                  AND a2.sequence < a.sequence
+                  AND a2.approver_id <> a.approver_id
+            )";
+
     // ── Recent activity query (last 30 days, role-scoped) ── //
     if ($roleId === 1) {
         $stmt = db()->prepare(
@@ -20,9 +31,7 @@
         // AdminApprover is never the literal approver_id on a row — they only
         // ever act through the fallback in FormController::processApproval().
         // So show forms at any sequence/form-type they cover, per
-        // FormController::ADMIN_APPROVER_STANDIN_COVERAGE:
-        //   - Vehicle Request: Checker/Dept Head/Final (2, 4, 6)
-        //   - Leave Application / Overtime: Dept Head only (4)
+        // FormController::ADMIN_APPROVER_STANDIN_COVERAGE.
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -38,72 +47,90 @@
         );
         $stmt->execute([$userId, $userId]);
     } elseif ($roleId === 6) {
-        // FinalApprover shared queue: see forms assigned to them PLUS any
-        // pending Grant Approval row assigned to any other Final Approver.
+        // FinalApprover shared queue: only forms where a role-6 approval row
+        // is the current active pending step.
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
-            WHERE (
-                a.approver_id = ?
-                OR f.submitted_by = ?
-                OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 6)
+            JOIN employees ea ON ea.id = a.approver_id
+            WHERE ea.role_id = 6
+            AND a.status = \'pending\'
+            AND NOT EXISTS (
+                SELECT 1 FROM approvals a2
+                WHERE a2.form_id = a.form_id
+                  AND a2.status = \'pending\'
+                  AND a2.sequence < a.sequence
+                  AND a2.approver_id <> a.approver_id
             )
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute([$userId, $userId]);
+        $stmt->execute();
     } elseif ($roleId === 9) {
-        // HRVerifier shared queue: see forms assigned to them PLUS any
-        // pending Process Approval (HR Verification) row assigned to any
-        // other HR Verifier.
+        // HRVerifier shared queue: only forms where a role-9 approval row
+        // is the current active pending step.
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
-            WHERE (
-                a.approver_id = ?
-                OR f.submitted_by = ?
-                OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 9)
+            JOIN employees ea ON ea.id = a.approver_id
+            WHERE ea.role_id = 9
+            AND a.status = \'pending\'
+            AND NOT EXISTS (
+                SELECT 1 FROM approvals a2
+                WHERE a2.form_id = a.form_id
+                  AND a2.status = \'pending\'
+                  AND a2.sequence < a.sequence
+                  AND a2.approver_id <> a.approver_id
             )
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute([$userId, $userId]);
+        $stmt->execute();
     } elseif ($roleId === 8) {
-        // FinanceHead shared queue: see forms assigned to them PLUS any
-        // pending Evaluation Approval row assigned to any other Finance Head.
+        // EvaluationApprover/FinanceHead shared queue: only forms where a
+        // role-8 approval row is the current active pending step.
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
-            WHERE (
-                a.approver_id = ?
-                OR f.submitted_by = ?
-                OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 8)
+            JOIN employees ea ON ea.id = a.approver_id
+            WHERE ea.role_id = 8
+            AND a.status = \'pending\'
+            AND NOT EXISTS (
+                SELECT 1 FROM approvals a2
+                WHERE a2.form_id = a.form_id
+                  AND a2.status = \'pending\'
+                  AND a2.sequence < a.sequence
+                  AND a2.approver_id <> a.approver_id
             )
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute([$userId, $userId]);
+        $stmt->execute();
     } elseif ($roleId === 5) {
-        // AcquisitionChecker/Accounting shared queue: see forms assigned to
-        // them PLUS any pending Process (Accounting Checking) row assigned
-        // to any other Accounting account.
+        // AcquisitionChecker/Accounting shared queue: only forms where a
+        // role-5 approval row is the current active pending step.
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
             JOIN approvals a ON a.form_id = f.id
-            WHERE (
-                a.approver_id = ?
-                OR f.submitted_by = ?
-                OR a.approver_id IN (SELECT id FROM employees WHERE role_id = 5)
+            JOIN employees ea ON ea.id = a.approver_id
+            WHERE ea.role_id = 5
+            AND a.status = \'pending\'
+            AND NOT EXISTS (
+                SELECT 1 FROM approvals a2
+                WHERE a2.form_id = a.form_id
+                  AND a2.status = \'pending\'
+                  AND a2.sequence < a.sequence
+                  AND a2.approver_id <> a.approver_id
             )
             AND f.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             ORDER BY f.created_at DESC'
         );
-        $stmt->execute([$userId, $userId]);
-    } elseif (in_array($roleId, [ 2, 4 ], true)) {
+        $stmt->execute();
+    } elseif (in_array($roleId, [2, 4], true)) {
         $stmt = db()->prepare(
             'SELECT DISTINCT f.id, f.form_type, f.status, e.full_name, f.created_at
             FROM forms f JOIN employees e ON e.id = f.submitted_by
@@ -132,16 +159,16 @@
 
     // ── Status ── //
     $statusLabels = [
-        'draft' => 'Draft',
-        'submitted' => 'Submitted',
+        'draft'                  => 'Draft',
+        'submitted'              => 'Submitted',
         'immediatehead_approved' => 'With Immediate Head',
-        'process_approved' => 'Processing',
-        'department_reviewed' => 'Dept. Review',
-        'finance_reviewed' => 'Finance Review',
-        'final_approved' => 'Final Approved',
-        'completed' => 'Completed',
-        'rejected' => 'Rejected',
-        'cancelled' => 'Cancelled',
+        'process_approved'       => 'Processing',
+        'department_reviewed'    => 'Dept. Review',
+        'finance_reviewed'       => 'Finance Review',
+        'final_approved'         => 'Final Approved',
+        'completed'              => 'Completed',
+        'rejected'               => 'Rejected',
+        'cancelled'              => 'Cancelled',
     ];
 
     // ── KPI bucket mapping ── //
@@ -170,17 +197,17 @@
 
     // ── Icon + fixed colour map (keyed by form_type) ── //
     $iconMap = [
-        'advance_payment' => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash', 'barColor' => '#10b981'],
-        'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4', 'barColor' => '#8b5cf6'],
-        'request_for_payment' => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt', 'barColor' => '#ec4899'],
-        'leave_application' => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach', 'barColor' => '#0ea5e9'],
-        'reimbursement' => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund', 'barColor' => '#f97316'],
-        'liquidation' => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator', 'barColor' => '#0284c7'],
-        'vehicle_request' => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car', 'barColor' => '#ca8a04'],
+        'advance_payment'        => ['bg' => '#d1fae5', 'color' => '#10b981', 'icon' => 'ti-cash',              'barColor' => '#10b981'],
+        'overtime_authorization' => ['bg' => '#ede9fe', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4',     'barColor' => '#8b5cf6'],
+        'request_for_payment'    => ['bg' => '#fce7f3', 'color' => '#ec4899', 'icon' => 'ti-receipt',          'barColor' => '#ec4899'],
+        'leave_application'      => ['bg' => '#dbeafe', 'color' => '#0ea5e9', 'icon' => 'ti-beach',            'barColor' => '#0ea5e9'],
+        'reimbursement'          => ['bg' => '#ffedd5', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund','barColor' => '#f97316'],
+        'liquidation'            => ['bg' => '#e0f2fe', 'color' => '#0284c7', 'icon' => 'ti-calculator',       'barColor' => '#0284c7'],
+        'vehicle_request'        => ['bg' => '#fef9c3', 'color' => '#ca8a04', 'icon' => 'ti-car',              'barColor' => '#ca8a04'],
     ];
 
     // ── Form volume ── //
-    $typeCounts   = [];
+    $typeCounts = [];
     foreach ($forms as $f) {
         $typeCounts[$f['form_type']] = ($typeCounts[$f['form_type']] ?? 0) + 1;
     }
@@ -188,18 +215,18 @@
     arsort($typeCounts);
 
     $quickForms = [
-        ['slug' => 'advance-payment', 'label' => 'Advance', 'desc' => 'Cash advance', 'color' => '#10b981', 'icon' => 'ti-cash'],
-        ['slug' => 'overtime-authorization', 'label' => 'Overtime', 'desc' => 'OT authorization', 'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
-        ['slug' => 'request-for-payment', 'label' => 'Payment', 'desc' => 'Request payment',  'color' => '#ec4899', 'icon' => 'ti-receipt'],
-        ['slug' => 'leave-application', 'label' => 'Leave', 'desc' => 'File absence', 'color' => '#0ea5e9', 'icon' => 'ti-beach'],
-        ['slug' => 'reimbursement', 'label' => 'Reimburse', 'desc' => 'Claim expenses', 'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
-        ['slug' => 'liquidation', 'label' => 'Liquidation', 'desc' => 'Clear advance', 'color' => '#0284c7', 'icon' => 'ti-calculator'],
-        ['slug' => 'vehicle-request', 'label' => 'Vehicle', 'desc' => 'Reserve vehicle', 'color' => '#ca8a04', 'icon' => 'ti-car'],
+        ['slug' => 'advance-payment',        'label' => 'Advance',    'desc' => 'Cash advance',      'color' => '#10b981', 'icon' => 'ti-cash'],
+        ['slug' => 'overtime-authorization', 'label' => 'Overtime',   'desc' => 'OT authorization',  'color' => '#8b5cf6', 'icon' => 'ti-clock-hour-4'],
+        ['slug' => 'request-for-payment',    'label' => 'Payment',    'desc' => 'Request payment',   'color' => '#ec4899', 'icon' => 'ti-receipt'],
+        ['slug' => 'leave-application',      'label' => 'Leave',      'desc' => 'File absence',      'color' => '#0ea5e9', 'icon' => 'ti-beach'],
+        ['slug' => 'reimbursement',          'label' => 'Reimburse',  'desc' => 'Claim expenses',    'color' => '#f97316', 'icon' => 'ti-credit-card-refund'],
+        ['slug' => 'liquidation',            'label' => 'Liquidation','desc' => 'Clear advance',     'color' => '#0284c7', 'icon' => 'ti-calculator'],
+        ['slug' => 'vehicle-request',        'label' => 'Vehicle',    'desc' => 'Reserve vehicle',   'color' => '#ca8a04', 'icon' => 'ti-car'],
     ];
 
     // ── Pending alert ── //
     $dashPending = 0;
-    if (in_array($roleId, [ 2, 4, 5, 6, 7, 8, 9 ], true)) {
+    if (in_array($roleId, [2, 4, 5, 6, 7, 8, 9], true)) {
         $cacheKey = "pending_count_{$userId}";
         $dashPending = (int) ($_SESSION[$cacheKey] ?? 0);
     }
@@ -223,13 +250,13 @@
         <div class="kpi-icon blue"><i class="ti ti-hourglass"></i></div>
         <div class="kpi-label">In Approval</div>
         <div class="kpi-value"><?= $counts['in_approval'] ?></div>
-        <div class="kpi-delta kpi-delta--period">Last 30 days · Submitted &amp; pending</div>
+        <div class="kpi-delta kpi-delta--period">Last 30 days · Submitted & pending</div>
     </a>
     <a href="<?= url('my-submissions?status=approved') ?>" class="kpi-card green kpi-card--link">
         <div class="kpi-icon green"><i class="ti ti-circle-check"></i></div>
         <div class="kpi-label">Approved</div>
         <div class="kpi-value"><?= $counts['approved'] ?></div>
-        <div class="kpi-delta kpi-delta--period">Last 30 days · Final approved &amp; completed</div>
+        <div class="kpi-delta kpi-delta--period">Last 30 days · Final approved & completed</div>
     </a>
     <a href="<?= url('my-submissions?status=draft') ?>" class="kpi-card amber kpi-card--link">
         <div class="kpi-icon amber"><i class="ti ti-file-pencil"></i></div>
@@ -254,7 +281,7 @@
             <span class="card-panel-title">Recent Activity</span>
             <?php $allLink = ($roleId === 1)
                 ? url('requests')
-                : (in_array($roleId, [ 2, 4, 5, 6, 7, 8, 9 ], true)
+                : (in_array($roleId, [2, 4, 5, 6, 7, 8, 9], true)
                     ? url('approvals')
                     : url('my-submissions'));
             ?>

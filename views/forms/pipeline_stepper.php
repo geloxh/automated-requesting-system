@@ -159,9 +159,7 @@ $normalizeStepFile = function (?string $path): array {
             <?php if ($isDualStage && $pendingRows): ?>
                 <div class="step-waiting">
                     <i class="ti ti-hourglass-low"></i>
-                    Waiting on <?= implode($isRaceStage ? ' or ' : ' &amp; ', array_map(
-                        fn($r) => htmlspecialchars($r['full_name'] ?? 'checker'), $pendingRows
-                    )) ?>
+                    Waiting for Approver
                 </div>
             <?php endif; ?>
         </div>
