@@ -75,10 +75,18 @@ class FormController {
         'grant-approval' => ['sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
 
-    private const PIPELINE_REIMB_LIQUID = [
+        private const PIPELINE_REIMB_LIQUID = [
         'submit' => ['sequence' => 1, 'from' => 'draft', 'to' => 'submitted', 'role_id' => 3, 'label' => 'Submitted'],
         'checker-approval' => ['sequence' => 2, 'from' => 'submitted', 'to' => 'immediatehead_approved','role_id' => 2, 'label' => 'Immediate Head Approval'],
-        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved','to' => 'process_approved', 'role_id' => 9, 'label' => 'Process Approval'],
+        // Both HR (role 9, the seeded approver) and Accounting (role 5, added
+        // as a dynamic co-sign row when HR approves — see processApproval())
+        // act at sequence 3. Once both rows are approved this stage lands
+        // directly on 'process_approved', matching the pipeline stepper UI,
+        // my_submissions.php, and EmployeeController::actAsApprover(), all of
+        // which treat sequence 3 -> process_approved for Finance-type forms.
+        // There is no separate routable "accounting-approval" action — Accounting's
+        // sign-off happens here, at sequence 3, not as its own pipeline step.
+        'process-approval' => ['sequence' => 3, 'from' => 'immediatehead_approved', 'to' => 'process_approved', 'role_id' => 9, 'label' => 'Process (Accounting Checking)'],
         'evaluation-approval' => ['sequence' => 4, 'from' => 'process_approved', 'to' => 'finance_reviewed', 'role_id' => 8, 'label' => 'Evaluation Approval'],
         'grant-approval' => ['sequence' => 5, 'from' => 'finance_reviewed', 'to' => 'completed', 'role_id' => 6, 'label' => 'Grant Approval Request'],
     ];
@@ -628,6 +636,32 @@ class FormController {
                 exit;
             }
             $uploadedFilePath = 'uploads/approvals/' . $fileName;
+        }
+
+        // Pre-flight check: on Reimbursement/Liquidation forms, an HR Verifier
+        // approving the Process stage triggers auto-creation of the Accounting
+        // co-sign row (below). If no active Accounting approver exists, that
+        // used to throw *inside* the transaction and roll back the HR
+        // Verifier's own approval too — surfacing as a generic "Action failed"
+        // with no indication of the real cause. Check this up front instead,
+        // so the HR Verifier's approval is never silently lost and the error
+        // actually points at the fix.
+        if ($action === 'process-approval' && in_array($form['form_type'], self::REIMB_LIQUID_TYPES, true) && $roleId === 9) {
+            $accAlreadySeededCheck = db()->prepare(
+                "SELECT COUNT(*) FROM approvals a
+                JOIN employees e ON e.id = a.approver_id
+                WHERE a.form_id = ? AND a.sequence = 3 AND e.role_id = 5"
+            );
+            $accAlreadySeededCheck->execute([$id]);
+            if ((int) $accAlreadySeededCheck->fetchColumn() === 0) {
+                $formDataCheck = json_decode($form['data'], true) ?? [];
+                $accIdsCheck = $this->resolveApproversByRole(db(), 5, $formDataCheck, (int) $form['submitted_by'], $form['form_type']);
+                if (empty($accIdsCheck)) {
+                    $_SESSION['error'] = 'Your approval could not be recorded: there is no active Accounting (AcquisitionChecker) account configured to co-sign the Process stage. Ask a System Admin to add or reactivate one.';
+                    header("Location: " . url("forms/view/{$id}"));
+                    exit;
+                }
+            }
         }
 
         $pdo = db();
