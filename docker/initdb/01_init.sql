@@ -9,7 +9,7 @@
 -- ============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS chat_reactions, chat_typing, chat_blocked_users, chat_messages, audit_logs, approvals, forms, employees, roles, password_reset_tokens;
+DROP TABLE IF EXISTS chat_reactions, chat_typing, chat_blocked_users, chat_messages, audit_logs, approvals, form_data, forms, employees, roles, password_reset_tokens;
 DROP VIEW IF EXISTS form_approval_status, form_approval_status_new;
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -136,6 +136,22 @@ CREATE TABLE forms (
 CREATE INDEX idx_forms_type ON forms(form_type);
 CREATE INDEX idx_forms_status ON forms(status);
 CREATE INDEX idx_forms_submitted ON forms(submitted_by);
+
+-- ============================================================
+-- FORM DATA
+-- Per-form submitted field values (JSON), keyed by form_id.
+-- Read/written by FormController (findForm(), update(), etc.)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS form_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    form_id BIGINT NOT NULL,
+    data LONGTEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_form_data_form_id (form_id),
+    CONSTRAINT fk_form_data_form FOREIGN KEY (form_id) REFERENCES forms(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
 -- APPROVALS
